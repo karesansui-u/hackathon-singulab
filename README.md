@@ -11,6 +11,10 @@ https://github.com/user-attachments/assets/e405f2c3-9518-489d-87c3-c155d7fca38b
 
 デモ動画：火災近傍では、単純な退避にとどまらず、合流指示・物資確保・他者待機・監視などの創発的な判断が観察された。
 
+## 設計メモ
+
+- [ポスト資本主義ではなく「持続主義で資本主義を補完する」シミュレーション設計メモ](/Users/sunagawa/Project/hackathon-singulab/docs/post-capitalist-structure-sustain-simulation-design.md)
+
 ### Fire Event（火事イベント）
 
 シミュレーションの途中で、指定位置（またはランダムな位置）に複数の火事を発生させることができます。火事には以下の特徴があります:
