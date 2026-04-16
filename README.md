@@ -14,6 +14,15 @@ https://github.com/user-attachments/assets/e405f2c3-9518-489d-87c3-c155d7fca38b
 ## 設計メモ
 
 - [ポスト資本主義ではなく「持続主義で資本主義を補完する」シミュレーション設計メモ](/Users/sunagawa/Project/hackathon-singulab/docs/post-capitalist-structure-sustain-simulation-design.md)
+- [世界モデル向けデータ注入アーキテクチャ](/Users/sunagawa/Project/hackathon-singulab/docs/world-data-ingestion-architecture.md)
+- [プレゼン用メモ: なぜ世界設計をここまで現実寄りにするのか](/Users/sunagawa/Project/hackathon-singulab/docs/presentation-framing-world-realism.md)
+
+## World Demo
+
+- Config: [scenarios/major_powers_world_demo.yaml](/Users/sunagawa/Project/hackathon-singulab/scenarios/major_powers_world_demo.yaml)
+- Runner: [scripts/run_world_demo.py](/Users/sunagawa/Project/hackathon-singulab/scripts/run_world_demo.py)
+- Command: `./scripts/run_world_demo.py`
+- Output: `output/world_demo/major_powers_10turn/`
 
 ### Fire Event（火事イベント）
 

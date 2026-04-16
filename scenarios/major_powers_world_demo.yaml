@@ -1,0 +1,324 @@
+meta:
+  name: Major Powers World Demo
+  turns: 10
+  output_dir: output/world_demo/major_powers_10turn
+
+countries:
+  - code: USA
+    name: United States
+    population_weight: 0.18
+    energy_security: 0.82
+    food_security: 0.88
+    compute_access: 0.97
+    institutional_capacity: 0.74
+    social_cohesion: 0.58
+    alliance_support: 0.78
+    distribution_capacity: 0.44
+    supply_chain_resilience: 0.65
+    capital_surplus: 0.92
+    automation_exposure: 0.82
+    physical_exposure: 0.42
+    sanction_exposure: 0.12
+    conflict_risk: 0.20
+    climate_stress: 0.22
+    import_dependency: 0.30
+    cash_stability: 0.84
+    inequality_pressure: 0.34
+    labor_displacement: 0.12
+    energy_exporter: true
+
+  - code: CHN
+    name: China
+    population_weight: 0.18
+    energy_security: 0.68
+    food_security: 0.70
+    compute_access: 0.86
+    institutional_capacity: 0.68
+    social_cohesion: 0.62
+    alliance_support: 0.48
+    distribution_capacity: 0.40
+    supply_chain_resilience: 0.72
+    capital_surplus: 0.88
+    automation_exposure: 0.74
+    physical_exposure: 0.66
+    sanction_exposure: 0.36
+    conflict_risk: 0.28
+    climate_stress: 0.30
+    import_dependency: 0.42
+    cash_stability: 0.81
+    inequality_pressure: 0.38
+    labor_displacement: 0.13
+
+  - code: EU
+    name: European Union
+    population_weight: 0.16
+    energy_security: 0.56
+    food_security: 0.80
+    compute_access: 0.84
+    institutional_capacity: 0.81
+    social_cohesion: 0.67
+    alliance_support: 0.78
+    distribution_capacity: 0.59
+    supply_chain_resilience: 0.67
+    capital_surplus: 0.80
+    automation_exposure: 0.79
+    physical_exposure: 0.48
+    sanction_exposure: 0.18
+    conflict_risk: 0.14
+    climate_stress: 0.20
+    import_dependency: 0.52
+    cash_stability: 0.79
+    inequality_pressure: 0.28
+    labor_displacement: 0.10
+
+  - code: JPN
+    name: Japan
+    population_weight: 0.07
+    energy_security: 0.32
+    food_security: 0.42
+    compute_access: 0.88
+    institutional_capacity: 0.83
+    social_cohesion: 0.71
+    alliance_support: 0.76
+    distribution_capacity: 0.55
+    supply_chain_resilience: 0.69
+    capital_surplus: 0.74
+    automation_exposure: 0.77
+    physical_exposure: 0.52
+    sanction_exposure: 0.14
+    conflict_risk: 0.10
+    climate_stress: 0.18
+    import_dependency: 0.78
+    cash_stability: 0.77
+    inequality_pressure: 0.26
+    labor_displacement: 0.11
+
+  - code: IND
+    name: India
+    population_weight: 0.19
+    energy_security: 0.49
+    food_security: 0.69
+    compute_access: 0.63
+    institutional_capacity: 0.52
+    social_cohesion: 0.61
+    alliance_support: 0.58
+    distribution_capacity: 0.34
+    supply_chain_resilience: 0.53
+    capital_surplus: 0.46
+    automation_exposure: 0.68
+    physical_exposure: 0.60
+    sanction_exposure: 0.10
+    conflict_risk: 0.24
+    climate_stress: 0.34
+    import_dependency: 0.49
+    cash_stability: 0.63
+    inequality_pressure: 0.42
+    labor_displacement: 0.12
+
+  - code: SAU
+    name: Saudi Arabia
+    population_weight: 0.03
+    energy_security: 0.96
+    food_security: 0.28
+    compute_access: 0.58
+    institutional_capacity: 0.63
+    social_cohesion: 0.57
+    alliance_support: 0.62
+    distribution_capacity: 0.38
+    supply_chain_resilience: 0.46
+    capital_surplus: 0.72
+    automation_exposure: 0.44
+    physical_exposure: 0.54
+    sanction_exposure: 0.18
+    conflict_risk: 0.29
+    climate_stress: 0.43
+    import_dependency: 0.61
+    cash_stability: 0.78
+    inequality_pressure: 0.33
+    labor_displacement: 0.09
+    energy_exporter: true
+
+  - code: RUS
+    name: Russia
+    population_weight: 0.04
+    energy_security: 0.88
+    food_security: 0.74
+    compute_access: 0.52
+    institutional_capacity: 0.41
+    social_cohesion: 0.48
+    alliance_support: 0.28
+    distribution_capacity: 0.24
+    supply_chain_resilience: 0.47
+    capital_surplus: 0.58
+    automation_exposure: 0.51
+    physical_exposure: 0.57
+    sanction_exposure: 0.78
+    conflict_risk: 0.44
+    climate_stress: 0.26
+    import_dependency: 0.55
+    cash_stability: 0.58
+    inequality_pressure: 0.46
+    labor_displacement: 0.08
+    energy_exporter: true
+
+  - code: BRA
+    name: Brazil
+    population_weight: 0.05
+    energy_security: 0.79
+    food_security: 0.91
+    compute_access: 0.54
+    institutional_capacity: 0.49
+    social_cohesion: 0.55
+    alliance_support: 0.44
+    distribution_capacity: 0.31
+    supply_chain_resilience: 0.58
+    capital_surplus: 0.43
+    automation_exposure: 0.56
+    physical_exposure: 0.48
+    sanction_exposure: 0.08
+    conflict_risk: 0.21
+    climate_stress: 0.38
+    import_dependency: 0.34
+    cash_stability: 0.64
+    inequality_pressure: 0.41
+    labor_displacement: 0.10
+
+cooperation_links:
+  - donor: USA
+    target: JPN
+    weight: 0.70
+  - donor: USA
+    target: IND
+    weight: 0.65
+  - donor: USA
+    target: EU
+    weight: 0.45
+  - donor: EU
+    target: IND
+    weight: 0.55
+  - donor: EU
+    target: BRA
+    weight: 0.40
+  - donor: EU
+    target: JPN
+    weight: 0.35
+  - donor: JPN
+    target: IND
+    weight: 0.60
+  - donor: SAU
+    target: JPN
+    weight: 0.70
+  - donor: SAU
+    target: IND
+    weight: 0.55
+  - donor: SAU
+    target: EU
+    weight: 0.35
+  - donor: CHN
+    target: BRA
+    weight: 0.55
+  - donor: CHN
+    target: SAU
+    weight: 0.45
+
+events:
+  - turn: 2
+    name: Frontier model diffusion wave
+    description: High-capability frontier models spread into white-collar workflows.
+    modifiers:
+      labor_displacement_bonus: 0.025
+
+  - turn: 3
+    name: Advanced semiconductor controls tighten
+    description: Export controls narrow advanced compute access for some blocs.
+    country_effects:
+      CHN:
+        compute_access: -0.08
+        sanction_exposure: 0.06
+      USA:
+        supply_chain_resilience: -0.02
+      EU:
+        supply_chain_resilience: -0.02
+      JPN:
+        supply_chain_resilience: -0.03
+
+  - turn: 4
+    name: Maritime chokepoint disruption
+    description: Shipping risk raises energy and trade friction for import-heavy economies.
+    country_effects:
+      EU:
+        energy_security: -0.08
+        supply_chain_resilience: -0.05
+      JPN:
+        energy_security: -0.10
+        supply_chain_resilience: -0.06
+      IND:
+        energy_security: -0.07
+        supply_chain_resilience: -0.05
+      SAU:
+        conflict_risk: 0.05
+
+  - turn: 5
+    name: Public adaptation fork
+    description: Countries decide whether to build distribution and structure-credit rails quickly.
+    modifiers:
+      structure_credit_bonus: 0.025
+
+  - turn: 6
+    name: Heat and crop volatility
+    description: Climate shocks hit tropical and subtropical production belts.
+    country_effects:
+      IND:
+        climate_stress: 0.08
+        food_security: -0.04
+      BRA:
+        climate_stress: 0.09
+        food_security: -0.05
+      EU:
+        climate_stress: 0.03
+
+  - turn: 7
+    name: Resilience funds open
+    description: Capital winners can rotate profits into resilience and redundancy investments.
+    modifiers:
+      winner_reinvestment_bonus: 0.05
+
+  - turn: 8
+    name: Sanctions and bloc pressure escalate
+    description: Conflict blocs face another round of restrictions and trade friction.
+    country_effects:
+      RUS:
+        sanction_exposure: 0.08
+        conflict_risk: 0.04
+      CHN:
+        sanction_exposure: 0.04
+      EU:
+        energy_security: -0.03
+      IND:
+        supply_chain_resilience: -0.03
+
+  - turn: 9
+    name: Multilateral resilience compact
+    description: Some blocs coordinate support for food, energy and social stability.
+    modifiers:
+      cooperation_bonus: 0.08
+      structure_credit_bonus: 0.02
+
+scenarios:
+  - key: fracture
+    name: High automation / low adaptation
+    automation_velocity: 0.115
+    physical_automation_velocity: 0.072
+    adaptation_velocity: 0.030
+    structure_credit_intensity: 0.020
+    cooperation_bias: 0.030
+    winner_reinvestment: 0.020
+
+  - key: complement
+    name: High automation / high adaptation
+    automation_velocity: 0.115
+    physical_automation_velocity: 0.072
+    adaptation_velocity: 0.115
+    structure_credit_intensity: 0.115
+    cooperation_bias: 0.105
+    winner_reinvestment: 0.090
