@@ -1,0 +1,35 @@
+{
+  "scenario_key": "fracture",
+  "scenario_name": "High automation / low adaptation",
+  "turns": 10,
+  "global_avg_S_final": 0.4093,
+  "global_avg_horizon_final": 5.4352,
+  "global_avg_cash_final": 0.2596,
+  "global_avg_war_burden_final": 0.0464,
+  "global_avg_domestic_burden_final": 0.0635,
+  "global_avg_protest_pressure_final": 0.3045,
+  "gray_zone_events": 8,
+  "proxy_events": 9,
+  "limited_war_events": 1,
+  "grievance_events": 13,
+  "protest_events": 6,
+  "mass_protest_events": 0,
+  "riot_events": 0,
+  "insurgency_events": 0,
+  "civil_conflict_events": 0,
+  "top_resilient": [
+    "USA",
+    "SAU",
+    "EU"
+  ],
+  "most_fragile": [
+    "JPN",
+    "IND",
+    "RUS"
+  ],
+  "most_domestically_fragile": [
+    "BRA",
+    "CHN",
+    "RUS"
+  ]
+}

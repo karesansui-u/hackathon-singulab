@@ -371,6 +371,200 @@ cooperation_value(A -> B) =
 
 これにより、援助を「持続を支える共有インフラ投資」として扱える。
 
+### 17.1 戦争と強制的外部化
+
+地域・国家スケールでは、自国の持続可能性が崩れそうなとき、協力だけでなく強制的外部化が起きうる。
+これは歴史的にも現代的にも、
+
+- 国内の生存圧力や体制維持圧力
+- 資源・物流・制裁の締め付け
+- 領土や海域の争点
+- 同盟と核抑止による直接戦争の抑制
+
+の組み合わせで現れる。
+
+したがって世界モデルでは、戦争を単純なランダムイベントにしない。
+少なくとも次の順でエスカレーションするほうが現実に近い。
+
+1. `gray-zone coercion`
+2. `proxy war / coercive campaign`
+3. `limited war`
+
+重要なのは、特に核抑止や同盟抑止が強い組み合わせでは、
+全面戦争よりも灰色地帯の圧力、海上・経済・技術・情報領域での coercion が先に立ちやすいこと。
+
+このモデルでは、戦争を「自国の `S` を守るための危険な外部化戦略」として扱う。
+短期的な rally 効果や攪乱効果はあっても、長期的には `war_burden` として自国の `M` を削り、`L` を増やす。
+
+### 17.2 戦争は確定攻撃ではなく確率的エスカレーションとして扱う
+
+より現実に近づけるなら、戦争は `attack = true / false` の単純行動ではなく、
+`hazard` と `escalation probability` の組み合わせで扱うほうがよい。
+
+つまり各国家ペア `(A, B)` に対して、各 turn で
+
+- `p_gray_zone(A -> B, t)`
+- `p_proxy(A -> B, t)`
+- `p_limited_war(A -> B, t)`
+
+を計算し、その turn に実際の event が発火するかを確率的に決める。
+
+この確率は少なくとも次の変数に依存する。
+
+- `survival_pressure(A)`: 自国存続圧力
+- `domestic_diversion_incentive(A)`: 国内不満を外部化したい誘因
+- `target_fragility(B)`: 相手が崩れやすいか
+- `territorial_salience(A, B)`: 領土・海域・物流争点の強さ
+- `resource_gain(A, B)`: 資源・chokepoint・制裁回避の利得
+- `alliance_gap(A, B)`: 同盟支援の不確実性
+- `deterrence(A, B)`: 核抑止・軍事抑止・経済抑止
+- `war_fatigue(A)`: 既存の戦争負担
+
+イメージとしては次の形になる。
+
+```text
+p_mode(A -> B, t) =
+  sigmoid(
+    α * survival_pressure(A)
+  + β * domestic_diversion_incentive(A)
+  + γ * target_fragility(B)
+  + δ * territorial_salience(A, B)
+  + ε * resource_gain(A, B)
+  - ζ * deterrence(A, B)
+  - η * war_fatigue(A)
+  )
+```
+
+重要なのは、戦争を「起こす/起こさない」の意思決定だけでなく、
+「起こりやすさがどこまで高まっているか」を state として持つこと。
+
+ハッカソン実装では次の 2 モードを用意するとよい。
+
+1. `stochastic mode`
+   確率から event をサンプルする。毎回少し違う歴史になる。
+2. `deterministic replay mode`
+   乱数 seed を固定するか、期待値上位だけを発火させる。デモ再現性が高い。
+
+これにより、
+
+- 平時は線が出ない
+- 緊張が高まると `war_pressure` が上がる
+- しきい値を超えると一定確率で `gray-zone` が出る
+- さらに条件が重なると `proxy` や `limited war` が出る
+
+という自然な見え方になる。
+
+### 17.3 国内崩壊も段階付きの確率過程として扱う
+
+国内内部の崩壊も、`riot = true` のような単発イベントではなく、
+不満の蓄積とエスカレーション段階で扱うほうが精度が出る。
+
+各国家に対して次の潜在変数を持つ。
+
+- `economic_stress`
+- `legitimacy_stress`
+- `mobilization_capacity`
+- `coercion_capacity`
+- `elite_fragmentation`
+- `communal_polarization`
+- `trigger_shock`
+
+ここで重要なのは、重課税そのものではなく
+`生活維持不能感` と `制度への不信`
+が protest や暴動の核になること。
+
+したがって、税制は直接変数というより、
+
+- 可処分所得悪化
+- 若年失業
+- 住宅負担
+- 食料・エネルギー負担
+- 債務負担
+- AI 失職圧力
+
+を通じて `economic_stress` を上げるものとして入れる。
+
+国内状態は少なくとも次の段階を持てる。
+
+1. `stable`
+2. `grievance`
+3. `protest`
+4. `mass_protest`
+5. `riot`
+6. `insurgency`
+7. `civil_conflict`
+
+各 turn で段階遷移確率を計算する。
+
+```text
+p(protest | state) =
+  sigmoid(
+    a * economic_stress
+  + b * legitimacy_stress
+  + c * mobilization_capacity
+  + d * trigger_shock
+  - e * coercion_capacity
+  - f * relief_support
+  )
+```
+
+```text
+p(riot | protest_state) =
+  sigmoid(
+    g * repression_mismatch
+  + h * elite_fragmentation
+  + i * communal_polarization
+  + j * unemployment_shock
+  - k * trusted_mediation
+  )
+```
+
+```text
+p(civil_conflict | riot_state) =
+  sigmoid(
+    l * armed_capacity
+  + m * elite_fragmentation
+  + n * territorial_fragmentation
+  + o * external_sponsorship
+  - p * regime_cohesion
+  )
+```
+
+これにより、
+
+- 重課税や就職難がただちに内乱を生むわけではない
+- しかし生活苦と制度不信が続くと protest 確率が上がる
+- protest が長引き、弾圧や分断が重なると riot へ進みやすい
+- さらに武装化能力や外部支援があると civil conflict に近づく
+
+という、より現実に近い挙動を表現できる。
+
+### 17.4 戦争と国内崩壊は相互作用させる
+
+国内崩壊と対外戦争は別系統ではなく、相互に影響する。
+
+- 国内不満が高いと `domestic_diversion_incentive` が上がり、対外 coercion の確率が上がる
+- 対外戦争が長引くと `war_burden` が増え、国内の `economic_stress` と `legitimacy_stress` が悪化する
+- 支援や `structure credits` がうまく機能すると protest と war の両方を下げうる
+
+したがって、国家スケールの主要変数としては最低でも次を持つ。
+
+- `war_pressure`
+- `protest_pressure`
+- `riot_pressure`
+- `elite_fragmentation`
+- `domestic_diversion_incentive`
+- `war_fatigue`
+
+そして viewer 上では、
+
+- 平時は線を出さない
+- 支援や交渉が走ったときだけ青線
+- coercion や war event が発火したときだけ赤/紫/黒の矢印
+- 国内不安は地図上のノードの halo や pulse で見せる
+
+とすると、情報量と直感のバランスがよい。
+
 ## 18. AI 進歩シナリオの基本軸
 
 AI による雇用代替を入れるときは、まず 2 軸で見る。

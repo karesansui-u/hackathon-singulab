@@ -12,3 +12,5 @@ output_codex/
 output_codex_smoke/
 
 *.log
+
+data/cache/

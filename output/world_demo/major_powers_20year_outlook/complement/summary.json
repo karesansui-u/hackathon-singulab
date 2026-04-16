@@ -1,0 +1,35 @@
+{
+  "scenario_key": "complement",
+  "scenario_name": "20-year complement path",
+  "turns": 20,
+  "global_avg_S_final": 0.3767,
+  "global_avg_horizon_final": 5.4691,
+  "global_avg_cash_final": 0.0756,
+  "global_avg_war_burden_final": 0.0618,
+  "global_avg_domestic_burden_final": 0.1361,
+  "global_avg_protest_pressure_final": 0.34,
+  "gray_zone_events": 18,
+  "proxy_events": 14,
+  "limited_war_events": 2,
+  "grievance_events": 13,
+  "protest_events": 9,
+  "mass_protest_events": 5,
+  "riot_events": 16,
+  "insurgency_events": 7,
+  "civil_conflict_events": 3,
+  "top_resilient": [
+    "USA",
+    "SAU",
+    "JPN"
+  ],
+  "most_fragile": [
+    "BRA",
+    "IND",
+    "RUS"
+  ],
+  "most_domestically_fragile": [
+    "IND",
+    "RUS",
+    "BRA"
+  ]
+}

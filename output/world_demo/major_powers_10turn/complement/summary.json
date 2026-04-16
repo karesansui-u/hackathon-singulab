@@ -1,0 +1,35 @@
+{
+  "scenario_key": "complement",
+  "scenario_name": "High automation / high adaptation",
+  "turns": 10,
+  "global_avg_S_final": 0.4611,
+  "global_avg_horizon_final": 6.6671,
+  "global_avg_cash_final": 0.4182,
+  "global_avg_war_burden_final": 0.0137,
+  "global_avg_domestic_burden_final": 0.0547,
+  "global_avg_protest_pressure_final": 0.2461,
+  "gray_zone_events": 6,
+  "proxy_events": 5,
+  "limited_war_events": 0,
+  "grievance_events": 12,
+  "protest_events": 3,
+  "mass_protest_events": 0,
+  "riot_events": 0,
+  "insurgency_events": 0,
+  "civil_conflict_events": 0,
+  "top_resilient": [
+    "USA",
+    "EU",
+    "JPN"
+  ],
+  "most_fragile": [
+    "CHN",
+    "IND",
+    "RUS"
+  ],
+  "most_domestically_fragile": [
+    "EU",
+    "RUS",
+    "USA"
+  ]
+}

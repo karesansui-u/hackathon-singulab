@@ -2,6 +2,51 @@ meta:
   name: Major Powers World Demo
   turns: 10
   output_dir: output/world_demo/major_powers_10turn
+  seed: 20260416
+  turn_duration_months: 1
+  default_scenario: fracture
+
+layout:
+  USA:
+    x: -0.82
+    y: 0.48
+    lon: -98.5
+    lat: 39.8
+  EU:
+    x: -0.08
+    y: 0.50
+    lon: 12.5
+    lat: 50.2
+  RUS:
+    x: 0.24
+    y: 0.73
+    lon: 97.0
+    lat: 61.0
+  CHN:
+    x: 0.56
+    y: 0.44
+    lon: 104.0
+    lat: 35.0
+  JPN:
+    x: 0.84
+    y: 0.43
+    lon: 138.0
+    lat: 36.2
+  IND:
+    x: 0.36
+    y: 0.08
+    lon: 78.5
+    lat: 22.3
+  SAU:
+    x: 0.06
+    y: 0.03
+    lon: 45.0
+    lat: 23.8
+  BRA:
+    x: -0.47
+    y: -0.28
+    lon: -52.0
+    lat: -14.2
 
 countries:
   - code: USA
@@ -26,6 +71,11 @@ countries:
     inequality_pressure: 0.34
     labor_displacement: 0.12
     energy_exporter: true
+    military_capacity: 0.88
+    regime_rigidity: 0.36
+    revisionism: 0.40
+    gray_zone_capability: 0.75
+    nuclear_deterrent: 1.00
 
   - code: CHN
     name: China
@@ -48,6 +98,11 @@ countries:
     cash_stability: 0.81
     inequality_pressure: 0.38
     labor_displacement: 0.13
+    military_capacity: 0.82
+    regime_rigidity: 0.68
+    revisionism: 0.63
+    gray_zone_capability: 0.79
+    nuclear_deterrent: 1.00
 
   - code: EU
     name: European Union
@@ -70,6 +125,11 @@ countries:
     cash_stability: 0.79
     inequality_pressure: 0.28
     labor_displacement: 0.10
+    military_capacity: 0.62
+    regime_rigidity: 0.28
+    revisionism: 0.18
+    gray_zone_capability: 0.42
+    nuclear_deterrent: 0.65
 
   - code: JPN
     name: Japan
@@ -92,6 +152,11 @@ countries:
     cash_stability: 0.77
     inequality_pressure: 0.26
     labor_displacement: 0.11
+    military_capacity: 0.55
+    regime_rigidity: 0.24
+    revisionism: 0.22
+    gray_zone_capability: 0.48
+    nuclear_deterrent: 0.00
 
   - code: IND
     name: India
@@ -114,6 +179,11 @@ countries:
     cash_stability: 0.63
     inequality_pressure: 0.42
     labor_displacement: 0.12
+    military_capacity: 0.63
+    regime_rigidity: 0.43
+    revisionism: 0.34
+    gray_zone_capability: 0.56
+    nuclear_deterrent: 0.85
 
   - code: SAU
     name: Saudi Arabia
@@ -137,6 +207,11 @@ countries:
     inequality_pressure: 0.33
     labor_displacement: 0.09
     energy_exporter: true
+    military_capacity: 0.58
+    regime_rigidity: 0.62
+    revisionism: 0.38
+    gray_zone_capability: 0.47
+    nuclear_deterrent: 0.00
 
   - code: RUS
     name: Russia
@@ -160,6 +235,11 @@ countries:
     inequality_pressure: 0.46
     labor_displacement: 0.08
     energy_exporter: true
+    military_capacity: 0.74
+    regime_rigidity: 0.81
+    revisionism: 0.86
+    gray_zone_capability: 0.61
+    nuclear_deterrent: 1.00
 
   - code: BRA
     name: Brazil
@@ -182,6 +262,63 @@ countries:
     cash_stability: 0.64
     inequality_pressure: 0.41
     labor_displacement: 0.10
+    military_capacity: 0.38
+    regime_rigidity: 0.31
+    revisionism: 0.17
+    gray_zone_capability: 0.31
+    nuclear_deterrent: 0.00
+
+war_model:
+  max_conflicts_per_turn: 2
+  gray_zone_threshold: 0.31
+  proxy_threshold: 0.37
+  limited_war_threshold: 0.55
+  nuclear_direct_war_cap: 0.42
+  event_intensity_scale: 1.0
+
+rivalries:
+  - actor: USA
+    target: CHN
+    domain: technology_maritime
+    base_tension: 0.58
+    historical_rivalry: 0.42
+    territorial_salience: 0.62
+    gray_zone_bias: 0.88
+  - actor: CHN
+    target: USA
+    domain: technology_maritime
+    base_tension: 0.56
+    historical_rivalry: 0.42
+    territorial_salience: 0.62
+    gray_zone_bias: 0.90
+  - actor: CHN
+    target: JPN
+    domain: maritime_island_chain
+    base_tension: 0.54
+    historical_rivalry: 0.68
+    territorial_salience: 0.58
+    gray_zone_bias: 0.86
+  - actor: CHN
+    target: IND
+    domain: border_himalaya
+    base_tension: 0.48
+    historical_rivalry: 0.52
+    territorial_salience: 0.47
+    gray_zone_bias: 0.65
+  - actor: RUS
+    target: EU
+    domain: continental_energy
+    base_tension: 0.72
+    historical_rivalry: 0.82
+    territorial_salience: 0.74
+    gray_zone_bias: 0.40
+  - actor: USA
+    target: RUS
+    domain: nuclear_coercion
+    base_tension: 0.46
+    historical_rivalry: 0.76
+    territorial_salience: 0.30
+    gray_zone_bias: 0.82
 
 cooperation_links:
   - donor: USA
@@ -225,6 +362,7 @@ events:
   - turn: 2
     name: Frontier model diffusion wave
     description: High-capability frontier models spread into white-collar workflows.
+    domestic_trigger_bonus: 0.04
     modifiers:
       labor_displacement_bonus: 0.025
 
@@ -245,6 +383,7 @@ events:
   - turn: 4
     name: Maritime chokepoint disruption
     description: Shipping risk raises energy and trade friction for import-heavy economies.
+    domestic_trigger_bonus: 0.03
     country_effects:
       EU:
         energy_security: -0.08
@@ -267,6 +406,7 @@ events:
   - turn: 6
     name: Heat and crop volatility
     description: Climate shocks hit tropical and subtropical production belts.
+    domestic_trigger_bonus: 0.04
     country_effects:
       IND:
         climate_stress: 0.08
@@ -286,6 +426,7 @@ events:
   - turn: 8
     name: Sanctions and bloc pressure escalate
     description: Conflict blocs face another round of restrictions and trade friction.
+    domestic_trigger_bonus: 0.05
     country_effects:
       RUS:
         sanction_exposure: 0.08
@@ -313,6 +454,8 @@ scenarios:
     structure_credit_intensity: 0.020
     cooperation_bias: 0.030
     winner_reinvestment: 0.020
+    war_risk_bias: 0.105
+    deescalation_capacity: 0.020
 
   - key: complement
     name: High automation / high adaptation
@@ -322,3 +465,5 @@ scenarios:
     structure_credit_intensity: 0.115
     cooperation_bias: 0.105
     winner_reinvestment: 0.090
+    war_risk_bias: -0.040
+    deescalation_capacity: 0.100

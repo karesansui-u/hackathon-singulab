@@ -1,0 +1,138 @@
+{
+  "config": "/tmp/major_powers_world_demo_30turn.yaml",
+  "output_dir": "output/world_demo/major_powers_30turn_probe",
+  "scenarios": [
+    {
+      "key": "fracture",
+      "name": "High automation / low adaptation"
+    },
+    {
+      "key": "complement",
+      "name": "High automation / high adaptation"
+    }
+  ],
+  "viewer": {
+    "turn_duration_months": 1,
+    "default_scenario": "fracture"
+  },
+  "graph": {
+    "cooperation": [
+      {
+        "source": "USA",
+        "target": "JPN",
+        "weight": 0.7,
+        "kind": "cooperation"
+      },
+      {
+        "source": "USA",
+        "target": "IND",
+        "weight": 0.65,
+        "kind": "cooperation"
+      },
+      {
+        "source": "USA",
+        "target": "EU",
+        "weight": 0.45,
+        "kind": "cooperation"
+      },
+      {
+        "source": "EU",
+        "target": "IND",
+        "weight": 0.55,
+        "kind": "cooperation"
+      },
+      {
+        "source": "EU",
+        "target": "BRA",
+        "weight": 0.4,
+        "kind": "cooperation"
+      },
+      {
+        "source": "EU",
+        "target": "JPN",
+        "weight": 0.35,
+        "kind": "cooperation"
+      },
+      {
+        "source": "JPN",
+        "target": "IND",
+        "weight": 0.6,
+        "kind": "cooperation"
+      },
+      {
+        "source": "SAU",
+        "target": "JPN",
+        "weight": 0.7,
+        "kind": "cooperation"
+      },
+      {
+        "source": "SAU",
+        "target": "IND",
+        "weight": 0.55,
+        "kind": "cooperation"
+      },
+      {
+        "source": "SAU",
+        "target": "EU",
+        "weight": 0.35,
+        "kind": "cooperation"
+      },
+      {
+        "source": "CHN",
+        "target": "BRA",
+        "weight": 0.55,
+        "kind": "cooperation"
+      },
+      {
+        "source": "CHN",
+        "target": "SAU",
+        "weight": 0.45,
+        "kind": "cooperation"
+      }
+    ],
+    "rivalries": [
+      {
+        "source": "USA",
+        "target": "CHN",
+        "weight": 0.58,
+        "domain": "technology_maritime",
+        "kind": "rivalry"
+      },
+      {
+        "source": "CHN",
+        "target": "USA",
+        "weight": 0.56,
+        "domain": "technology_maritime",
+        "kind": "rivalry"
+      },
+      {
+        "source": "CHN",
+        "target": "JPN",
+        "weight": 0.54,
+        "domain": "maritime_island_chain",
+        "kind": "rivalry"
+      },
+      {
+        "source": "CHN",
+        "target": "IND",
+        "weight": 0.48,
+        "domain": "border_himalaya",
+        "kind": "rivalry"
+      },
+      {
+        "source": "RUS",
+        "target": "EU",
+        "weight": 0.72,
+        "domain": "continental_energy",
+        "kind": "rivalry"
+      },
+      {
+        "source": "USA",
+        "target": "RUS",
+        "weight": 0.46,
+        "domain": "nuclear_coercion",
+        "kind": "rivalry"
+      }
+    ]
+  }
+}

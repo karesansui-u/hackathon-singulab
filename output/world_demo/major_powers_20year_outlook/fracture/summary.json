@@ -1,0 +1,35 @@
+{
+  "scenario_key": "fracture",
+  "scenario_name": "20-year fracture path",
+  "turns": 20,
+  "global_avg_S_final": 0.3706,
+  "global_avg_horizon_final": 5.2541,
+  "global_avg_cash_final": 0.0258,
+  "global_avg_war_burden_final": 0.0633,
+  "global_avg_domestic_burden_final": 0.1214,
+  "global_avg_protest_pressure_final": 0.3506,
+  "gray_zone_events": 18,
+  "proxy_events": 19,
+  "limited_war_events": 0,
+  "grievance_events": 18,
+  "protest_events": 11,
+  "mass_protest_events": 3,
+  "riot_events": 5,
+  "insurgency_events": 5,
+  "civil_conflict_events": 0,
+  "top_resilient": [
+    "USA",
+    "SAU",
+    "EU"
+  ],
+  "most_fragile": [
+    "JPN",
+    "CHN",
+    "RUS"
+  ],
+  "most_domestically_fragile": [
+    "CHN",
+    "RUS",
+    "USA"
+  ]
+}

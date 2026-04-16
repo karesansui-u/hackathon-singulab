@@ -21,8 +21,31 @@ https://github.com/user-attachments/assets/e405f2c3-9518-489d-87c3-c155d7fca38b
 
 - Config: [scenarios/major_powers_world_demo.yaml](/Users/sunagawa/Project/hackathon-singulab/scenarios/major_powers_world_demo.yaml)
 - Runner: [scripts/run_world_demo.py](/Users/sunagawa/Project/hackathon-singulab/scripts/run_world_demo.py)
-- Command: `./scripts/run_world_demo.py`
+- Command: `venv/bin/python scripts/run_world_demo.py`
 - Output: `output/world_demo/major_powers_10turn/`
+- Main figures: `comparison.png`, `fracture/dashboard.png`, `complement/dashboard.png`
+- Step renderer: [scripts/render_world_demo_steps.py](/Users/sunagawa/Project/hackathon-singulab/scripts/render_world_demo_steps.py)
+- Step command: `venv/bin/python scripts/render_world_demo_steps.py`
+- Step outputs: `fracture/frames/*.png`, `fracture/animation.gif`, `complement/frames/*.png`, `complement/animation.gif`
+- Japan-centered map asset builder: [scripts/build_japan_centered_world_map.py](/Users/sunagawa/Project/hackathon-singulab/scripts/build_japan_centered_world_map.py)
+- Map asset command: `venv/bin/python scripts/build_japan_centered_world_map.py`
+- Browser viewer: [visualization/world_demo_viewer.html](/Users/sunagawa/Project/hackathon-singulab/visualization/world_demo_viewer.html)
+- Viewer launcher: [scripts/open_world_demo_viewer.py](/Users/sunagawa/Project/hackathon-singulab/scripts/open_world_demo_viewer.py)
+- Launcher command: `venv/bin/python scripts/open_world_demo_viewer.py`
+- Browser usage: `world_demo_viewer.html` を開くと既定の demo を自動読込。別の root に変えたいときだけ `Root を選ぶ` を押し、その後は scenario をプルダウンで切替
+- Viewer notes: 地図の横に `Turn Chat` と `Country Reasoning` を表示し、マクロ発話と国家ごとの考慮メモを synthetic に可視化
+
+## 20-Year Outlook
+
+- Config: [scenarios/major_powers_20year_outlook.yaml](/Users/sunagawa/Project/hackathon-singulab/scenarios/major_powers_20year_outlook.yaml)
+- Command: `venv/bin/python scripts/run_world_demo.py --config scenarios/major_powers_20year_outlook.yaml`
+- Output: `output/world_demo/major_powers_20year_outlook/`
+- Default scenario: `managed_transition`
+- Notes: `extends` で `major_powers_world_demo.yaml` を継承しつつ、`1 turn = 12 months` の年次ステップに切り替えた長期予測用 config
+- 40-step variant: [scenarios/major_powers_20year_40step.yaml](/Users/sunagawa/Project/hackathon-singulab/scenarios/major_powers_20year_40step.yaml)
+- 40-step command: `venv/bin/python scripts/run_world_demo.py --config scenarios/major_powers_20year_40step.yaml`
+- 40-step output: `output/world_demo/major_powers_20year_40step/`
+- 40-step notes: `1 turn = 6 months` にした半期刻み版。年次20ターン版より中間の domestic escalation を細かく追える
 
 ### Fire Event（火事イベント）
 

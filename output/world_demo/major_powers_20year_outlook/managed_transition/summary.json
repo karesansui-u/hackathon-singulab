@@ -1,0 +1,35 @@
+{
+  "scenario_key": "managed_transition",
+  "scenario_name": "20-year managed transition",
+  "turns": 20,
+  "global_avg_S_final": 0.3941,
+  "global_avg_horizon_final": 5.7138,
+  "global_avg_cash_final": 0.063,
+  "global_avg_war_burden_final": 0.0515,
+  "global_avg_domestic_burden_final": 0.1083,
+  "global_avg_protest_pressure_final": 0.3313,
+  "gray_zone_events": 13,
+  "proxy_events": 12,
+  "limited_war_events": 1,
+  "grievance_events": 20,
+  "protest_events": 10,
+  "mass_protest_events": 4,
+  "riot_events": 8,
+  "insurgency_events": 0,
+  "civil_conflict_events": 0,
+  "top_resilient": [
+    "USA",
+    "EU",
+    "SAU"
+  ],
+  "most_fragile": [
+    "IND",
+    "CHN",
+    "RUS"
+  ],
+  "most_domestically_fragile": [
+    "CHN",
+    "BRA",
+    "USA"
+  ]
+}
