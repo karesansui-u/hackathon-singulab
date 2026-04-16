@@ -208,6 +208,32 @@ python main.py --config config.claude.smoke.yaml
 
 `claude` が未認証なら、事前に `claude login` を実行してください。
 
+Codex CLI を使う例:
+
+このリポジトリには、Codex 用のラッパースクリプト [scripts/run_codex_prompt.sh](/Users/sunagawa/Project/hackathon-singulab/scripts/run_codex_prompt.sh:1) と設定ファイルも含めています。
+
+- `config.codex.smoke.yaml`: 小さく安全に試すための設定
+- `config.codex.yaml`: 通常サイズの設定
+
+最初に一度だけログインしておけば、その後は設定ファイル経由でそのまま実行できます。
+
+```bash
+codex login
+python main.py --config config.codex.smoke.yaml
+```
+
+通常実行:
+
+```bash
+python main.py --config config.codex.yaml
+```
+
+必要ならモデルだけ後から変えることもできます。
+
+```bash
+CODEX_MODEL=gpt-5.4 python main.py --config config.codex.smoke.yaml
+```
+
 Codex など別のCLIを使う場合も同じ仕組みで差し替えできます。ただし、CLIによっては人間向けの進捗表示やツール実行を含むことがあるため、**このシミュレーション向けには最終テキストだけを返す薄いラッパースクリプトを挟む構成**が安全です。
 
 ## 使用方法
@@ -254,6 +280,13 @@ Claude Code CLI を使う例:
 ```bash
 python main.py --config config.claude.smoke.yaml
 python main.py --config config.claude.yaml
+```
+
+Codex CLI を使う例:
+
+```bash
+python main.py --config config.codex.smoke.yaml
+python main.py --config config.codex.yaml
 ```
 
 ## 設定ファイル（config.yaml）

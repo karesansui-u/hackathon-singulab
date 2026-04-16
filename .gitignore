@@ -6,5 +6,9 @@ venv/
 
 output/
 output_smoke/
+output_claude/
+output_claude_smoke/
+output_codex/
+output_codex_smoke/
 
 *.log
