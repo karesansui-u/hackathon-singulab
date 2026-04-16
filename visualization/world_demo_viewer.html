@@ -41,8 +41,8 @@
 
         .app {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) 340px;
-            height: 100vh;
+            grid-template-columns: minmax(0, 1fr) minmax(540px, 640px);
+            height: 100dvh;
             gap: 18px;
             padding: 18px;
         }
@@ -51,6 +51,7 @@
             display: grid;
             grid-template-rows: auto minmax(0, 1fr) auto;
             min-width: 0;
+            min-height: 0;
             gap: 14px;
         }
 
@@ -64,24 +65,31 @@
 
         .topbar {
             display: grid;
-            grid-template-columns: auto minmax(0, 1fr) auto;
-            gap: 12px;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 10px;
             align-items: center;
-            padding: 14px 16px;
+            padding: 10px 12px;
+        }
+
+        .header-stack {
+            display: grid;
+            gap: 8px;
+            min-width: 0;
         }
 
         .brand {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
+            min-width: 0;
         }
 
         .badge {
-            padding: 8px 12px;
+            padding: 6px 10px;
             border-radius: 999px;
             background: rgba(94, 196, 255, 0.14);
             color: var(--accent);
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 800;
             letter-spacing: 0.08em;
             text-transform: uppercase;
@@ -89,15 +97,26 @@
 
         .title-block h1 {
             margin: 0;
-            font-size: clamp(20px, 2vw, 28px);
+            font-size: clamp(15px, 1.4vw, 20px);
             letter-spacing: -0.04em;
         }
 
         .title-block p {
             margin: 4px 0 0;
             color: var(--muted);
-            font-size: 13px;
-            line-height: 1.5;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .title-block-secondary {
+            padding: 8px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(184, 216, 255, 0.08);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .brand .title-block p {
+            display: none;
         }
 
         .toolbar-actions {
@@ -106,6 +125,7 @@
             gap: 10px;
             flex-wrap: wrap;
             justify-content: flex-end;
+            align-self: center;
         }
 
         .scenario-tools {
@@ -182,20 +202,25 @@
             position: relative;
             min-height: 0;
             overflow: hidden;
+            display: grid;
         }
 
         .stage-shell {
             height: 100%;
-            padding: 18px;
+            min-height: 0;
+            padding: 14px 18px 8px;
             display: grid;
             place-items: center;
+            align-content: center;
+            overflow: hidden;
         }
 
         .stage {
             position: relative;
-            width: 100%;
-            height: 100%;
-            min-height: 0;
+            width: min(100%, 1180px);
+            height: auto;
+            min-height: 320px;
+            max-height: min(58dvh, 680px);
             aspect-ratio: 2 / 1;
             border-radius: 22px;
             overflow: hidden;
@@ -264,6 +289,7 @@
             gap: 14px;
             align-items: center;
             padding: 14px 16px;
+            min-height: 0;
         }
 
         .playback {
@@ -273,15 +299,18 @@
         }
 
         .turn-scrub {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) repeat(6, auto);
+            display: flex;
+            flex-wrap: wrap;
             gap: 10px;
             align-items: center;
+            min-width: 0;
         }
 
         input[type="range"] {
             width: 100%;
             accent-color: #5ec4ff;
+            flex: 1 1 320px;
+            min-width: 220px;
         }
 
         .metric-chip {
@@ -290,6 +319,7 @@
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(184, 216, 255, 0.08);
             min-width: 96px;
+            flex: 0 0 auto;
         }
 
         .metric-chip span {
@@ -310,13 +340,27 @@
 
         .sidebar {
             display: grid;
-            grid-template-rows: auto auto minmax(0, 1fr) minmax(0, 1fr) auto;
+            grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+            grid-template-areas: "selected tabs";
             gap: 14px;
             min-height: 0;
+            overflow: auto;
+            align-content: start;
         }
 
         .side-card {
             padding: 16px;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .side-card.selected-card {
+            grid-area: selected;
+        }
+
+        .side-card.tabs-card {
+            grid-area: tabs;
         }
 
         .side-card h2,
@@ -359,6 +403,12 @@
             display: grid;
             gap: 10px;
             margin-top: 14px;
+            flex: 1 1 auto;
+            align-content: start;
+        }
+
+        .selected-card #countryName {
+            margin-top: 2px;
         }
 
         .bar-row {
@@ -386,6 +436,8 @@
             gap: 8px;
             overflow: auto;
             padding-right: 2px;
+            min-height: 140px;
+            flex: 1 1 auto;
         }
 
         .feed {
@@ -394,6 +446,54 @@
             overflow: auto;
             padding-right: 2px;
             max-height: 100%;
+            min-height: 140px;
+            flex: 1 1 auto;
+        }
+
+        .tabs-card {
+            min-height: 0;
+        }
+
+        .tab-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .tab-button {
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(184, 216, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+        }
+
+        .tab-button.active {
+            background: rgba(94, 196, 255, 0.12);
+            color: var(--ink);
+            border-color: rgba(94, 196, 255, 0.28);
+        }
+
+        .tab-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 0;
+            flex: 1 1 auto;
+        }
+
+        .tab-panel[hidden] {
+            display: none;
+        }
+
+        .tab-panel-copy {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
         }
 
         .feed-item {
@@ -570,6 +670,42 @@
             color: var(--muted);
         }
 
+        .country-note {
+            display: grid;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(184, 216, 255, 0.08);
+        }
+
+        .country-note-head {
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--ink);
+            font-weight: 700;
+        }
+
+        .country-note-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .country-note-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(184, 216, 255, 0.08);
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+
         @keyframes flow {
             from {
                 stroke-dashoffset: 0;
@@ -579,7 +715,23 @@
             }
         }
 
-        @media (max-width: 1200px) {
+        @media (max-width: 1500px) {
+            .app {
+                grid-template-columns: minmax(0, 1fr) minmax(480px, 560px);
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+                align-items: stretch;
+            }
+
+            .stage {
+                width: min(100%, 1080px);
+                max-height: min(54dvh, 620px);
+            }
+        }
+
+        @media (max-width: 1024px) {
             .app {
                 grid-template-columns: 1fr;
                 height: auto;
@@ -590,9 +742,31 @@
                 overflow: auto;
             }
 
+            .topbar {
+                grid-template-columns: 1fr;
+            }
+
+            .toolbar-actions {
+                justify-content: flex-start;
+            }
+
+            .stage-shell {
+                padding: 14px;
+            }
+
+            .stage {
+                width: 100%;
+                min-height: 260px;
+                max-height: none;
+            }
+
             .sidebar {
-                grid-template-columns: 1fr 1fr;
-                grid-template-rows: auto auto;
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "selected"
+                    "tabs";
+                grid-template-rows: none;
+                overflow: visible;
             }
         }
     </style>
@@ -601,16 +775,17 @@
     <div class="app">
         <section class="workspace">
             <header class="panel topbar">
-                <div class="brand">
-                    <span class="badge">Japan-Centered Map</span>
-                    <div class="title-block">
-                        <h1>World Demo Playback</h1>
-                        <p>世界地図を主役にして、支援・戦争圧力・持続状態の変化だけを中央で追う viewer です。</p>
+                <div class="header-stack">
+                    <div class="brand">
+                        <span class="badge">Japan-Centered Map</span>
+                        <div class="title-block">
+                            <h1>World Demo</h1>
+                        </div>
                     </div>
-                </div>
-                <div id="eventSummary" class="title-block">
-                    <h1 style="font-size: 18px;">シナリオ未読込</h1>
-                    <p>前回の root が保存されていれば自動で復元し、なければ同梱 demo を先に読み込みます。</p>
+                    <div id="eventSummary" class="title-block title-block-secondary">
+                        <h1 style="font-size: 16px;">シナリオ未読込</h1>
+                        <p>root 読込待ち</p>
+                    </div>
                 </div>
                 <div class="toolbar-actions">
                     <div class="scenario-tools">
@@ -676,7 +851,7 @@
         </section>
 
         <aside class="sidebar">
-            <section class="panel side-card">
+            <section class="panel side-card selected-card">
                 <h2>Selected Country</h2>
                 <div class="country-header">
                     <strong id="countryCode">-</strong>
@@ -684,42 +859,45 @@
                 </div>
                 <p id="countryName">シナリオを読み込むと、国をクリックして詳細を見られます。</p>
                 <div class="bar-list" id="countryBars"></div>
-                <div id="countryNarrative" class="event-tag">Turn playback inactive</div>
+                <div id="countryNarrative" class="country-note">Turn playback inactive</div>
             </section>
 
-            <section class="panel side-card">
-                <h3>Turn Event</h3>
-                <p id="eventDescription">イベント説明はここに表示されます。</p>
-                <div class="event-tag" id="eventTag">No event</div>
-            </section>
-
-            <section class="panel side-card">
-                <h3>Turn Chat</h3>
-                <p>マクロ発話と国家間の支援・圧力イベントを、チャット風にまとめます。</p>
-                <div id="chatFeed" class="feed"></div>
-            </section>
-
-            <section class="panel side-card">
-                <h3>Country Reasoning</h3>
-                <p>選択中の国が今なにを気にしていそうかを、状態変数から要約して表示します。</p>
-                <div id="thoughtFeed" class="feed"></div>
-            </section>
-
-            <section class="panel side-card">
-                <h3>Country Ranking</h3>
-                <div id="countryList" class="list"></div>
-            </section>
-
-            <section class="panel side-card">
-                <h3>Legend</h3>
-                <div class="legend">
-                    <div class="legend-item"><span class="swatch" style="background:#59d98e;"></span>S high</div>
-                    <div class="legend-item"><span class="swatch" style="background:#ff6c5c;"></span>S low</div>
-                    <div class="legend-item"><span class="swatch" style="background:#5ec4ff;"></span>cooperation</div>
-                    <div class="legend-item"><span class="swatch" style="background:#7b1fa2;"></span>gray-zone</div>
-                    <div class="legend-item"><span class="swatch" style="background:#d32f2f;"></span>proxy</div>
-                    <div class="legend-item"><span class="swatch" style="background:#111111;"></span>limited war</div>
+            <section class="panel side-card tabs-card">
+                <div class="tab-strip" role="tablist" aria-label="Right Sidebar Tabs">
+                    <button class="tab-button active" type="button" data-tab="chat">Chat</button>
+                    <button class="tab-button" type="button" data-tab="reasoning">Reasoning</button>
+                    <button class="tab-button" type="button" data-tab="ranking">Ranking</button>
+                    <button class="tab-button" type="button" data-tab="legend">Legend</button>
                 </div>
+
+                <section id="tabPanelChat" class="tab-panel">
+                    <h3>Turn Chat</h3>
+                    <p class="tab-panel-copy">マクロ発話と国家間の支援・圧力イベントを、チャット風にまとめます。</p>
+                    <div id="chatFeed" class="feed"></div>
+                </section>
+
+                <section id="tabPanelReasoning" class="tab-panel" hidden>
+                    <h3>Country Reasoning</h3>
+                    <p class="tab-panel-copy">選択中の国が今なにを気にしていそうかを、状態変数から要約して表示します。</p>
+                    <div id="thoughtFeed" class="feed"></div>
+                </section>
+
+                <section id="tabPanelRanking" class="tab-panel" hidden>
+                    <h3>Country Ranking</h3>
+                    <div id="countryList" class="list"></div>
+                </section>
+
+                <section id="tabPanelLegend" class="tab-panel" hidden>
+                    <h3>Legend</h3>
+                    <div class="legend">
+                        <div class="legend-item"><span class="swatch" style="background:#59d98e;"></span>S high</div>
+                        <div class="legend-item"><span class="swatch" style="background:#ff6c5c;"></span>S low</div>
+                        <div class="legend-item"><span class="swatch" style="background:#5ec4ff;"></span>cooperation</div>
+                        <div class="legend-item"><span class="swatch" style="background:#7b1fa2;"></span>gray-zone</div>
+                        <div class="legend-item"><span class="swatch" style="background:#d32f2f;"></span>proxy</div>
+                        <div class="legend-item"><span class="swatch" style="background:#111111;"></span>limited war</div>
+                    </div>
+                </section>
             </section>
         </aside>
     </div>
@@ -756,9 +934,10 @@
         const HANDLE_DB_NAME = "world-demo-viewer";
         const HANDLE_STORE_NAME = "handles";
         const ROOT_HANDLE_KEY = "root-handle";
-        const SCENARIO_PREF_KEY = "world-demo-scenario-key";
+        const SCENARIO_PREF_KEY_PREFIX = "world-demo-scenario-key";
         const LINK_MODE_PREF_KEY = "world-demo-link-mode";
-        const DEFAULT_ROOT_URL = "../output/world_demo/major_powers_10turn";
+        const SIDEBAR_TAB_PREF_KEY = "world-demo-sidebar-tab";
+        const DEFAULT_ROOT_URL = "../output/world_demo/major_powers_20year_outlook";
 
         const state = {
             accessMode: "none",
@@ -785,6 +964,7 @@
             eventsByTurn: new Map(),
             selectedCountry: "JPN",
             linkMode: localStorage.getItem(LINK_MODE_PREF_KEY) || "events",
+            sidebarTab: localStorage.getItem(SIDEBAR_TAB_PREF_KEY) || "chat",
             playing: false,
             playTimer: null,
         };
@@ -800,6 +980,7 @@
         const scenarioSelect = document.getElementById("scenarioSelect");
         const linkModeSelect = document.getElementById("linkModeSelect");
         const rootStatus = document.getElementById("rootStatus");
+        const tabButtons = Array.from(document.querySelectorAll(".tab-button"));
 
         function parseCSV(text) {
             const rows = [];
@@ -851,6 +1032,22 @@
                 .map(line => line.trim())
                 .filter(Boolean)
                 .map(line => JSON.parse(line));
+        }
+
+        function scenarioPrefStorageKey(rootIdentifier) {
+            const safeRoot = String(rootIdentifier || "default")
+                .replace(/[^a-zA-Z0-9_-]+/g, "_")
+                .replace(/^_+|_+$/g, "") || "default";
+            return `${SCENARIO_PREF_KEY_PREFIX}:${safeRoot}`;
+        }
+
+        function readScenarioPreference(rootIdentifier) {
+            return localStorage.getItem(scenarioPrefStorageKey(rootIdentifier));
+        }
+
+        function persistScenarioPreference(scenarioKey) {
+            const rootIdentifier = state.rootUrl || state.rootLabel || "default";
+            localStorage.setItem(scenarioPrefStorageKey(rootIdentifier), scenarioKey);
         }
 
         function openHandleDb() {
@@ -1418,7 +1615,13 @@
                 modeEl.textContent = "idle";
                 nameEl.textContent = "シナリオを読み込むと、国をクリックして詳細を見られます。";
                 barsEl.innerHTML = "";
-                noteEl.textContent = "Turn playback inactive";
+                noteEl.innerHTML = `
+                    <div class="country-note-head">再生が始まると、この国の短い状態要約がここに出ます。</div>
+                    <div class="country-note-meta">
+                        <span class="country-note-pill">mode idle</span>
+                        <span class="country-note-pill">domestic stable</span>
+                    </div>
+                `;
                 return;
             }
 
@@ -1448,12 +1651,19 @@
             `).join("");
 
             const risk =
-                Number(row.civil_conflict_pressure || 0) > 0.48 ? "domestic rupture risk is acute" :
-                Number(row.war_pressure) > 0.35 ? "conflict pressure is acute" :
-                Number(row.support_needed) > 0.25 ? "support dependence is rising" :
-                Number(row.S) > 0.52 ? "structure sustain remains relatively intact" :
-                "system stress is building";
-            noteEl.textContent = `${row.code}: ${risk}. likely mode = ${row.likely_mode.replace("_", " ")}. domestic stage = ${row.domestic_stage || "stable"}.`;
+                Number(row.civil_conflict_pressure || 0) > 0.48 ? "国内の断裂リスクがかなり高い状態です。" :
+                Number(row.war_pressure) > 0.35 ? "対外圧力が強く、安全保障リスクが前面に出ています。" :
+                Number(row.support_needed) > 0.25 ? "外部支援への依存が強まりつつあります。" :
+                Number(row.S) > 0.52 ? "構造持続はまだ比較的安定しています。" :
+                "全体ストレスがじわじわ積み上がっています。";
+            noteEl.innerHTML = `
+                <div class="country-note-head">${row.code}: ${risk}</div>
+                <div class="country-note-meta">
+                    <span class="country-note-pill">mode ${row.likely_mode.replace("_", " ")}</span>
+                    <span class="country-note-pill">domestic ${row.domestic_stage || "stable"}</span>
+                    <span class="country-note-pill">S ${format(row.S)}</span>
+                </div>
+            `;
         }
 
         function renderCountryList() {
@@ -1499,6 +1709,20 @@
                 messages.push(...buildTurnMessages(turn));
             }
 
+            if (!messages.length) {
+                chatEl.innerHTML = `
+                    <article class="feed-item">
+                        <div class="feed-meta">
+                            <span>WORLD → ALL</span>
+                            <span>${formatElapsed(state.turns[state.turnIndex])}</span>
+                        </div>
+                        <div class="feed-body">この turn は大きな交渉イベントが少なく、世界チャットは静かです。</div>
+                        <div class="feed-note">scenario データは読めています。以後の turn で支援・圧力・国内イベントがここに流れます。</div>
+                    </article>
+                `;
+                return;
+            }
+
             chatEl.innerHTML = messages.map(item => `
                 <article class="feed-item">
                     <div class="feed-meta">
@@ -1541,10 +1765,37 @@
             `;
         }
 
+        function renderSidebarTabs() {
+            const activeTab = ["chat", "reasoning", "ranking", "legend"].includes(state.sidebarTab)
+                ? state.sidebarTab
+                : "chat";
+            state.sidebarTab = activeTab;
+
+            const panelMap = {
+                chat: document.getElementById("tabPanelChat"),
+                reasoning: document.getElementById("tabPanelReasoning"),
+                ranking: document.getElementById("tabPanelRanking"),
+                legend: document.getElementById("tabPanelLegend"),
+            };
+
+            tabButtons.forEach(button => {
+                const isActive = button.dataset.tab === activeTab;
+                button.classList.toggle("active", isActive);
+                button.setAttribute("aria-selected", isActive ? "true" : "false");
+            });
+
+            Object.entries(panelMap).forEach(([key, panel]) => {
+                if (!panel) {
+                    return;
+                }
+                panel.hidden = key !== activeTab;
+            });
+
+            localStorage.setItem(SIDEBAR_TAB_PREF_KEY, activeTab);
+        }
+
         function renderHeader() {
             const header = document.getElementById("eventSummary");
-            const eventDescription = document.getElementById("eventDescription");
-            const eventTag = document.getElementById("eventTag");
             if (!state.turns.length) {
                 return;
             }
@@ -1555,11 +1806,9 @@
             const timeLabel = formatElapsed(turn);
 
             header.innerHTML = `
-                <h1 style="font-size: 19px;">${state.scenarioName} | ${timeLabel}</h1>
-                <p>${event.name}. ${event.description}</p>
+                <h1 style="font-size: 16px;">${state.scenarioName}</h1>
+                <p>${timeLabel} · ${event.name}</p>
             `;
-            eventDescription.textContent = event.description;
-            eventTag.textContent = `${timeLabel} | ${event.name} | cooperation ${(event.cooperation_transfers || []).length} | domestic ${(event.domestic_events || []).length} | conflicts ${(event.conflict_events || []).length}`;
 
             document.getElementById("timeValue").textContent = timeLabel;
             document.getElementById("turnValue").textContent = `${turn}/${state.turns.length}`;
@@ -1576,6 +1825,7 @@
             renderChatFeed();
             renderThoughtFeed();
             renderCountryList();
+            renderSidebarTabs();
             emptyState.style.display = state.turns.length ? "none" : "grid";
             turnSlider.value = state.turns.length ? String(state.turns[state.turnIndex]) : "1";
         }
@@ -1652,7 +1902,7 @@
             prevButton.disabled = false;
             nextButton.disabled = false;
             scenarioSelect.disabled = false;
-            localStorage.setItem(SCENARIO_PREF_KEY, scenarioKey);
+            persistScenarioPreference(scenarioKey);
             render();
         }
 
@@ -1723,7 +1973,7 @@
 
             const preferred =
                 preferredScenario ||
-                localStorage.getItem(SCENARIO_PREF_KEY) ||
+                readScenarioPreference(rootHandle.name) ||
                 state.viewerMeta.default_scenario ||
                 scenarioEntries[0].key;
             const selectedKey = state.scenarioHandles.has(preferred) ? preferred : scenarioEntries[0].key;
@@ -1750,7 +2000,7 @@
             setRootLabel(`bundled demo · ${rootUrl.split("/").pop()}`);
 
             const preferred =
-                localStorage.getItem(SCENARIO_PREF_KEY) ||
+                readScenarioPreference(rootUrl) ||
                 state.viewerMeta.default_scenario ||
                 scenarioEntries[0].key;
             const selectedKey = state.scenarioUrls.has(preferred) ? preferred : scenarioEntries[0].key;
@@ -1819,6 +2069,13 @@
             }
         });
 
+        tabButtons.forEach(button => {
+            button.addEventListener("click", () => {
+                state.sidebarTab = button.dataset.tab || "chat";
+                renderSidebarTabs();
+            });
+        });
+
         playButton.addEventListener("click", () => {
             if (state.playing) {
                 stopPlayback();
@@ -1883,6 +2140,7 @@
 
         resetPlaybackUi();
         linkModeSelect.value = state.linkMode;
+        renderSidebarTabs();
 
         (async () => {
             const restored = await tryRestoreSavedRoot();
