@@ -41,7 +41,7 @@
 
         .app {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(540px, 640px);
+            grid-template-columns: minmax(0, 1fr) minmax(620px, 760px);
             height: 100dvh;
             gap: 18px;
             padding: 18px;
@@ -340,7 +340,7 @@
 
         .sidebar {
             display: grid;
-            grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+            grid-template-columns: minmax(240px, 0.82fr) minmax(340px, 1.18fr);
             grid-template-areas: "selected tabs";
             gap: 14px;
             min-height: 0;
@@ -614,23 +614,6 @@
             stroke-width: 4px;
         }
 
-        .edge {
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            vector-effect: non-scaling-stroke;
-        }
-
-        .edge.coop {
-            stroke-dasharray: 11 10;
-            animation: flow 2.2s linear infinite;
-        }
-
-        .edge.conflict {
-            stroke-dasharray: 16 9;
-            animation: flow 1.6s linear infinite;
-        }
-
         .node-group {
             cursor: pointer;
         }
@@ -706,18 +689,9 @@
             letter-spacing: 0.02em;
         }
 
-        @keyframes flow {
-            from {
-                stroke-dashoffset: 0;
-            }
-            to {
-                stroke-dashoffset: -40;
-            }
-        }
-
         @media (max-width: 1500px) {
             .app {
-                grid-template-columns: minmax(0, 1fr) minmax(480px, 560px);
+                grid-template-columns: minmax(0, 1fr) minmax(560px, 660px);
             }
 
             .controls {
@@ -797,14 +771,6 @@
                             <span>Scenario</span>
                             <select id="scenarioSelect" disabled>
                                 <option>読み込み待ち</option>
-                            </select>
-                        </label>
-                        <label class="select-wrap">
-                            <span>Links</span>
-                            <select id="linkModeSelect">
-                                <option value="events">events only</option>
-                                <option value="selected">selected dependencies</option>
-                                <option value="none">none</option>
                             </select>
                         </label>
                     </div>
@@ -935,7 +901,6 @@
         const HANDLE_STORE_NAME = "handles";
         const ROOT_HANDLE_KEY = "root-handle";
         const SCENARIO_PREF_KEY_PREFIX = "world-demo-scenario-key";
-        const LINK_MODE_PREF_KEY = "world-demo-link-mode";
         const SIDEBAR_TAB_PREF_KEY = "world-demo-sidebar-tab";
         const DEFAULT_ROOT_URL = "../output/world_demo/major_powers_20year_outlook";
 
@@ -963,7 +928,6 @@
             aggregateByTurn: new Map(),
             eventsByTurn: new Map(),
             selectedCountry: "JPN",
-            linkMode: localStorage.getItem(LINK_MODE_PREF_KEY) || "events",
             sidebarTab: localStorage.getItem(SIDEBAR_TAB_PREF_KEY) || "chat",
             playing: false,
             playTimer: null,
@@ -978,7 +942,6 @@
         const nextButton = document.getElementById("nextButton");
         const turnSlider = document.getElementById("turnSlider");
         const scenarioSelect = document.getElementById("scenarioSelect");
-        const linkModeSelect = document.getElementById("linkModeSelect");
         const rootStatus = document.getElementById("rootStatus");
         const tabButtons = Array.from(document.querySelectorAll(".tab-button"));
 
@@ -1162,20 +1125,6 @@
 
         function nodeRadius(weight) {
             return 18 + 56 * Number(weight);
-        }
-
-        function curvedPath(start, end, bend = 0.18) {
-            const mx = (start.x + end.x) / 2;
-            const my = (start.y + end.y) / 2;
-            const dx = end.x - start.x;
-            const dy = end.y - start.y;
-            const length = Math.max(Math.hypot(dx, dy), 1);
-            const nx = -dy / length;
-            const ny = dx / length;
-            const curve = 70 + length * bend * 0.22;
-            const cx = mx + nx * curve;
-            const cy = my + ny * curve;
-            return `M ${start.x.toFixed(1)} ${start.y.toFixed(1)} Q ${cx.toFixed(1)} ${cy.toFixed(1)} ${end.x.toFixed(1)} ${end.y.toFixed(1)}`;
         }
 
         function format(value, digits = 2) {
@@ -1486,59 +1435,6 @@
             document.getElementById("eventCountValue").textContent = "-";
         }
 
-        function buildMarkerDefs() {
-            return `
-                <defs>
-                    <marker id="arrow-coop" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
-                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#5ec4ff"></path>
-                    </marker>
-                    <marker id="arrow-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
-                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#7b1fa2"></path>
-                    </marker>
-                    <marker id="arrow-proxy" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
-                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#d32f2f"></path>
-                    </marker>
-                    <marker id="arrow-limited" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
-                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"></path>
-                    </marker>
-                </defs>
-            `;
-        }
-
-        function buildStaticEdges() {
-            if (state.linkMode !== "selected" || !state.selectedCountry) {
-                return "";
-            }
-
-            const fragments = [];
-            for (const edge of state.graph.cooperation || []) {
-                if (edge.source !== state.selectedCountry && edge.target !== state.selectedCountry) {
-                    continue;
-                }
-                const start = project(edge.source);
-                const end = project(edge.target);
-                const path = curvedPath(start, end, 0.10);
-                const width = 1.5 + Number(edge.weight || 0) * 4.0;
-                fragments.push(
-                    `<path class="edge" d="${path}" stroke="#5ec4ff" stroke-opacity="0.20" stroke-width="${width.toFixed(1)}"></path>`,
-                );
-            }
-
-            for (const edge of state.graph.rivalries || []) {
-                if (edge.source !== state.selectedCountry && edge.target !== state.selectedCountry) {
-                    continue;
-                }
-                const start = project(edge.source);
-                const end = project(edge.target);
-                const path = curvedPath(start, end, -0.10);
-                const width = 1.5 + Number(edge.weight || 0) * 4.0;
-                fragments.push(
-                    `<path class="edge" d="${path}" stroke="#ff8b7a" stroke-opacity="0.18" stroke-width="${width.toFixed(1)}" stroke-dasharray="8 10"></path>`,
-                );
-            }
-            return fragments.join("");
-        }
-
         function renderOverlay() {
             if (!state.turns.length) {
                 overlay.innerHTML = "";
@@ -1547,30 +1443,6 @@
 
             const turn = state.turns[state.turnIndex];
             const currentRows = state.rowsByTurn.get(turn);
-            const event = state.eventsByTurn.get(turn) || { conflict_events: [], cooperation_transfers: [], name: "Baseline dynamics", description: "No exogenous event." };
-
-            let edges = "";
-            edges += buildStaticEdges();
-
-            if (state.linkMode !== "none") {
-                for (const transfer of event.cooperation_transfers || []) {
-                    const start = project(transfer.donor);
-                    const end = project(transfer.target);
-                    const path = curvedPath(start, end, 0.12);
-                    const width = 4 + Number(transfer.amount) * 110;
-                    edges += `<path class="edge coop" d="${path}" stroke="#5ec4ff" stroke-opacity="0.84" stroke-width="${width.toFixed(1)}" marker-end="url(#arrow-coop)"></path>`;
-                }
-
-                for (const conflict of event.conflict_events || []) {
-                    const start = project(conflict.actor);
-                    const end = project(conflict.target);
-                    const path = curvedPath(start, end, -0.12);
-                    const color = MODE_COLORS[conflict.mode] || "#111111";
-                    const markerId = conflict.mode === "gray_zone" ? "arrow-gray" : conflict.mode === "proxy" ? "arrow-proxy" : "arrow-limited";
-                    const width = 5 + Number(conflict.intensity) * 22;
-                    edges += `<path class="edge conflict" d="${path}" stroke="${color}" stroke-opacity="0.92" stroke-width="${width.toFixed(1)}" marker-end="url(#${markerId})"></path>`;
-                }
-            }
 
             let nodes = "";
             const rows = Array.from(currentRows.values());
@@ -1594,7 +1466,7 @@
                 `;
             }
 
-            overlay.innerHTML = buildMarkerDefs() + edges + nodes;
+            overlay.innerHTML = nodes;
             overlay.querySelectorAll(".node-group").forEach(node => {
                 node.addEventListener("click", () => {
                     state.selectedCountry = node.dataset.code;
@@ -2050,12 +1922,6 @@
             }
         });
 
-        linkModeSelect.addEventListener("change", event => {
-            state.linkMode = event.target.value;
-            localStorage.setItem(LINK_MODE_PREF_KEY, state.linkMode);
-            render();
-        });
-
         scenarioSelect.addEventListener("change", async event => {
             const scenarioKey = event.target.value;
             stopPlayback();
@@ -2139,7 +2005,6 @@
         });
 
         resetPlaybackUi();
-        linkModeSelect.value = state.linkMode;
         renderSidebarTabs();
 
         (async () => {
