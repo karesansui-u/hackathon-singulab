@@ -5,7 +5,7 @@ import json
 import math
 import logging
 from typing import List, Tuple, Optional, Dict, TypedDict
-from ollama_client import OllamaClient
+from llm_backends import LLMClientProtocol
 from utils import is_position_in_place, get_place_at_position, PlaceConfig
 
 logger = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ class Agent:
         self,
         agent_id: int,
         initial_position: Tuple[int, int],
-        llm_client: OllamaClient,
+        llm_client: LLMClientProtocol,
         communication_radius: float,
         half_space_size: int,
         places: List[PlaceConfig],

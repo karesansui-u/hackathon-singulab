@@ -29,7 +29,7 @@ https://github.com/user-attachments/assets/e405f2c3-9518-489d-87c3-c155d7fca38b
 ## 必要な環境
 
 - Python 3.8以上
-- Ollama（LLMサーバー）
+- Ollama または外部LLM CLI
 - 必要なPythonパッケージ（requirements.txt参照）
 - FFmpeg（動画生成を行う場合のみ）
 
@@ -74,7 +74,16 @@ source venv/bin/activate
 venv\Scripts\activate.bat
 ```
 
-### 3. Ollamaのセットアップ
+### 3. LLMバックエンドのセットアップ
+
+このプロジェクトは `llm.provider` でバックエンドを切り替えられます。
+
+- `ollama`: 既存どおり Ollama API を使用
+- `command`: 任意のCLIコマンドを subprocess 経由で実行
+
+まずは最も安定している `ollama` の設定方法を説明します。
+
+#### `provider: ollama` の場合
 
 #### Ollamaのインストール
    - [Ollama](https://ollama.ai/)をインストール
@@ -150,13 +159,63 @@ llm:
 
 ### 4. 設定ファイルの確認
    - `config.yaml`でパラメータを確認・調整
-   - **特に `llm.model` を、ご自身の環境にインストール済みのモデル名に変更してください**（`ollama list` で確認できます）
+   - `provider: ollama` を使う場合は、**特に `llm.model` を、ご自身の環境にインストール済みのモデル名に変更してください**（`ollama list` で確認できます）
+   - `provider: command` を使う場合は、実行したいCLIコマンドを `llm.command` に設定してください
+
+#### `provider: command` の場合
+
+`command` バックエンドでは、外部CLIを1回のプロンプト呼び出しとして使えます。各エージェントの1推論ごとにコマンドを起動するため、Ollamaよりオーバーヘッドは大きめです。
+
+最小構成は以下です。
+
+```yaml
+llm:
+  provider: "command"
+  command:
+    - "your-cli"
+    - "{prompt}"
+```
+
+`{prompt}` を `command` に含めると、その位置にプロンプト文字列が埋め込まれます。`{prompt}` を使わない場合は、デフォルトで最後の引数として追加されます。CLIが標準入力から受け取る場合は `prompt_mode: "stdin"` を使います。
+
+Claude Code CLI を使う例:
+
+```yaml
+llm:
+  provider: "command"
+  command:
+    - "claude"
+    - "-p"
+    - "--output-format"
+    - "json"
+    - "{prompt}"
+  response_format: "json"
+  response_json_field: "result"
+  timeout_seconds: 180
+```
+
+このリポジトリには、すぐ試せる Claude Code CLI 用の設定ファイルも含めています。
+
+- `config.claude.smoke.yaml`: 小さく安全に試すための設定
+- `config.claude.yaml`: 通常サイズの設定
+
+初回は以下を推奨します。
+
+```bash
+claude --version
+python main.py --config config.claude.smoke.yaml
+```
+
+`claude` が未認証なら、事前に `claude login` を実行してください。
+
+Codex など別のCLIを使う場合も同じ仕組みで差し替えできます。ただし、CLIによっては人間向けの進捗表示やツール実行を含むことがあるため、**このシミュレーション向けには最終テキストだけを返す薄いラッパースクリプトを挟む構成**が安全です。
 
 ## 使用方法
 
 **注意**: 
 - 実行前に仮想環境を有効化してください
-- Ollamaサーバーが起動していることを確認してください（`ollama serve`を別のターミナルで実行）
+- `provider: ollama` の場合は Ollama サーバーが起動していることを確認してください（`ollama serve`を別のターミナルで実行）
+- `provider: command` の場合は設定したCLIコマンドが `PATH` 上で実行できることを確認してください
 
 ### 基本的な実行
 
@@ -188,6 +247,13 @@ python main.py --save-frames
 
 ```bash
 python main.py --config custom_config.yaml
+```
+
+Claude Code CLI を使う例:
+
+```bash
+python main.py --config config.claude.smoke.yaml
+python main.py --config config.claude.yaml
 ```
 
 ## 設定ファイル（config.yaml）
@@ -292,8 +358,15 @@ python main.py --config custom_config.yaml
   ```
 
 - **llm**: LLM設定（詳細は `config.yaml` を参照）
-  - `model`: Ollamaモデル名
-  - `base_url`: Ollama APIエンドポイント
+  - `provider`: `ollama` または `command`
+  - `model`: モデル名。`ollama` では必須、`command` では任意の識別子
+  - `base_url`: Ollama APIエンドポイント（`provider: ollama` のとき使用）
+  - `command`: 実行するCLIコマンド。文字列または配列で指定可能（`provider: command` のとき使用）
+  - `prompt_mode`: `auto` / `append_arg` / `stdin`。CLIへのプロンプト渡し方を制御
+  - `response_format`: `text` または `json`
+  - `response_json_field`: JSON出力から取り出すフィールド名（例: `result`）
+  - `timeout_seconds`: CLI実行タイムアウト秒数
+  - `env`: CLI実行時に追加する環境変数
   - `temperature`: サンプリング温度（低いほど一貫した行動、高いほど多様な行動）
   - `max_tokens`: 最大トークン数
   - `repeat_penalty`: 反復ペナルティ（同じトークンの繰り返しを抑制）
@@ -312,9 +385,10 @@ python main.py --config custom_config.yaml
 - ただし、場所の占有状況（エージェント数、収容上限、占有率）は、その場所内にいるエージェントのみが直接受け取ります
 
 **モデルの選択について**:
-- `config.yaml` の `llm.model` で使用するモデルを指定
-- 利用可能なモデルを確認するには: `ollama list`
-- モデルをダウンロードするには: `ollama pull <モデル名>`
+- `provider: ollama` の場合は `config.yaml` の `llm.model` で使用するモデルを指定
+- 利用可能な Ollama モデルを確認するには: `ollama list`
+- Ollama モデルをダウンロードするには: `ollama pull <モデル名>`
+- `provider: command` の場合は `llm.command` が実行可能かどうかが重要で、モデル一覧の確認はCLI側の仕様に依存します
 
 ## 出力
 

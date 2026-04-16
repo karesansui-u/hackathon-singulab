@@ -9,7 +9,7 @@ import logging
 from typing import List, Tuple, Dict, Set, Optional
 import numpy as np
 from agent import Agent
-from ollama_client import OllamaClient
+from llm_backends import create_llm_client
 from utils import get_place_at_position, PlaceConfig
 
 logger = logging.getLogger(__name__)
@@ -128,15 +128,18 @@ class Simulation:
 
         # LLM parameters
         llm_config = self.config['llm']
-        self.llm_client = OllamaClient(
-            base_url=llm_config['base_url'],
-            model=llm_config['model'],
-            temperature=llm_config.get('temperature', 0.7),
-            max_tokens=llm_config.get('max_tokens', 200),
-            repeat_penalty=llm_config.get('repeat_penalty', 1.1),
-            repeat_last_n=llm_config.get('repeat_last_n', 128),
-            min_p=llm_config.get('min_p', 0.05)
-        )
+        self.llm_provider = llm_config.get('provider', 'ollama').lower()
+        self.llm_client = create_llm_client(llm_config)
+        self.llm_target = llm_config.get('model')
+        if not self.llm_target:
+            if self.llm_provider in {'command', 'cli'}:
+                command = llm_config.get('command', [])
+                if isinstance(command, list):
+                    self.llm_target = " ".join(command)
+                else:
+                    self.llm_target = str(command)
+            else:
+                self.llm_target = self.llm_provider
         
         # Initialize agents
         self.agents: List[Agent] = []
@@ -771,9 +774,12 @@ class Simulation:
         """Run the full simulation"""
         logger.info("Starting simulation...")
         
-        # Check Ollama connection
+        # Check LLM backend availability
         if not self.llm_client.check_connection():
-            logger.error("Cannot connect to Ollama. Please make sure Ollama is running.")
+            if self.llm_provider == 'ollama':
+                logger.error("Cannot connect to Ollama. Please make sure Ollama is running.")
+            else:
+                logger.error("Cannot run the configured CLI LLM backend: %s", self.llm_target)
             return
         
         # Initialize agents

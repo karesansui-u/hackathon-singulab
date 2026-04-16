@@ -1,4 +1,4 @@
-# Smoke-test configuration for a quick local run
+# Smoke-test configuration using Claude Code CLI (`claude -p`)
 
 simulation:
   duration: 4
@@ -28,14 +28,17 @@ places:
     capacity: 4
 
 llm:
-  provider: "ollama"
-  model: "gemma4:e4b"
-  base_url: "http://localhost:11434"
-  temperature: 0.2
-  max_tokens: 128
-  repeat_penalty: 1.1
-  repeat_last_n: 128
-  min_p: 0.05
+  provider: "command"
+  model: "claude-code-cli"
+  command:
+    - "claude"
+    - "-p"
+    - "--output-format"
+    - "json"
+    - "{prompt}"
+  response_format: "json"
+  response_json_field: "result"
+  timeout_seconds: 180
 
 fires:
   - name: "fire_1"
@@ -75,8 +78,8 @@ economy:
 visualization:
   save_frames: true
   frame_interval: 1
-  output_dir: "output_smoke"
+  output_dir: "output_claude_smoke"
 
 logging:
   level: "INFO"
-  log_file: "simulation_smoke.log"
+  log_file: "simulation_claude_smoke.log"

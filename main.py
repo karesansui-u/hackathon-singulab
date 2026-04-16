@@ -37,14 +37,18 @@ def setup_logging(config: dict):
     )
 
 
-def check_ollama_setup(sim: Simulation, logger: logging.Logger) -> bool:
-    """Check Ollama connection and model availability"""
+def check_llm_setup(sim: Simulation, logger: logging.Logger) -> bool:
+    """Check the configured LLM backend before running the simulation."""
     if not sim.llm_client.check_connection():
-        logger.error("Cannot connect to Ollama. Please make sure Ollama is running.")
-        logger.error(f"Expected URL: {sim.llm_client.base_url}")
+        if sim.llm_provider == 'ollama':
+            logger.error("Cannot connect to Ollama. Please make sure Ollama is running.")
+            logger.error(f"Expected URL: {sim.llm_client.base_url}")
+        else:
+            logger.error("Cannot run the configured CLI LLM backend.")
+            logger.error(f"Configured command/model: {sim.llm_target}")
         return False
-    
-    if not sim.llm_client.check_model_exists():
+
+    if sim.llm_provider == 'ollama' and not sim.llm_client.check_model_exists():
         logger.warning(f"Model '{sim.llm_client.model}' not found in Ollama.")
         available_models = sim.llm_client.list_models()
         if available_models:
@@ -55,8 +59,12 @@ def check_ollama_setup(sim: Simulation, logger: logging.Logger) -> bool:
             logger.error("No models found in Ollama. Please download a model first.")
             logger.error(f"Example: ollama pull {sim.llm_client.model}")
         return False
-    
-    logger.info(f"Using model: {sim.llm_client.model}")
+
+    logger.info(
+        "Using %s backend: %s",
+        sim.llm_provider,
+        sim.llm_target
+    )
     return True
 
 
@@ -232,8 +240,8 @@ def main():
         # Initialize agents
         sim.initialize_agents()
         
-        # Check Ollama setup
-        if not check_ollama_setup(sim, logger):
+        # Check LLM backend setup
+        if not check_llm_setup(sim, logger):
             return
         
         logger.info("Starting simulation...")

@@ -34,6 +34,7 @@ places:
   
 # LLM Parameters
 llm:
+  provider: "ollama"
   #model: "qwen3:4b-instruct-2507-q4_K_M"
   model: "gpt-oss:20b"  # Ollama model name
   base_url: "http://localhost:11434"  # Ollama API endpoint
