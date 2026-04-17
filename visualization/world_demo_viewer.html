@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Demo Map Viewer</title>
+    <title>世界デモ・マップビューア</title>
     <style>
         :root {
             --bg: #06111d;
@@ -193,6 +193,12 @@
             border: 1px solid var(--line);
         }
 
+        button.secondary.is-active {
+            background: rgba(94, 196, 255, 0.14);
+            border-color: rgba(94, 196, 255, 0.28);
+            color: var(--ink);
+        }
+
         button:disabled {
             opacity: 0.45;
             cursor: default;
@@ -203,6 +209,155 @@
             min-height: 0;
             overflow: hidden;
             display: grid;
+        }
+
+        .filter-panel {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            z-index: 4;
+            width: min(340px, calc(100% - 32px));
+            max-height: calc(100% - 32px);
+            padding: 14px;
+            overflow: hidden;
+            display: grid;
+            grid-template-rows: auto minmax(0, 1fr);
+            gap: 12px;
+        }
+
+        .filter-panel[hidden] {
+            display: none;
+        }
+
+        .filter-panel-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .filter-panel-head strong {
+            display: block;
+            font-size: 16px;
+            letter-spacing: -0.04em;
+        }
+
+        .filter-panel-head span {
+            display: block;
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .filter-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .filter-actions button {
+            padding: 9px 12px;
+            font-size: 12px;
+        }
+
+        .filter-panel-body {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .filter-section {
+            display: grid;
+            grid-template-rows: auto minmax(0, 1fr);
+            gap: 8px;
+            min-height: 0;
+        }
+
+        .filter-section-title {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px;
+            color: var(--ink);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .filter-section-title small {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: normal;
+            text-transform: none;
+        }
+
+        .filter-list {
+            display: grid;
+            gap: 8px;
+            min-height: 0;
+            overflow: auto;
+            padding-right: 4px;
+        }
+
+        .filter-list.country-filter-list {
+            max-height: 280px;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(184, 216, 255, 0.08);
+        }
+
+        .filter-option.region-hidden {
+            opacity: 0.64;
+        }
+
+        .filter-option input {
+            margin: 2px 0 0;
+            accent-color: var(--accent);
+        }
+
+        .filter-option-copy {
+            min-width: 0;
+        }
+
+        .filter-option-copy strong {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 10px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .filter-option-copy small {
+            display: block;
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .filter-empty {
+            padding: 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed rgba(184, 216, 255, 0.1);
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.6;
         }
 
         .stage-shell {
@@ -227,10 +382,15 @@
             background: linear-gradient(180deg, rgba(14, 32, 51, 0.98), rgba(7, 17, 28, 0.98));
             border: 1px solid rgba(164, 209, 255, 0.16);
             box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+            cursor: grab;
+            touch-action: none;
         }
 
-        .stage img,
-        .stage svg,
+        .stage.dragging {
+            cursor: grabbing;
+        }
+
+        .map-viewport,
         .stage .empty {
             position: absolute;
             inset: 0;
@@ -238,14 +398,244 @@
             height: 100%;
         }
 
-        .stage img {
+        .map-viewport {
+            transform-origin: center center;
+            will-change: transform;
+        }
+
+        .map-viewport img,
+        .map-viewport svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-viewport img {
             object-fit: contain;
             object-position: center;
             opacity: 0.96;
+            user-select: none;
+            -webkit-user-drag: none;
         }
 
-        .stage svg {
+        .map-viewport svg {
             overflow: visible;
+        }
+
+        .map-event-layer {
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: 14px;
+            z-index: 3;
+            pointer-events: none;
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        .map-event-layer:empty {
+            display: none;
+        }
+
+        .map-popup {
+            min-width: 220px;
+            max-width: 280px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: linear-gradient(180deg, rgba(12, 24, 39, 0.94), rgba(7, 15, 25, 0.98));
+            border: 1px solid rgba(184, 216, 255, 0.12);
+            box-shadow: 0 18px 30px rgba(0, 0, 0, 0.28);
+            animation: mapPopupIn 420ms cubic-bezier(.2,.8,.2,1);
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            gap: 10px;
+            align-items: flex-start;
+            flex: 0 0 auto;
+        }
+
+        .map-popup.conflict {
+            border-color: rgba(255, 108, 92, 0.34);
+            background: linear-gradient(180deg, rgba(66, 18, 18, 0.94), rgba(22, 9, 12, 0.98));
+        }
+
+        .map-popup.domestic {
+            border-color: rgba(255, 190, 85, 0.32);
+            background: linear-gradient(180deg, rgba(70, 42, 8, 0.94), rgba(20, 14, 8, 0.98));
+        }
+
+        .map-popup.cooperation {
+            border-color: rgba(94, 196, 255, 0.32);
+            background: linear-gradient(180deg, rgba(12, 33, 58, 0.94), rgba(8, 16, 28, 0.98));
+        }
+
+        .map-popup-order {
+            width: 26px;
+            height: 26px;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: var(--ink);
+            font-size: 12px;
+            font-weight: 900;
+            flex: 0 0 auto;
+        }
+
+        .map-popup-copy {
+            min-width: 0;
+        }
+
+        .map-popup-kicker {
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .map-popup-title {
+            margin-top: 6px;
+            font-size: 13px;
+            font-weight: 800;
+            line-height: 1.4;
+            color: var(--ink);
+        }
+
+        .map-popup-body {
+            margin-top: 6px;
+            font-size: 11px;
+            line-height: 1.5;
+            color: rgba(237, 246, 255, 0.84);
+        }
+
+        .map-focus-card {
+            position: absolute;
+            left: 16px;
+            top: 16px;
+            z-index: 2;
+            width: min(272px, calc(100% - 32px));
+            padding: 10px 12px;
+            border-radius: 16px;
+            background: linear-gradient(180deg, rgba(11, 22, 36, 0.86), rgba(7, 15, 25, 0.92));
+            border: 1px solid rgba(184, 216, 255, 0.12);
+            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.22);
+            pointer-events: auto;
+            backdrop-filter: blur(8px);
+            cursor: grab;
+            touch-action: none;
+        }
+
+        .map-focus-card[hidden] {
+            display: none;
+        }
+
+        .map-focus-card.dragging {
+            cursor: grabbing;
+        }
+
+        .map-focus-kicker {
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .map-focus-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .map-focus-title strong {
+            display: block;
+            font-size: 19px;
+            letter-spacing: -0.05em;
+            line-height: 1.05;
+        }
+
+        .map-focus-title span {
+            display: block;
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .map-focus-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .map-focus-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(184, 216, 255, 0.1);
+            color: var(--ink);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+        }
+
+        .map-focus-pill.is-war {
+            background: rgba(255, 108, 92, 0.12);
+            border-color: rgba(255, 108, 92, 0.26);
+            color: #ffd5cf;
+        }
+
+        .map-focus-pill.is-domestic {
+            background: rgba(255, 190, 85, 0.12);
+            border-color: rgba(255, 190, 85, 0.24);
+            color: #ffe1a8;
+        }
+
+        .map-focus-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .map-focus-stat {
+            padding: 8px 9px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(184, 216, 255, 0.08);
+        }
+
+        .map-focus-stat span {
+            display: block;
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .map-focus-stat strong {
+            display: block;
+            margin-top: 4px;
+            font-size: 14px;
+            letter-spacing: -0.04em;
+        }
+
+        .map-focus-note {
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.5;
         }
 
         .stage .empty {
@@ -268,28 +658,20 @@
             letter-spacing: -0.03em;
         }
 
-        .overlay-note {
-            position: absolute;
-            left: 18px;
-            bottom: 18px;
-            padding: 12px 14px;
-            border-radius: 16px;
-            background: rgba(6, 14, 24, 0.68);
-            border: 1px solid rgba(184, 216, 255, 0.12);
-            color: var(--muted);
-            font-size: 13px;
-            line-height: 1.5;
-            max-width: 340px;
-            backdrop-filter: blur(14px);
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            align-items: stretch;
+            padding: 14px 16px;
+            min-height: 0;
         }
 
-        .controls {
+        .controls-top {
             display: grid;
             grid-template-columns: auto minmax(0, 1fr);
             gap: 14px;
             align-items: center;
-            padding: 14px 16px;
-            min-height: 0;
         }
 
         .playback {
@@ -299,6 +681,12 @@
         }
 
         .turn-scrub {
+            display: flex;
+            align-items: center;
+            min-width: 0;
+        }
+
+        .metrics-row {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
@@ -318,8 +706,15 @@
             border-radius: 14px;
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(184, 216, 255, 0.08);
-            min-width: 96px;
-            flex: 0 0 auto;
+            width: 138px;
+            min-width: 138px;
+            flex: 0 0 138px;
+        }
+
+        .metric-chip.time-chip {
+            width: 152px;
+            min-width: 152px;
+            flex-basis: 152px;
         }
 
         .metric-chip span {
@@ -341,7 +736,10 @@
         .sidebar {
             display: grid;
             grid-template-columns: minmax(240px, 0.82fr) minmax(340px, 1.18fr);
-            grid-template-areas: "selected tabs";
+            grid-template-areas:
+                "selected tabs"
+                "reasoning reasoning";
+            grid-template-rows: minmax(0, 2fr) minmax(260px, 1fr);
             gap: 14px;
             min-height: 0;
             overflow: auto;
@@ -361,6 +759,10 @@
 
         .side-card.tabs-card {
             grid-area: tabs;
+        }
+
+        .side-card.reasoning-card {
+            grid-area: reasoning;
         }
 
         .side-card h2,
@@ -413,7 +815,7 @@
 
         .bar-row {
             display: grid;
-            grid-template-columns: 88px minmax(0, 1fr) auto;
+            grid-template-columns: 152px minmax(0, 1fr) auto;
             align-items: center;
             gap: 10px;
             font-size: 13px;
@@ -451,6 +853,14 @@
         }
 
         .tabs-card {
+            min-height: 0;
+        }
+
+        .reasoning-card {
+            min-height: 0;
+        }
+
+        .reasoning-card .feed {
             min-height: 0;
         }
 
@@ -501,6 +911,13 @@
             border-radius: 14px;
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(184, 216, 255, 0.08);
+        }
+
+        .feed-item.latest {
+            border-color: rgba(94, 196, 255, 0.26);
+            background: linear-gradient(180deg, rgba(20, 44, 68, 0.34), rgba(255, 255, 255, 0.03));
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.16);
+            animation: feedSlideIn 360ms cubic-bezier(.2,.8,.2,1);
         }
 
         .feed-meta {
@@ -588,6 +1005,54 @@
             color: var(--muted);
         }
 
+        .glossary {
+            display: grid;
+            gap: 10px;
+        }
+
+        .glossary-item {
+            padding: 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(184, 216, 255, 0.08);
+        }
+
+        .glossary-item strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: var(--ink);
+        }
+
+        .glossary-item p {
+            margin: 0;
+            font-size: 12px;
+            line-height: 1.65;
+            color: var(--muted);
+        }
+
+        @keyframes feedSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes mapPopupIn {
+            from {
+                opacity: 0;
+                transform: translateY(18px) scale(0.94);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
         .swatch {
             width: 14px;
             height: 14px;
@@ -596,13 +1061,15 @@
         }
 
         .node-label {
-            font-size: 20px;
+            font-size: 15px;
             font-weight: 800;
             fill: #f4f9ff;
             paint-order: stroke;
             stroke: rgba(3, 8, 14, 0.9);
-            stroke-width: 6px;
+            stroke-width: 5px;
             letter-spacing: 0.04em;
+            opacity: 0;
+            pointer-events: none;
         }
 
         .node-sub {
@@ -618,15 +1085,66 @@
             cursor: pointer;
         }
 
+        .node-hit {
+            fill: rgba(255, 255, 255, 0);
+        }
+
         .node-core {
             stroke: rgba(236, 246, 255, 0.96);
             stroke-width: 4px;
+            transition: stroke-width 0.16s ease, filter 0.16s ease, stroke 0.16s ease;
         }
 
         .node-group.selected .node-core {
             stroke: #ffffff;
             stroke-width: 5px;
             filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.45));
+        }
+
+        .node-group.hovered .node-core {
+            stroke: rgba(255, 255, 255, 0.92);
+            stroke-width: 4.8px;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.32));
+        }
+
+        .node-group.event-active .node-core {
+            stroke-width: 5.8px;
+        }
+
+        .node-group.event-active .node-ring {
+            opacity: 1;
+        }
+
+        .node-group.event-conflict .node-core {
+            stroke: rgba(255, 220, 215, 0.98);
+            filter: drop-shadow(0 0 20px rgba(255, 108, 92, 0.45));
+        }
+
+        .node-group.event-conflict .node-ring {
+            stroke: rgba(255, 108, 92, 0.96);
+        }
+
+        .node-group.event-domestic .node-core {
+            stroke: rgba(255, 241, 204, 0.98);
+            filter: drop-shadow(0 0 18px rgba(255, 190, 85, 0.42));
+        }
+
+        .node-group.event-domestic .node-ring {
+            stroke: rgba(255, 190, 85, 0.96);
+        }
+
+        .node-group.event-cooperation .node-core {
+            stroke: rgba(224, 246, 255, 0.98);
+            filter: drop-shadow(0 0 18px rgba(94, 196, 255, 0.4));
+        }
+
+        .node-group.event-cooperation .node-ring {
+            stroke: rgba(94, 196, 255, 0.96);
+        }
+
+        .node-group.selected .node-label,
+        .node-group.hovered .node-label {
+            opacity: 1;
         }
 
         .node-ring {
@@ -637,6 +1155,30 @@
         .node-aura {
             fill: none;
             opacity: 0.32;
+        }
+
+        .status-marker text {
+            font-size: 12px;
+            font-weight: 900;
+            fill: #f8fbff;
+            letter-spacing: 0.03em;
+            paint-order: stroke;
+            stroke: rgba(3, 8, 14, 0.78);
+            stroke-width: 3px;
+            pointer-events: none;
+        }
+
+        .status-marker circle {
+            stroke-width: 2px;
+            filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.22));
+        }
+
+        .status-marker.war circle {
+            stroke: rgba(255, 240, 240, 0.9);
+        }
+
+        .status-marker.domestic circle {
+            stroke: rgba(255, 241, 222, 0.92);
         }
 
         .event-tag {
@@ -694,7 +1236,7 @@
                 grid-template-columns: minmax(0, 1fr) minmax(560px, 660px);
             }
 
-            .controls {
+            .controls-top {
                 grid-template-columns: 1fr;
                 align-items: stretch;
             }
@@ -738,7 +1280,8 @@
                 grid-template-columns: 1fr;
                 grid-template-areas:
                     "selected"
-                    "tabs";
+                    "tabs"
+                    "reasoning";
                 grid-template-rows: none;
                 overflow: visible;
             }
@@ -751,1269 +1294,196 @@
             <header class="panel topbar">
                 <div class="header-stack">
                     <div class="brand">
-                        <span class="badge">Japan-Centered Map</span>
+                        <span class="badge">日本中心地図</span>
                         <div class="title-block">
-                            <h1>World Demo</h1>
+                            <h1>世界デモ</h1>
                         </div>
                     </div>
                     <div id="eventSummary" class="title-block title-block-secondary">
                         <h1 style="font-size: 16px;">シナリオ未読込</h1>
-                        <p>root 読込待ち</p>
+                        <p>ルート読込待ち</p>
                     </div>
                 </div>
                 <div class="toolbar-actions">
                     <div class="scenario-tools">
                         <div class="control-stack">
-                            <span>Root</span>
-                            <strong id="rootStatus">bundled demo</strong>
+                            <span>ルート</span>
+                            <strong id="rootStatus">同梱デモ</strong>
                         </div>
                         <label class="select-wrap">
-                            <span>Scenario</span>
+                            <span>シナリオ</span>
                             <select id="scenarioSelect" disabled>
                                 <option>読み込み待ち</option>
                             </select>
                         </label>
                     </div>
-                    <button id="openButton">Root を選ぶ</button>
-                    <button id="fullscreenButton" class="secondary">全画面</button>
+                    <button id="filterToggleButton" class="secondary" type="button">表示フィルタ</button>
+                    <button id="openButton">ルートを選ぶ</button>
+                    <input id="rootInput" type="file" webkitdirectory directory multiple hidden>
                 </div>
             </header>
 
             <section class="panel stage-panel">
                 <div class="stage-shell">
                     <div class="stage" id="stage">
-                        <img src="./assets/world_admin_japan_centered.svg" alt="Japan-centered world map">
-                        <svg id="overlay" viewBox="0 0 2000 1000" preserveAspectRatio="xMidYMid meet" aria-label="world demo overlay"></svg>
+                        <div id="mapViewport" class="map-viewport">
+                            <img src="./assets/world_admin_japan_centered.svg" alt="日本中心の世界地図">
+                            <svg id="overlay" viewBox="0 0 2000 1000" preserveAspectRatio="xMidYMid meet" aria-label="世界デモの重ね表示"></svg>
+                        </div>
+                        <div id="mapEventLayer" class="map-event-layer" aria-hidden="true"></div>
+                        <div id="mapFocusCard" class="map-focus-card" hidden></div>
                         <div id="emptyState" class="empty">
                             <div>
                                 <strong>世界地図をそのまま動かします</strong>
-                                まずは自動で既定の world demo を開きます。別の出力に切り替えたいときだけ `Root を選ぶ` を押してください。
-                                一度選んだ root は次回から自動復元され、その中の scenario はプルダウンで切り替えられます。
+                                まずは自動で既定の世界デモを開きます。別の出力に切り替えたいときだけ `ルートを選ぶ` を押してください。
+                                一度選んだルートは次回から自動復元され、その中のシナリオはプルダウンで切り替えられます。
                             </div>
-                        </div>
-                        <div class="overlay-note">
-                            地図の中央はできるだけ情報を減らしてあります。全体状態や country metrics は右側に寄せています。
                         </div>
                     </div>
                 </div>
+                <aside id="filterPanel" class="panel filter-panel" hidden>
+                    <div class="filter-panel-head">
+                        <div>
+                            <strong>表示フィルタ</strong>
+                            <span>地域や国を一時的に隠して、地図と右側の情報量を調整できます。</span>
+                        </div>
+                        <div class="filter-actions">
+                            <button id="filterResetButton" class="secondary" type="button">全表示</button>
+                            <button id="filterCloseButton" class="secondary" type="button">閉じる</button>
+                        </div>
+                    </div>
+                    <div class="filter-panel-body">
+                        <section class="filter-section">
+                            <div class="filter-section-title">
+                                <span>地域</span>
+                                <small id="regionFilterSummary">-</small>
+                            </div>
+                            <div id="regionFilterList" class="filter-list"></div>
+                        </section>
+                        <section class="filter-section">
+                            <div class="filter-section-title">
+                                <span>国</span>
+                                <small id="countryFilterSummary">-</small>
+                            </div>
+                            <div id="countryFilterList" class="filter-list country-filter-list"></div>
+                        </section>
+                    </div>
+                </aside>
             </section>
 
             <footer class="panel controls">
-                <div class="playback">
-                    <button id="prevButton" class="secondary" disabled>Prev</button>
-                    <button id="playButton" disabled>Play</button>
-                    <button id="nextButton" class="secondary" disabled>Next</button>
+                <div class="controls-top">
+                    <div class="playback">
+                        <button id="prevButton" class="secondary" disabled>前へ</button>
+                        <button id="playButton" disabled>再生</button>
+                        <button id="nextButton" class="secondary" disabled>次へ</button>
+                    </div>
+                    <div class="turn-scrub">
+                        <input id="turnSlider" type="range" min="1" max="1" value="1" disabled>
+                    </div>
                 </div>
-                <div class="turn-scrub">
-                    <input id="turnSlider" type="range" min="1" max="1" value="1" disabled>
-                    <div class="metric-chip"><span>Time</span><strong id="timeValue">-</strong></div>
-                    <div class="metric-chip"><span>Turn</span><strong id="turnValue">-</strong></div>
-                    <div class="metric-chip"><span>Avg S</span><strong id="avgSValue">-</strong></div>
-                    <div class="metric-chip"><span>Avg Cash</span><strong id="avgCashValue">-</strong></div>
-                    <div class="metric-chip"><span>War Burden</span><strong id="warBurdenValue">-</strong></div>
-                    <div class="metric-chip"><span>Events</span><strong id="eventCountValue">-</strong></div>
+                <div class="metrics-row">
+                    <div class="metric-chip" title="何ターン目を見ているかです。シナリオによって1ターンの長さは変わります。"><span>ターン</span><strong id="turnValue">-</strong></div>
+                    <div class="metric-chip" title="各国の構造持続指数を人口重みで平均した値です。高いほど全体として持ちこたえています。"><span>平均構造持続指数</span><strong id="avgSValue">-</strong></div>
+                    <div class="metric-chip" title="家計・雇用・企業・政府の支払い余力がどれだけ保たれているかの平均です。"><span>平均経済安定度</span><strong id="avgCashValue">-</strong></div>
+                    <div class="metric-chip" title="対外衝突や軍事的緊張が、各国の持続性をどれだけ削っているかの平均です。"><span>戦争負荷</span><strong id="warBurdenValue">-</strong></div>
+                    <div class="metric-chip" title="そのターンに起きた対外衝突イベント数と国内不安イベント数の合計です。"><span>イベント</span><strong id="eventCountValue">-</strong></div>
                 </div>
             </footer>
         </section>
 
         <aside class="sidebar">
             <section class="panel side-card selected-card">
-                <h2>Selected Country</h2>
+                <h2>選択中の国</h2>
                 <div class="country-header">
                     <strong id="countryCode">-</strong>
-                    <span id="countryMode" class="mode-pill">idle</span>
+                    <span id="countryMode" class="mode-pill">待機</span>
                 </div>
                 <p id="countryName">シナリオを読み込むと、国をクリックして詳細を見られます。</p>
                 <div class="bar-list" id="countryBars"></div>
-                <div id="countryNarrative" class="country-note">Turn playback inactive</div>
             </section>
 
             <section class="panel side-card tabs-card">
-                <div class="tab-strip" role="tablist" aria-label="Right Sidebar Tabs">
-                    <button class="tab-button active" type="button" data-tab="chat">Chat</button>
-                    <button class="tab-button" type="button" data-tab="reasoning">Reasoning</button>
-                    <button class="tab-button" type="button" data-tab="ranking">Ranking</button>
-                    <button class="tab-button" type="button" data-tab="legend">Legend</button>
+                <div class="tab-strip" role="tablist" aria-label="右サイドバーのタブ">
+                    <button class="tab-button active" type="button" data-tab="chat">チャット</button>
+                    <button class="tab-button" type="button" data-tab="ranking">ランキング</button>
+                    <button class="tab-button" type="button" data-tab="glossary">用語</button>
+                    <button class="tab-button" type="button" data-tab="legend">凡例</button>
                 </div>
 
                 <section id="tabPanelChat" class="tab-panel">
-                    <h3>Turn Chat</h3>
+                    <h3>ターン別チャット</h3>
                     <p class="tab-panel-copy">マクロ発話と国家間の支援・圧力イベントを、チャット風にまとめます。</p>
                     <div id="chatFeed" class="feed"></div>
                 </section>
 
-                <section id="tabPanelReasoning" class="tab-panel" hidden>
-                    <h3>Country Reasoning</h3>
-                    <p class="tab-panel-copy">選択中の国が今なにを気にしていそうかを、状態変数から要約して表示します。</p>
-                    <div id="thoughtFeed" class="feed"></div>
-                </section>
-
                 <section id="tabPanelRanking" class="tab-panel" hidden>
-                    <h3>Country Ranking</h3>
+                    <h3>国別ランキング</h3>
                     <div id="countryList" class="list"></div>
                 </section>
 
-                <section id="tabPanelLegend" class="tab-panel" hidden>
-                    <h3>Legend</h3>
-                    <div class="legend">
-                        <div class="legend-item"><span class="swatch" style="background:#59d98e;"></span>S high</div>
-                        <div class="legend-item"><span class="swatch" style="background:#ff6c5c;"></span>S low</div>
-                        <div class="legend-item"><span class="swatch" style="background:#5ec4ff;"></span>cooperation</div>
-                        <div class="legend-item"><span class="swatch" style="background:#7b1fa2;"></span>gray-zone</div>
-                        <div class="legend-item"><span class="swatch" style="background:#d32f2f;"></span>proxy</div>
-                        <div class="legend-item"><span class="swatch" style="background:#111111;"></span>limited war</div>
+                <section id="tabPanelGlossary" class="tab-panel" hidden>
+                    <h3>用語の見方</h3>
+                    <div class="glossary">
+                        <article class="glossary-item">
+                            <strong>構造持続指数</strong>
+                            <p>その国や地域が、どれだけ壊れにくく持ちこたえやすいかを表す総合指数です。高いほど、資源・制度・協調がまだ保たれています。</p>
+                        </article>
+                        <article class="glossary-item">
+                            <strong>経済安定度</strong>
+                            <p>家計・雇用・企業・政府の支払い余力がどれだけ保たれているかの目安です。低いほど、生活苦や財政不安が広がりやすくなります。</p>
+                        </article>
+                        <article class="glossary-item">
+                            <strong>外部支援必要度</strong>
+                            <p>その国が外からの支援なしに持ちこたえにくい度合いです。高いほど、食料・エネルギー・資金・外交支援が必要です。</p>
+                        </article>
+                        <article class="glossary-item">
+                            <strong>国内不安定度 / デモ圧力</strong>
+                            <p>内政の揺らぎと、抗議行動が広がる強さです。高いほど、不満・デモ・暴動・内乱に進みやすくなります。</p>
+                        </article>
+                        <article class="glossary-item">
+                            <strong>地図の円の意味</strong>
+                            <p>地図上の円は、人口ではなく国内不安定化の強さを表します。小さく緑なら安定、大きく赤なら不安定、大きく黒に近づくほど構造死に近い状態です。</p>
+                        </article>
+                        <article class="glossary-item">
+                            <strong>持続見込み</strong>
+                            <p>今の状態のままで、どれくらいの期間持ちそうかの粗い見通しです。短いほど、構造的な余裕が失われています。</p>
+                        </article>
+                        <article class="glossary-item">
+                            <strong>境界的圧力 / 間接衝突 / 限定戦争</strong>
+                            <p>対外摩擦の強さを3段階で表しています。境界的圧力は直接戦争未満の威圧、間接衝突は代理勢力や周辺経由の衝突、限定戦争は直接的な軍事衝突です。</p>
+                        </article>
                     </div>
                 </section>
+
+                <section id="tabPanelLegend" class="tab-panel" hidden>
+                    <h3>凡例</h3>
+                    <div class="legend">
+                        <div class="legend-item"><span class="swatch" style="background:#63d98f;"></span>小さく緑: 安定</div>
+                        <div class="legend-item"><span class="swatch" style="background:#ffbe55;"></span>やや大きく黄: 不満拡大</div>
+                        <div class="legend-item"><span class="swatch" style="background:#ff5f57;"></span>大きく赤: 高不安定</div>
+                        <div class="legend-item"><span class="swatch" style="background:#15181f;"></span>大きく黒: 構造死に近い</div>
+                        <div class="legend-item"><span class="swatch" style="background:#7b1fa2;"></span>戦バッジ: 境界的圧力</div>
+                        <div class="legend-item"><span class="swatch" style="background:#d32f2f;"></span>戦バッジ: 間接衝突</div>
+                        <div class="legend-item"><span class="swatch" style="background:#111111;"></span>戦バッジ: 限定戦争</div>
+                        <div class="legend-item"><span class="swatch" style="background:#ffbe55;"></span>内バッジ: 暴動 / 武装化 / 内乱</div>
+                    </div>
+                </section>
+            </section>
+
+            <section class="panel side-card reasoning-card">
+                <h2>推論</h2>
+                <p class="tab-panel-copy">選択中の国が今なにを気にしていそうかを、状態変数とターン差分から要約して表示します。</p>
+                <div id="reasoningSummary" class="country-note">再生が始まると、この国の推論サマリーがここに表示されます。</div>
+                <div id="thoughtFeed" class="feed"></div>
             </section>
         </aside>
     </div>
 
-    <script>
-        const VIEW_WIDTH = 2000;
-        const VIEW_HEIGHT = 1000;
-        const CENTER_LON = 140;
-        const COUNTRY_COORDS = {
-            USA: { name: "United States", lon: -98.5, lat: 39.8 },
-            EU: { name: "European Union", lon: 12.5, lat: 50.2 },
-            RUS: { name: "Russia", lon: 97.0, lat: 61.0 },
-            CHN: { name: "China", lon: 104.0, lat: 35.0 },
-            JPN: { name: "Japan", lon: 138.0, lat: 36.2 },
-            IND: { name: "India", lon: 78.5, lat: 22.3 },
-            SAU: { name: "Saudi Arabia", lon: 45.0, lat: 23.8 },
-            BRA: { name: "Brazil", lon: -52.0, lat: -14.2 },
-        };
-        const MODE_COLORS = {
-            none: "#607d8b",
-            pressure_only: "#607d8b",
-            gray_zone: "#7b1fa2",
-            proxy: "#d32f2f",
-            limited_war: "#111111",
-        };
-        const BAR_COLORS = {
-            S: "#5ed18d",
-            cash: "#43b0ff",
-            support: "#ffaf45",
-            war: "#ff6c5c",
-            horizon: "#c792ea",
-        };
-
-        const HANDLE_DB_NAME = "world-demo-viewer";
-        const HANDLE_STORE_NAME = "handles";
-        const ROOT_HANDLE_KEY = "root-handle";
-        const SCENARIO_PREF_KEY_PREFIX = "world-demo-scenario-key";
-        const SIDEBAR_TAB_PREF_KEY = "world-demo-sidebar-tab";
-        const DEFAULT_ROOT_URL = "../output/world_demo/major_powers_20year_outlook";
-
-        const state = {
-            accessMode: "none",
-            rootHandle: null,
-            rootUrl: "",
-            rootLabel: "bundled demo",
-            scenarioHandles: new Map(),
-            scenarioUrls: new Map(),
-            scenarioMeta: new Map(),
-            graph: {
-                cooperation: [],
-                rivalries: [],
-            },
-            viewerMeta: {
-                turn_duration_months: 1,
-                default_scenario: "fracture",
-            },
-            scenarioKey: "",
-            scenarioName: "",
-            turns: [],
-            turnIndex: 0,
-            rowsByTurn: new Map(),
-            aggregateByTurn: new Map(),
-            eventsByTurn: new Map(),
-            selectedCountry: "JPN",
-            sidebarTab: localStorage.getItem(SIDEBAR_TAB_PREF_KEY) || "chat",
-            playing: false,
-            playTimer: null,
-        };
-
-        const overlay = document.getElementById("overlay");
-        const emptyState = document.getElementById("emptyState");
-        const openButton = document.getElementById("openButton");
-        const fullscreenButton = document.getElementById("fullscreenButton");
-        const playButton = document.getElementById("playButton");
-        const prevButton = document.getElementById("prevButton");
-        const nextButton = document.getElementById("nextButton");
-        const turnSlider = document.getElementById("turnSlider");
-        const scenarioSelect = document.getElementById("scenarioSelect");
-        const rootStatus = document.getElementById("rootStatus");
-        const tabButtons = Array.from(document.querySelectorAll(".tab-button"));
-
-        function parseCSV(text) {
-            const rows = [];
-            let row = [];
-            let field = "";
-            let inQuotes = false;
-
-            for (let index = 0; index < text.length; index += 1) {
-                const char = text[index];
-                const next = text[index + 1];
-
-                if (char === "\"") {
-                    if (inQuotes && next === "\"") {
-                        field += "\"";
-                        index += 1;
-                    } else {
-                        inQuotes = !inQuotes;
-                    }
-                } else if (char === "," && !inQuotes) {
-                    row.push(field);
-                    field = "";
-                } else if ((char === "\n" || char === "\r") && !inQuotes) {
-                    if (char === "\r" && next === "\n") {
-                        index += 1;
-                    }
-                    row.push(field);
-                    if (row.length > 1 || row[0] !== "") {
-                        rows.push(row);
-                    }
-                    row = [];
-                    field = "";
-                } else {
-                    field += char;
-                }
-            }
-
-            if (field || row.length) {
-                row.push(field);
-                rows.push(row);
-            }
-
-            const [header, ...body] = rows;
-            return body.map(cols => Object.fromEntries(header.map((key, idx) => [key, cols[idx] ?? ""])));
-        }
-
-        function parseJSONL(text) {
-            return text
-                .split(/\r?\n/)
-                .map(line => line.trim())
-                .filter(Boolean)
-                .map(line => JSON.parse(line));
-        }
-
-        function scenarioPrefStorageKey(rootIdentifier) {
-            const safeRoot = String(rootIdentifier || "default")
-                .replace(/[^a-zA-Z0-9_-]+/g, "_")
-                .replace(/^_+|_+$/g, "") || "default";
-            return `${SCENARIO_PREF_KEY_PREFIX}:${safeRoot}`;
-        }
-
-        function readScenarioPreference(rootIdentifier) {
-            return localStorage.getItem(scenarioPrefStorageKey(rootIdentifier));
-        }
-
-        function persistScenarioPreference(scenarioKey) {
-            const rootIdentifier = state.rootUrl || state.rootLabel || "default";
-            localStorage.setItem(scenarioPrefStorageKey(rootIdentifier), scenarioKey);
-        }
-
-        function openHandleDb() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(HANDLE_DB_NAME, 1);
-                request.onupgradeneeded = () => {
-                    request.result.createObjectStore(HANDLE_STORE_NAME);
-                };
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        async function saveRootHandle(handle) {
-            if (!("indexedDB" in window)) {
-                return;
-            }
-            try {
-                const db = await openHandleDb();
-                await new Promise((resolve, reject) => {
-                    const tx = db.transaction(HANDLE_STORE_NAME, "readwrite");
-                    tx.objectStore(HANDLE_STORE_NAME).put(handle, ROOT_HANDLE_KEY);
-                    tx.oncomplete = resolve;
-                    tx.onerror = () => reject(tx.error);
-                });
-                db.close();
-            } catch (error) {
-                console.warn("failed to save root handle", error);
-            }
-        }
-
-        async function loadSavedRootHandle() {
-            if (!("indexedDB" in window)) {
-                return null;
-            }
-            const db = await openHandleDb();
-            const result = await new Promise((resolve, reject) => {
-                const tx = db.transaction(HANDLE_STORE_NAME, "readonly");
-                const request = tx.objectStore(HANDLE_STORE_NAME).get(ROOT_HANDLE_KEY);
-                request.onsuccess = () => resolve(request.result ?? null);
-                request.onerror = () => reject(request.error);
-            });
-            db.close();
-            return result;
-        }
-
-        async function verifyPermission(handle, requestWrite = false) {
-            if (!handle || typeof handle.queryPermission !== "function") {
-                return false;
-            }
-            const options = { mode: requestWrite ? "readwrite" : "read" };
-            const queried = await handle.queryPermission(options);
-            if (queried === "granted") {
-                return true;
-            }
-            if (queried === "prompt" && requestWrite) {
-                return (await handle.requestPermission(options)) === "granted";
-            }
-            return false;
-        }
-
-        async function readRequiredFile(directoryHandle, fileName) {
-            const handle = await directoryHandle.getFileHandle(fileName);
-            return handle.getFile().then(file => file.text());
-        }
-
-        async function fetchRequiredText(url) {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch ${url}: ${response.status}`);
-            }
-            return response.text();
-        }
-
-        function wrapLongitude(lon) {
-            return ((lon - CENTER_LON + 540) % 360) - 180;
-        }
-
-        function project(code) {
-            const geo = COUNTRY_COORDS[code];
-            const wrapped = wrapLongitude(geo.lon);
-            return {
-                x: ((wrapped + 180) / 360) * VIEW_WIDTH,
-                y: ((90 - geo.lat) / 180) * VIEW_HEIGHT,
-            };
-        }
-
-        function clamp(value, min, max) {
-            return Math.max(min, Math.min(max, value));
-        }
-
-        function mixColor(a, b, t) {
-            const ar = parseInt(a.slice(1, 3), 16);
-            const ag = parseInt(a.slice(3, 5), 16);
-            const ab = parseInt(a.slice(5, 7), 16);
-            const br = parseInt(b.slice(1, 3), 16);
-            const bg = parseInt(b.slice(3, 5), 16);
-            const bb = parseInt(b.slice(5, 7), 16);
-            const r = Math.round(ar + (br - ar) * t).toString(16).padStart(2, "0");
-            const g = Math.round(ag + (bg - ag) * t).toString(16).padStart(2, "0");
-            const bHex = Math.round(ab + (bb - ab) * t).toString(16).padStart(2, "0");
-            return `#${r}${g}${bHex}`;
-        }
-
-        function sColor(value) {
-            const t = clamp((value - 0.30) / 0.36, 0, 1);
-            if (t < 0.5) {
-                return mixColor("#ff6c5c", "#ffd166", t / 0.5);
-            }
-            return mixColor("#ffd166", "#59d98e", (t - 0.5) / 0.5);
-        }
-
-        function nodeRadius(weight) {
-            return 18 + 56 * Number(weight);
-        }
-
-        function format(value, digits = 2) {
-            return Number(value).toFixed(digits);
-        }
-
-        function formatElapsed(turn) {
-            const months = Number(turn) * Number(state.viewerMeta.turn_duration_months || 1);
-            if (!Number.isFinite(months) || months <= 0) {
-                return "現時点";
-            }
-            if (months < 12) {
-                return `${months}か月後`;
-            }
-            const years = Math.floor(months / 12);
-            const remMonths = months % 12;
-            if (remMonths === 0) {
-                return `${years}年後`;
-            }
-            return `${years}年${remMonths}か月後`;
-        }
-
-        function previousTurnValue(turn) {
-            const index = state.turns.indexOf(turn);
-            if (index <= 0) {
-                return null;
-            }
-            return state.turns[index - 1];
-        }
-
-        function topChangesForTurn(turn) {
-            const prevTurn = previousTurnValue(turn);
-            if (prevTurn == null) {
-                return { rising: [], falling: [] };
-            }
-            const currentRows = Array.from(state.rowsByTurn.get(turn).values());
-            const previousRows = state.rowsByTurn.get(prevTurn);
-            const deltas = [];
-            for (const row of currentRows) {
-                const prev = previousRows.get(row.code);
-                if (!prev) {
-                    continue;
-                }
-                deltas.push({
-                    code: row.code,
-                    delta: Number(row.S) - Number(prev.S),
-                });
-            }
-            deltas.sort((a, b) => b.delta - a.delta);
-            return {
-                rising: deltas.slice(0, 3),
-                falling: deltas.slice(-3),
-            };
-        }
-
-        function modeReasoning(row) {
-            if (row.likely_mode === "gray_zone") {
-                return "survival pressure と rivalry が gray-zone 閾値を超え、直接戦争未満の coercion が立ち上がっています。";
-            }
-            if (row.likely_mode === "proxy") {
-                return "deterrence は効いているものの、代理的・間接的な圧力を使う誘因がかなり強い状態です。";
-            }
-            if (row.likely_mode === "limited_war") {
-                return "deterrence を織り込んでも限定戦争リスクがかなり高く、構造持続を直接削る局面です。";
-            }
-            if (row.likely_mode === "pressure_only") {
-                return "圧力は高まっていますが、この turn では event 発火までは届いていません。";
-            }
-            return "この turn では強い coercive event はなく、内部状態の調整が中心です。";
-        }
-
-        function buildTurnMessages(turn) {
-            const currentRows = Array.from(state.rowsByTurn.get(turn).values())
-                .sort((a, b) => Number(b.population_weight) - Number(a.population_weight));
-            const aggregate = state.aggregateByTurn.get(turn);
-            const event = state.eventsByTurn.get(turn) || { conflict_events: [], cooperation_transfers: [], domestic_events: [], name: "Baseline dynamics", description: "No exogenous event." };
-            const { rising, falling } = topChangesForTurn(turn);
-            const risingText = rising.length
-                ? rising.map(item => `${item.code} ${item.delta >= 0 ? "+" : ""}${item.delta.toFixed(2)}`).join(", ")
-                : "none";
-            const fallingText = falling.length
-                ? falling.map(item => `${item.code} ${item.delta >= 0 ? "+" : ""}${item.delta.toFixed(2)}`).join(", ")
-                : "none";
-
-            const messages = [
-                {
-                    type: "world",
-                    from: "WORLD",
-                    to: "ALL",
-                    time: formatElapsed(turn),
-                    body: `[${state.scenarioName}] ${event.name}. Avg S=${format(aggregate.avg_S, 3)}, cash=${format(aggregate.avg_cash_stability, 3)}, war burden=${format(aggregate.avg_war_burden, 3)}, domestic burden=${format(aggregate.avg_domestic_burden || 0, 3)}, protest=${format(aggregate.avg_protest_pressure || 0, 3)}. 上昇: ${risingText}. 低下: ${fallingText}.`,
-                    note: "Macro narration. このメッセージは world-level 変化をチャット欄に載せるための synthetic summary です。",
-                },
-            ];
-
-            for (const item of event.cooperation_transfers || []) {
-                messages.push({
-                    type: "cooperation",
-                    from: item.donor,
-                    to: item.target,
-                    time: formatElapsed(turn),
-                    body: `Resilience support corridor opened. Transfer amount ${Number(item.amount).toFixed(4)}. distribution capacity と alliance support の補強を狙っています。`,
-                    note: "Cross-border resilience investment. 会話というより政策メッセージに近い synthetic line です。",
-                });
-            }
-
-            for (const item of event.conflict_events || []) {
-                messages.push({
-                    type: item.mode,
-                    from: item.actor,
-                    to: item.target,
-                    time: formatElapsed(turn),
-                    body: `${item.mode} pressure activated in ${item.domain}. intensity ${Number(item.intensity).toFixed(2)}. target の war burden と fragility を押し上げます。`,
-                    note: "Survival-driven coercion. 現代戦の感触に合わせて gray-zone から始まる設計です。",
-                });
-            }
-
-            for (const item of event.domestic_events || []) {
-                messages.push({
-                    type: "domestic",
-                    from: item.country,
-                    to: "DOMESTIC",
-                    time: formatElapsed(turn),
-                    body: `${item.from_stage} -> ${item.to_stage}. protest ${format(item.protest_pressure)}, riot ${format(item.riot_pressure)}, civil ${format(item.civil_conflict_pressure)}.`,
-                    note: "Domestic instability event. 経済ストレス、正統性低下、動員力の組み合わせで段階遷移します。",
-                });
-            }
-
-            return messages;
-        }
-
-        function buildCountryThought(row, prevRow, event) {
-            const considerations = [];
-            const deltaS = prevRow ? Number(row.S) - Number(prevRow.S) : 0;
-            const deltaCash = prevRow ? Number(row.cash_stability) - Number(prevRow.cash_stability) : 0;
-
-            if (Number(row.support_needed) > 0.25) {
-                considerations.push(`support needed が ${format(row.support_needed)} まで上がっていて、外部支援なしでは horizon ${format(row.horizon_turns, 1)} が短いです。`);
-            }
-            if (Number(row.war_pressure) > 0.30) {
-                considerations.push(`war pressure が ${format(row.war_pressure)} と高く、coercive escalation を前提に posture を調整する必要があります。`);
-            }
-            if (Number(row.cash_stability) < 0.60) {
-                considerations.push(`cash stability が ${format(row.cash_stability)} まで落ちていて、短期の生活・制度安定を崩しやすい状態です。`);
-            }
-            if ((row.domestic_stage || "stable") !== "stable") {
-                considerations.push(`国内段階は ${row.domestic_stage} で、domestic burden ${format(row.domestic_burden)} が残っています。`);
-            }
-            if (Number(row.protest_pressure || 0) > 0.52) {
-                considerations.push(`protest pressure が ${format(row.protest_pressure)} と高く、デモや大規模抗議の持続を想定した対応が必要です。`);
-            }
-            if (Number(row.riot_pressure || 0) > 0.50) {
-                considerations.push(`riot pressure が ${format(row.riot_pressure)} に達していて、国内治安の破綻が対外 posture にも波及しかねません。`);
-            }
-            if (Number(row.civil_conflict_pressure || 0) > 0.48) {
-                considerations.push(`civil conflict pressure が ${format(row.civil_conflict_pressure)} と高く、内乱化を避ける再分配か鎮静化が急務です。`);
-            }
-            if (Number(row.labor_displacement) > 0.20) {
-                considerations.push(`labor displacement が ${format(row.labor_displacement)} と高く、AI 起因の雇用代替が社会 cohesion を削り始めています。`);
-            }
-            if (deltaS < -0.015) {
-                considerations.push(`前 turn 比で S が ${deltaS.toFixed(2)} 低下していて、今は防衛的な再均衡が優先です。`);
-            } else if (deltaS > 0.015) {
-                considerations.push(`前 turn 比で S が +${deltaS.toFixed(2)} 改善していて、この改善を次 turn でも固定化する余地があります。`);
-            }
-            if (deltaCash < -0.02) {
-                considerations.push(`cash stability も ${deltaCash.toFixed(2)} 変化していて、分配か外貨調達のどちらかを急がないと不安定化します。`);
-            }
-
-            const directConflict = (event.conflict_events || []).find(item => item.actor === row.code || item.target === row.code);
-            if (directConflict) {
-                if (directConflict.actor === row.code) {
-                    considerations.push(`この turn は ${directConflict.target} に対する ${directConflict.mode} event の当事者で、外部化による自国維持を選び始めています。`);
-                } else {
-                    considerations.push(`この turn は ${directConflict.actor} から ${directConflict.mode} 圧力を受けていて、deterrence と alliance support の再計算が必要です。`);
-                }
-            }
-
-            const directTransfer = (event.cooperation_transfers || []).find(item => item.donor === row.code || item.target === row.code);
-            if (directTransfer) {
-                if (directTransfer.donor === row.code) {
-                    considerations.push(`この turn は ${directTransfer.target} への支援供与側で、自国 surplus を resilience investment に回しています。`);
-                } else {
-                    considerations.push(`この turn は ${directTransfer.donor} から支援を受けていて、horizon 改善の余地があります。`);
-                }
-            }
-
-            const directDomestic = (event.domestic_events || []).find(item => item.country === row.code);
-            if (directDomestic) {
-                considerations.push(`この turn は ${directDomestic.from_stage} から ${directDomestic.to_stage} へ国内段階が動き、内政対応が安全保障と同じくらい重要になっています。`);
-            }
-
-            if (!considerations.length) {
-                considerations.push("この turn は大きな直接イベントがなく、内部バランスの維持と次の shock への備えが中心です。");
-            }
-
-            return {
-                snapshot: `S=${format(row.S)}, horizon=${format(row.horizon_turns, 1)}, cash=${format(row.cash_stability)}, support=${format(row.support_needed)}, domestic=${row.domestic_stage}, protest=${format(row.protest_pressure || 0)}, war pressure=${format(row.war_pressure)}, mode=${row.likely_mode}.`,
-                reasoning: modeReasoning(row),
-                considerations,
-            };
-        }
-
-        function setRootLabel(label) {
-            state.rootLabel = label;
-            rootStatus.textContent = label;
-        }
-
-        function normalizeScenarioEntries(manifest) {
-            const entries = manifest?.scenarios || [];
-            return entries.map(entry => {
-                if (typeof entry === "string") {
-                    return { key: entry, name: entry };
-                }
-                return {
-                    key: entry.key,
-                    name: entry.name || entry.key,
-                };
-            });
-        }
-
-        function applyViewerMeta(manifest) {
-            state.viewerMeta = {
-                turn_duration_months: Number(manifest?.viewer?.turn_duration_months ?? 1),
-                default_scenario: manifest?.viewer?.default_scenario || "fracture",
-            };
-            state.graph = {
-                cooperation: manifest?.graph?.cooperation || [],
-                rivalries: manifest?.graph?.rivalries || [],
-            };
-        }
-
-        async function fileExists(directoryHandle, fileName) {
-            try {
-                await directoryHandle.getFileHandle(fileName);
-                return true;
-            } catch (error) {
-                return false;
-            }
-        }
-
-        async function readManifestFromHandle(rootHandle) {
-            try {
-                const manifestText = await readRequiredFile(rootHandle, "manifest.json");
-                return JSON.parse(manifestText);
-            } catch (error) {
-                return null;
-            }
-        }
-
-        async function discoverScenarioHandles(rootHandle, manifest) {
-            const scenarios = [];
-            const manifestEntries = normalizeScenarioEntries(manifest);
-
-            if (manifestEntries.length) {
-                for (const entry of manifestEntries) {
-                    try {
-                        const scenarioHandle = await rootHandle.getDirectoryHandle(entry.key);
-                        if (await fileExists(scenarioHandle, "turns.csv")) {
-                            scenarios.push({ ...entry, handle: scenarioHandle });
-                        }
-                    } catch (error) {
-                        console.warn("scenario missing from root", entry.key, error);
-                    }
-                }
-            }
-
-            if (scenarios.length) {
-                return scenarios;
-            }
-
-            if (await fileExists(rootHandle, "turns.csv")) {
-                return [{ key: rootHandle.name, name: rootHandle.name, handle: rootHandle }];
-            }
-
-            for await (const [name, handle] of rootHandle.entries()) {
-                if (handle.kind !== "directory") {
-                    continue;
-                }
-                if (await fileExists(handle, "turns.csv")) {
-                    scenarios.push({ key: name, name, handle });
-                }
-            }
-            return scenarios;
-        }
-
-        function populateScenarioSelect(entries) {
-            state.scenarioMeta = new Map(entries.map(entry => [entry.key, entry]));
-            scenarioSelect.innerHTML = entries
-                .map(entry => `<option value="${entry.key}">${entry.name}</option>`)
-                .join("");
-            scenarioSelect.disabled = !entries.length;
-        }
-
-        function resetPlaybackUi() {
-            turnSlider.min = "1";
-            turnSlider.max = "1";
-            turnSlider.value = "1";
-            turnSlider.disabled = true;
-            playButton.disabled = true;
-            prevButton.disabled = true;
-            nextButton.disabled = true;
-            document.getElementById("timeValue").textContent = "-";
-            document.getElementById("turnValue").textContent = "-";
-            document.getElementById("avgSValue").textContent = "-";
-            document.getElementById("avgCashValue").textContent = "-";
-            document.getElementById("warBurdenValue").textContent = "-";
-            document.getElementById("eventCountValue").textContent = "-";
-        }
-
-        function renderOverlay() {
-            if (!state.turns.length) {
-                overlay.innerHTML = "";
-                return;
-            }
-
-            const turn = state.turns[state.turnIndex];
-            const currentRows = state.rowsByTurn.get(turn);
-
-            let nodes = "";
-            const rows = Array.from(currentRows.values());
-            for (const row of rows) {
-                const code = row.code;
-                const pos = project(code);
-                const radius = nodeRadius(row.population_weight);
-                const modeColor = MODE_COLORS[row.likely_mode] || MODE_COLORS.none;
-                const ringWidth = 3 + Number(row.war_pressure) * 18;
-                const auraWidth = 8 + Number(row.war_pressure) * 42;
-                const selected = state.selectedCountry === code ? "selected" : "";
-
-                nodes += `
-                    <g class="node-group ${selected}" data-code="${code}" transform="translate(${pos.x.toFixed(1)} ${pos.y.toFixed(1)})">
-                        <circle class="node-aura" r="${(radius + 18).toFixed(1)}" stroke="${modeColor}" stroke-width="${auraWidth.toFixed(1)}"></circle>
-                        <circle class="node-ring" r="${(radius + 10).toFixed(1)}" stroke="${modeColor}" stroke-width="${ringWidth.toFixed(1)}"></circle>
-                        <circle class="node-core" r="${radius.toFixed(1)}" fill="${sColor(Number(row.S))}"></circle>
-                        <text class="node-label" text-anchor="middle" y="${(-radius - 18).toFixed(1)}">${code}</text>
-                        <text class="node-sub" text-anchor="middle" y="${(-radius - 2).toFixed(1)}">S ${format(row.S)} | H ${format(row.horizon_turns, 1)} | ${row.domestic_stage || "stable"}</text>
-                    </g>
-                `;
-            }
-
-            overlay.innerHTML = nodes;
-            overlay.querySelectorAll(".node-group").forEach(node => {
-                node.addEventListener("click", () => {
-                    state.selectedCountry = node.dataset.code;
-                    render();
-                });
-            });
-        }
-
-        function renderSelectedCountry() {
-            const codeEl = document.getElementById("countryCode");
-            const modeEl = document.getElementById("countryMode");
-            const nameEl = document.getElementById("countryName");
-            const barsEl = document.getElementById("countryBars");
-            const noteEl = document.getElementById("countryNarrative");
-
-            if (!state.turns.length) {
-                codeEl.textContent = "-";
-                modeEl.textContent = "idle";
-                nameEl.textContent = "シナリオを読み込むと、国をクリックして詳細を見られます。";
-                barsEl.innerHTML = "";
-                noteEl.innerHTML = `
-                    <div class="country-note-head">再生が始まると、この国の短い状態要約がここに出ます。</div>
-                    <div class="country-note-meta">
-                        <span class="country-note-pill">mode idle</span>
-                        <span class="country-note-pill">domestic stable</span>
-                    </div>
-                `;
-                return;
-            }
-
-            const turn = state.turns[state.turnIndex];
-            const row = state.rowsByTurn.get(turn).get(state.selectedCountry) || Array.from(state.rowsByTurn.get(turn).values())[0];
-            state.selectedCountry = row.code;
-            codeEl.textContent = row.code;
-            modeEl.textContent = `${row.likely_mode.replace("_", " ")} / ${row.domestic_stage || "stable"}`;
-            modeEl.style.color = MODE_COLORS[row.likely_mode] || "#cfd8dc";
-            nameEl.textContent = `${row.name}. cash stability ${format(row.cash_stability)}, support needed ${format(row.support_needed)}, war pressure ${format(row.war_pressure)}, domestic burden ${format(row.domestic_burden || 0)}.`;
-
-            const barSpec = [
-                ["S", Number(row.S), BAR_COLORS.S],
-                ["cash", Number(row.cash_stability), BAR_COLORS.cash],
-                ["support", Number(row.support_needed), BAR_COLORS.support],
-                ["domestic", Number(row.domestic_burden || 0), "#8e24aa"],
-                ["protest", Number(row.protest_pressure || 0), "#ffb300"],
-                ["war", Number(row.war_pressure), BAR_COLORS.war],
-                ["horizon", clamp(Number(row.horizon_turns) / 10, 0, 1), BAR_COLORS.horizon],
-            ];
-            barsEl.innerHTML = barSpec.map(([label, value, color]) => `
-                <div class="bar-row">
-                    <span>${label}</span>
-                    <div class="bar-track"><div class="bar-fill" style="width:${(value * 100).toFixed(1)}%; background:${color};"></div></div>
-                    <strong>${format(value)}</strong>
-                </div>
-            `).join("");
-
-            const risk =
-                Number(row.civil_conflict_pressure || 0) > 0.48 ? "国内の断裂リスクがかなり高い状態です。" :
-                Number(row.war_pressure) > 0.35 ? "対外圧力が強く、安全保障リスクが前面に出ています。" :
-                Number(row.support_needed) > 0.25 ? "外部支援への依存が強まりつつあります。" :
-                Number(row.S) > 0.52 ? "構造持続はまだ比較的安定しています。" :
-                "全体ストレスがじわじわ積み上がっています。";
-            noteEl.innerHTML = `
-                <div class="country-note-head">${row.code}: ${risk}</div>
-                <div class="country-note-meta">
-                    <span class="country-note-pill">mode ${row.likely_mode.replace("_", " ")}</span>
-                    <span class="country-note-pill">domestic ${row.domestic_stage || "stable"}</span>
-                    <span class="country-note-pill">S ${format(row.S)}</span>
-                </div>
-            `;
-        }
-
-        function renderCountryList() {
-            const listEl = document.getElementById("countryList");
-            if (!state.turns.length) {
-                listEl.innerHTML = "";
-                return;
-            }
-
-            const turn = state.turns[state.turnIndex];
-            const rows = Array.from(state.rowsByTurn.get(turn).values())
-                .sort((a, b) => Number(b.S) - Number(a.S));
-
-            listEl.innerHTML = rows.map(row => `
-                <div class="list-item ${state.selectedCountry === row.code ? "active" : ""}" data-code="${row.code}">
-                    <strong>
-                        <span>${row.code}</span>
-                        <span>S ${format(row.S)}</span>
-                    </strong>
-                    <small>H ${format(row.horizon_turns, 1)} | cash ${format(row.cash_stability)} | domestic ${row.domestic_stage || "stable"} | war ${format(row.war_pressure)} | ${row.likely_mode.replace("_", " ")}</small>
-                </div>
-            `).join("");
-
-            listEl.querySelectorAll(".list-item").forEach(item => {
-                item.addEventListener("click", () => {
-                    state.selectedCountry = item.dataset.code;
-                    render();
-                });
-            });
-        }
-
-        function renderChatFeed() {
-            const chatEl = document.getElementById("chatFeed");
-            if (!state.turns.length) {
-                chatEl.innerHTML = "";
-                return;
-            }
-
-            const startIndex = Math.max(0, state.turnIndex - 2);
-            const recentTurns = state.turns.slice(startIndex, state.turnIndex + 1).reverse();
-            const messages = [];
-            for (const turn of recentTurns) {
-                messages.push(...buildTurnMessages(turn));
-            }
-
-            if (!messages.length) {
-                chatEl.innerHTML = `
-                    <article class="feed-item">
-                        <div class="feed-meta">
-                            <span>WORLD → ALL</span>
-                            <span>${formatElapsed(state.turns[state.turnIndex])}</span>
-                        </div>
-                        <div class="feed-body">この turn は大きな交渉イベントが少なく、世界チャットは静かです。</div>
-                        <div class="feed-note">scenario データは読めています。以後の turn で支援・圧力・国内イベントがここに流れます。</div>
-                    </article>
-                `;
-                return;
-            }
-
-            chatEl.innerHTML = messages.map(item => `
-                <article class="feed-item">
-                    <div class="feed-meta">
-                        <span>${item.from} → ${item.to}</span>
-                        <span>${item.time}</span>
-                    </div>
-                    <div class="feed-body">${item.body}</div>
-                    <div class="feed-note">${item.note}</div>
-                </article>
-            `).join("");
-        }
-
-        function renderThoughtFeed() {
-            const thoughtEl = document.getElementById("thoughtFeed");
-            if (!state.turns.length) {
-                thoughtEl.innerHTML = "";
-                return;
-            }
-
-            const turn = state.turns[state.turnIndex];
-            const prevTurn = previousTurnValue(turn);
-            const row = state.rowsByTurn.get(turn).get(state.selectedCountry) || Array.from(state.rowsByTurn.get(turn).values())[0];
-            const prevRow = prevTurn != null ? state.rowsByTurn.get(prevTurn).get(row.code) : null;
-            const event = state.eventsByTurn.get(turn) || { conflict_events: [], cooperation_transfers: [], domestic_events: [] };
-            const thought = buildCountryThought(row, prevRow, event);
-
-            thoughtEl.innerHTML = `
-                <article class="feed-item">
-                    <div class="feed-meta">
-                        <span>${row.code} synthetic state note</span>
-                        <span>${formatElapsed(turn)}</span>
-                    </div>
-                    <div class="feed-body">${thought.snapshot}</div>
-                    <div class="feed-note">${thought.reasoning}</div>
-                    <div class="subhead">Considerations</div>
-                    <ul class="thought-list">
-                        ${thought.considerations.map(item => `<li>${item}</li>`).join("")}
-                    </ul>
-                </article>
-            `;
-        }
-
-        function renderSidebarTabs() {
-            const activeTab = ["chat", "reasoning", "ranking", "legend"].includes(state.sidebarTab)
-                ? state.sidebarTab
-                : "chat";
-            state.sidebarTab = activeTab;
-
-            const panelMap = {
-                chat: document.getElementById("tabPanelChat"),
-                reasoning: document.getElementById("tabPanelReasoning"),
-                ranking: document.getElementById("tabPanelRanking"),
-                legend: document.getElementById("tabPanelLegend"),
-            };
-
-            tabButtons.forEach(button => {
-                const isActive = button.dataset.tab === activeTab;
-                button.classList.toggle("active", isActive);
-                button.setAttribute("aria-selected", isActive ? "true" : "false");
-            });
-
-            Object.entries(panelMap).forEach(([key, panel]) => {
-                if (!panel) {
-                    return;
-                }
-                panel.hidden = key !== activeTab;
-            });
-
-            localStorage.setItem(SIDEBAR_TAB_PREF_KEY, activeTab);
-        }
-
-        function renderHeader() {
-            const header = document.getElementById("eventSummary");
-            if (!state.turns.length) {
-                return;
-            }
-
-            const turn = state.turns[state.turnIndex];
-            const event = state.eventsByTurn.get(turn);
-            const aggregate = state.aggregateByTurn.get(turn);
-            const timeLabel = formatElapsed(turn);
-
-            header.innerHTML = `
-                <h1 style="font-size: 16px;">${state.scenarioName}</h1>
-                <p>${timeLabel} · ${event.name}</p>
-            `;
-
-            document.getElementById("timeValue").textContent = timeLabel;
-            document.getElementById("turnValue").textContent = `${turn}/${state.turns.length}`;
-            document.getElementById("avgSValue").textContent = format(aggregate.avg_S);
-            document.getElementById("avgCashValue").textContent = format(aggregate.avg_cash_stability);
-            document.getElementById("warBurdenValue").textContent = format(aggregate.avg_war_burden);
-            document.getElementById("eventCountValue").textContent = `W${aggregate.war_events_count} D${aggregate.domestic_events_count || 0}`;
-        }
-
-        function render() {
-            renderOverlay();
-            renderHeader();
-            renderSelectedCountry();
-            renderChatFeed();
-            renderThoughtFeed();
-            renderCountryList();
-            renderSidebarTabs();
-            emptyState.style.display = state.turns.length ? "none" : "grid";
-            turnSlider.value = state.turns.length ? String(state.turns[state.turnIndex]) : "1";
-        }
-
-        function setTurnFromValue(value) {
-            const turn = Number(value);
-            const index = state.turns.indexOf(turn);
-            if (index >= 0) {
-                state.turnIndex = index;
-                render();
-            }
-        }
-
-        function stopPlayback() {
-            state.playing = false;
-            if (state.playTimer) {
-                window.clearInterval(state.playTimer);
-                state.playTimer = null;
-            }
-            playButton.textContent = "Play";
-        }
-
-        function startPlayback() {
-            if (!state.turns.length) {
-                return;
-            }
-            stopPlayback();
-            state.playing = true;
-            playButton.textContent = "Pause";
-            state.playTimer = window.setInterval(() => {
-                if (state.turnIndex >= state.turns.length - 1) {
-                    state.turnIndex = 0;
-                } else {
-                    state.turnIndex += 1;
-                }
-                render();
-            }, 1400);
-        }
-
-        function ingestScenarioData(turnsRows, aggregateRows, eventsRows, scenarioKey, scenarioName) {
-            state.scenarioKey = scenarioKey;
-            state.scenarioName = scenarioName;
-            state.turns = Array.from(new Set(turnsRows.map(row => Number(row.turn)))).sort((a, b) => a - b);
-            state.rowsByTurn = new Map();
-            state.aggregateByTurn = new Map();
-            state.eventsByTurn = new Map();
-
-            for (const row of turnsRows) {
-                const turn = Number(row.turn);
-                if (!state.rowsByTurn.has(turn)) {
-                    state.rowsByTurn.set(turn, new Map());
-                }
-                state.rowsByTurn.get(turn).set(row.code, row);
-            }
-
-            for (const row of aggregateRows) {
-                state.aggregateByTurn.set(Number(row.turn), row);
-            }
-
-            for (const row of eventsRows) {
-                state.eventsByTurn.set(Number(row.turn), row);
-            }
-
-            state.turnIndex = 0;
-            state.selectedCountry = state.rowsByTurn.get(state.turns[0])?.has("JPN")
-                ? "JPN"
-                : turnsRows[0].code;
-
-            stopPlayback();
-            turnSlider.min = String(state.turns[0]);
-            turnSlider.max = String(state.turns[state.turns.length - 1]);
-            turnSlider.disabled = false;
-            playButton.disabled = false;
-            prevButton.disabled = false;
-            nextButton.disabled = false;
-            scenarioSelect.disabled = false;
-            persistScenarioPreference(scenarioKey);
-            render();
-        }
-
-        async function loadScenarioFromHandle(scenarioKey) {
-            const directoryHandle = state.scenarioHandles.get(scenarioKey);
-            if (!directoryHandle) {
-                return;
-            }
-            const [turnsText, aggregateText, eventsText] = await Promise.all([
-                readRequiredFile(directoryHandle, "turns.csv"),
-                readRequiredFile(directoryHandle, "aggregate.csv"),
-                readRequiredFile(directoryHandle, "events.jsonl"),
-            ]);
-
-            const turnsRows = parseCSV(turnsText);
-            const aggregateRows = parseCSV(aggregateText);
-            const eventsRows = parseJSONL(eventsText);
-
-            ingestScenarioData(
-                turnsRows,
-                aggregateRows,
-                eventsRows,
-                scenarioKey,
-                turnsRows[0]?.scenario_name || state.scenarioMeta.get(scenarioKey)?.name || directoryHandle.name,
-            );
-        }
-
-        async function loadScenarioFromUrl(scenarioKey) {
-            const baseUrl = state.scenarioUrls.get(scenarioKey);
-            if (!baseUrl) {
-                return;
-            }
-            const [turnsText, aggregateText, eventsText] = await Promise.all([
-                fetchRequiredText(`${baseUrl}/turns.csv`),
-                fetchRequiredText(`${baseUrl}/aggregate.csv`),
-                fetchRequiredText(`${baseUrl}/events.jsonl`),
-            ]);
-
-            ingestScenarioData(
-                parseCSV(turnsText),
-                parseCSV(aggregateText),
-                parseJSONL(eventsText),
-                scenarioKey,
-                state.scenarioMeta.get(scenarioKey)?.name || scenarioKey,
-            );
-        }
-
-        async function connectRootHandle(rootHandle, options = {}) {
-            const { persist = true, preferredScenario = null } = options;
-            const manifest = await readManifestFromHandle(rootHandle);
-            const scenarioEntries = await discoverScenarioHandles(rootHandle, manifest);
-            if (!scenarioEntries.length) {
-                throw new Error("No scenario directories found under the selected root.");
-            }
-
-            state.accessMode = "fs-root";
-            state.rootHandle = rootHandle;
-            state.rootUrl = "";
-            state.scenarioHandles = new Map(scenarioEntries.map(entry => [entry.key, entry.handle]));
-            state.scenarioUrls = new Map();
-            applyViewerMeta(manifest);
-            populateScenarioSelect(scenarioEntries);
-            setRootLabel(rootHandle.name);
-
-            if (persist) {
-                await saveRootHandle(rootHandle);
-            }
-
-            const preferred =
-                preferredScenario ||
-                readScenarioPreference(rootHandle.name) ||
-                state.viewerMeta.default_scenario ||
-                scenarioEntries[0].key;
-            const selectedKey = state.scenarioHandles.has(preferred) ? preferred : scenarioEntries[0].key;
-            scenarioSelect.value = selectedKey;
-            await loadScenarioFromHandle(selectedKey);
-        }
-
-        async function connectBundledRoot(rootUrl) {
-            const manifest = JSON.parse(await fetchRequiredText(`${rootUrl}/manifest.json`));
-            const scenarioEntries = normalizeScenarioEntries(manifest);
-            if (!scenarioEntries.length) {
-                throw new Error("Bundled manifest does not contain scenarios.");
-            }
-
-            state.accessMode = "url-root";
-            state.rootHandle = null;
-            state.rootUrl = rootUrl;
-            state.scenarioHandles = new Map();
-            state.scenarioUrls = new Map(
-                scenarioEntries.map(entry => [entry.key, `${rootUrl}/${entry.key}`]),
-            );
-            applyViewerMeta(manifest);
-            populateScenarioSelect(scenarioEntries);
-            setRootLabel(`bundled demo · ${rootUrl.split("/").pop()}`);
-
-            const preferred =
-                readScenarioPreference(rootUrl) ||
-                state.viewerMeta.default_scenario ||
-                scenarioEntries[0].key;
-            const selectedKey = state.scenarioUrls.has(preferred) ? preferred : scenarioEntries[0].key;
-            scenarioSelect.value = selectedKey;
-            await loadScenarioFromUrl(selectedKey);
-        }
-
-        async function tryRestoreSavedRoot() {
-            try {
-                const rootHandle = await loadSavedRootHandle();
-                if (!rootHandle) {
-                    return false;
-                }
-                if (!(await verifyPermission(rootHandle))) {
-                    return false;
-                }
-                await connectRootHandle(rootHandle, { persist: false });
-                return true;
-            } catch (error) {
-                console.warn("failed to restore saved root", error);
-                return false;
-            }
-        }
-
-        async function tryLoadBundledRoot() {
-            if (!location.protocol.startsWith("http")) {
-                return false;
-            }
-            try {
-                await connectBundledRoot(DEFAULT_ROOT_URL);
-                return true;
-            } catch (error) {
-                console.warn("failed to load bundled root", error);
-                return false;
-            }
-        }
-
-        openButton.addEventListener("click", async () => {
-            try {
-                const rootHandle = await window.showDirectoryPicker({ id: "world-demo-root" });
-                await connectRootHandle(rootHandle);
-            } catch (error) {
-                if (error && error.name !== "AbortError") {
-                    console.error(error);
-                    window.alert("root ディレクトリを読み込めませんでした。world demo の出力 root を選んでください。");
-                }
-            }
-        });
-
-        scenarioSelect.addEventListener("change", async event => {
-            const scenarioKey = event.target.value;
-            stopPlayback();
-            if (!scenarioKey) {
-                return;
-            }
-            if (state.accessMode === "url-root") {
-                await loadScenarioFromUrl(scenarioKey);
-            } else {
-                await loadScenarioFromHandle(scenarioKey);
-            }
-        });
-
-        tabButtons.forEach(button => {
-            button.addEventListener("click", () => {
-                state.sidebarTab = button.dataset.tab || "chat";
-                renderSidebarTabs();
-            });
-        });
-
-        playButton.addEventListener("click", () => {
-            if (state.playing) {
-                stopPlayback();
-            } else {
-                startPlayback();
-            }
-        });
-
-        prevButton.addEventListener("click", () => {
-            if (!state.turns.length) {
-                return;
-            }
-            stopPlayback();
-            state.turnIndex = (state.turnIndex - 1 + state.turns.length) % state.turns.length;
-            render();
-        });
-
-        nextButton.addEventListener("click", () => {
-            if (!state.turns.length) {
-                return;
-            }
-            stopPlayback();
-            state.turnIndex = (state.turnIndex + 1) % state.turns.length;
-            render();
-        });
-
-        turnSlider.addEventListener("input", event => {
-            stopPlayback();
-            setTurnFromValue(event.target.value);
-        });
-
-        fullscreenButton.addEventListener("click", async () => {
-            const target = document.querySelector(".workspace");
-            if (!document.fullscreenElement) {
-                await target.requestFullscreen();
-            } else {
-                await document.exitFullscreen();
-            }
-        });
-
-        document.addEventListener("keydown", event => {
-            if (!state.turns.length) {
-                return;
-            }
-            if (event.key === "ArrowRight") {
-                stopPlayback();
-                state.turnIndex = (state.turnIndex + 1) % state.turns.length;
-                render();
-            } else if (event.key === "ArrowLeft") {
-                stopPlayback();
-                state.turnIndex = (state.turnIndex - 1 + state.turns.length) % state.turns.length;
-                render();
-            } else if (event.key === " ") {
-                event.preventDefault();
-                if (state.playing) {
-                    stopPlayback();
-                } else {
-                    startPlayback();
-                }
-            }
-        });
-
-        resetPlaybackUi();
-        renderSidebarTabs();
-
-        (async () => {
-            const restored = await tryRestoreSavedRoot();
-            if (restored) {
-                return;
-            }
-            await tryLoadBundledRoot();
-        })();
-    </script>
+    <script src="./world_demo/state.js"></script>
+    <script src="./world_demo/data.js"></script>
+    <script src="./world_demo/renderers.js"></script>
+    <script src="./world_demo/interactions.js"></script>
+    <script src="./world_demo/app.js"></script>
 </body>
 </html>

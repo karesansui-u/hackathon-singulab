@@ -1,57 +1,17 @@
-#!/usr/bin/env python3
-"""
-Run a coarse world simulation for a small set of major countries.
-
-The goal is not forecasting accuracy. The goal is to make the design memo
-concrete enough that we can compare:
-
-- high automation / low adaptation
-- high automation / high adaptation
-
-using country-level state, cooperation, and structure-sustain metrics.
-
-This version also models survival-driven conflict escalation in a way that
-leans toward modern patterns:
-
-- gray-zone coercion is common
-- proxy or coercive campaigns appear under sustained stress
-- direct limited war is rarer and suppressed by deterrence, especially in
-  nuclear pairings
-"""
-
 from __future__ import annotations
 
-import argparse
-import csv
-import json
 import math
-import sys
 from copy import deepcopy
-from pathlib import Path
 from typing import Dict, List, Tuple
 
 import numpy as np
-import yaml
 
-try:
-    import matplotlib.pyplot as plt
-except ImportError:  # pragma: no cover - plotting is optional
-    plt = None
-
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-from world_demo_sim import engine as sim_engine
-from world_demo_sim import io_helpers as sim_io
-from world_demo_sim import reporting as sim_reporting
-from world_demo_sim import selection as sim_selection
-from world_demo_sim.types import ScenarioRunResult
+from .io_helpers import clamp, sigmoid, weighted_average
+from .selection import expand_event_country_effects
+from .types import ScenarioRunResult
 
 
 State = Dict[str, float]
-Row = Dict[str, float]
-
 DOMESTIC_STAGES = [
     "stable",
     "grievance",
@@ -64,204 +24,9 @@ DOMESTIC_STAGES = [
 DOMESTIC_STAGE_INDEX = {name: idx for idx, name in enumerate(DOMESTIC_STAGES)}
 
 
-def clamp(value: float, lower: float = 0.0, upper: float = 1.0) -> float:
-    return max(lower, min(upper, value))
-
-
-def sigmoid(value: float) -> float:
-    if value >= 0:
-        z = math.exp(-value)
-        return 1.0 / (1.0 + z)
-    z = math.exp(value)
-    return z / (1.0 + z)
-
-
 def domestic_stage_name(index: int | float) -> str:
     bounded = max(0, min(int(index), len(DOMESTIC_STAGES) - 1))
     return DOMESTIC_STAGES[bounded]
-
-
-def deep_merge(base: dict, override: dict) -> dict:
-    merged = deepcopy(base)
-    for key, value in override.items():
-        if (
-            key in merged
-            and isinstance(merged[key], dict)
-            and isinstance(value, dict)
-        ):
-            merged[key] = deep_merge(merged[key], value)
-        else:
-            merged[key] = deepcopy(value)
-    return merged
-
-
-def load_yaml(path: Path) -> dict:
-    with path.open("r", encoding="utf-8") as handle:
-        payload = yaml.safe_load(handle)
-    extends = payload.pop("extends", None)
-    if not extends:
-        return payload
-    base_path = (path.parent / extends).resolve()
-    base_payload = load_yaml(base_path)
-    return deep_merge(base_payload, payload)
-
-
-def load_country_library(path: Path) -> dict:
-    with path.open("r", encoding="utf-8") as handle:
-        return yaml.safe_load(handle)
-
-
-def merge_numeric_effects(base: dict, delta: dict) -> dict:
-    merged = deepcopy(base)
-    for key, value in delta.items():
-        if isinstance(value, (int, float)) and isinstance(merged.get(key), (int, float)):
-            merged[key] = merged.get(key, 0.0) + value
-        else:
-            merged[key] = value
-    return merged
-
-
-def resolve_country_selection(config: dict, config_path: Path, country_set_override: str | None = None) -> dict:
-    selection = config.get("country_selection")
-    if not selection:
-        return config
-
-    library_path = (config_path.parent / selection["library"]).resolve()
-    library = load_country_library(library_path)
-    preset_name = country_set_override or selection.get("preset", "core_30")
-    preset = library["presets"][preset_name]
-    profiles = library["profiles"]
-    tier_order = {"T1": 1, "T2": 2, "T3": 3}
-    include_codes = set(preset.get("include_codes", []))
-    exclude_codes = set(preset.get("exclude_codes", []))
-    by_code = {entry["code"]: entry for entry in library["countries"]}
-
-    missing_codes = sorted(code for code in include_codes | exclude_codes if code not in by_code)
-    if missing_codes:
-        raise ValueError(f"Unknown country codes in preset '{preset_name}': {', '.join(missing_codes)}")
-
-    selected_map = {
-        entry["code"]: deepcopy(entry)
-        for entry in library["countries"]
-        if entry["tier"] in preset["tiers"] and entry["code"] not in exclude_codes
-    }
-    for code in include_codes:
-        if code in exclude_codes:
-            continue
-        selected_map[code] = deepcopy(by_code[code])
-
-    selected_entries = list(selected_map.values())
-    selected_entries.sort(
-        key=lambda entry: (
-            0 if entry["code"] in include_codes else 1,
-            tier_order.get(entry["tier"], 99),
-            entry.get("phase1_priority", 999),
-            entry["code"],
-        )
-    )
-    selected_entries = selected_entries[: preset["max_countries"]]
-    selected_codes = {entry["code"] for entry in selected_entries}
-
-    resolved = deepcopy(config)
-    resolved_countries = []
-    layout = {}
-    selected_metadata = {}
-
-    for entry in selected_entries:
-        state = deepcopy(profiles[entry["profile"]])
-        state = deep_merge(state, entry.get("overrides", {}))
-        state["code"] = entry["code"]
-        state["name"] = entry["name"]
-        state["name_ja"] = entry.get("name_ja", entry["name"])
-        state["population_weight"] = entry["population_weight"]
-        state["lon"] = entry["lon"]
-        state["lat"] = entry["lat"]
-        state["tier"] = entry["tier"]
-        state["region_id"] = entry["region_id"]
-        state["role_tags"] = deepcopy(entry.get("role_tags", []))
-        resolved_countries.append(state)
-        layout[entry["code"]] = {
-            "lon": entry["lon"],
-            "lat": entry["lat"],
-        }
-        selected_metadata[entry["code"]] = {
-            "code": entry["code"],
-            "name": entry["name"],
-            "name_ja": entry.get("name_ja", entry["name"]),
-            "tier": entry["tier"],
-            "region_id": entry["region_id"],
-            "role_tags": deepcopy(entry.get("role_tags", [])),
-            "primary_axes": deepcopy(entry.get("primary_axes", [])),
-            "secondary_axes": deepcopy(entry.get("secondary_axes", [])),
-            "reason_short": entry.get("reason_short", ""),
-            "lon": entry["lon"],
-            "lat": entry["lat"],
-        }
-
-    resolved["countries"] = resolved_countries
-    resolved["layout"] = layout
-    resolved["cooperation_links"] = [
-        edge for edge in library.get("cooperation_links", [])
-        if edge["donor"] in selected_codes and edge["target"] in selected_codes
-    ]
-    resolved["rivalries"] = [
-        edge for edge in library.get("rivalries", [])
-        if edge["actor"] in selected_codes and edge["target"] in selected_codes
-    ]
-    resolved.setdefault("meta", {})
-    resolved["meta"]["country_set"] = preset_name
-    resolved["meta"]["country_count"] = len(resolved_countries)
-    resolved["_selection_metadata"] = {
-        "preset": preset_name,
-        "library_path": str(library_path),
-        "countries": selected_metadata,
-    }
-    return resolved
-
-
-def validate_config_links(config: dict) -> None:
-    codes = {country["code"] for country in config.get("countries", [])}
-    missing_layout = sorted(code for code in codes if code not in config.get("layout", {}))
-    if missing_layout:
-        raise ValueError(f"Missing layout entries for: {', '.join(missing_layout)}")
-
-    bad_rivalries = [
-        edge for edge in config.get("rivalries", [])
-        if edge["actor"] not in codes or edge["target"] not in codes
-    ]
-    if bad_rivalries:
-        pairs = ", ".join(f"{edge['actor']}->{edge['target']}" for edge in bad_rivalries[:8])
-        raise ValueError(f"Rivalries reference missing countries: {pairs}")
-
-    bad_cooperation = [
-        edge for edge in config.get("cooperation_links", [])
-        if edge["donor"] not in codes or edge["target"] not in codes
-    ]
-    if bad_cooperation:
-        pairs = ", ".join(f"{edge['donor']}->{edge['target']}" for edge in bad_cooperation[:8])
-        raise ValueError(f"Cooperation links reference missing countries: {pairs}")
-
-
-def expand_event_country_effects(event: dict, selection_metadata: dict) -> dict:
-    effects = deepcopy(event.get("country_effects", {}))
-    countries = selection_metadata.get("countries", {})
-    if not countries:
-        return effects
-
-    for code, meta in countries.items():
-        merged = deepcopy(effects.get(code, {}))
-        for tag, deltas in event.get("tag_effects", {}).items():
-            if tag in meta.get("role_tags", []):
-                merged = merge_numeric_effects(merged, deltas)
-        for region_id, deltas in event.get("region_effects", {}).items():
-            if region_id == meta.get("region_id"):
-                merged = merge_numeric_effects(merged, deltas)
-        for tier, deltas in event.get("tier_effects", {}).items():
-            if tier == meta.get("tier"):
-                merged = merge_numeric_effects(merged, deltas)
-        if merged:
-            effects[code] = merged
-    return effects
 
 
 def build_initial_states(config: dict) -> Dict[str, State]:
@@ -278,7 +43,6 @@ def build_initial_states(config: dict) -> Dict[str, State]:
         "domestic_burden": 0.0,
     }
     for country in config["countries"]:
-        code = country["code"]
         state = deepcopy(country)
         for key, value in defaults.items():
             state.setdefault(key, value)
@@ -371,7 +135,7 @@ def build_initial_states(config: dict) -> Dict[str, State]:
         state["domestic_burden"] = clamp(
             max(state["domestic_burden"], 0.025 * int(state["domestic_stage_index"]))
         )
-        states[code] = state
+        states[state["code"]] = state
     return states
 
 
@@ -651,7 +415,6 @@ def transfer_relief_map(transfers: List[dict]) -> Dict[str, float]:
 
 def compute_domestic_signals(
     state: State,
-    metrics: Dict[str, float],
     turn_effect: dict,
     relief_support: float,
     event: dict,
@@ -822,7 +585,6 @@ def apply_domestic_instability(
     domestic_events: List[dict] = []
 
     for code, state in states.items():
-        metrics = metric_snapshot(state)
         relief_support = clamp(
             0.30 * turn_effects[code].get("structure_credit_gain", 0.0)
             + 0.20 * turn_effects[code].get("capital_share_gain", 0.0)
@@ -831,7 +593,7 @@ def apply_domestic_instability(
             0.0,
             1.0,
         )
-        signals = compute_domestic_signals(state, metrics, turn_effects[code], relief_support, event)
+        signals = compute_domestic_signals(state, turn_effects[code], relief_support, event)
 
         old_stage_index = int(state["domestic_stage_index"])
         next_stage_index = old_stage_index
@@ -943,19 +705,6 @@ def apply_domestic_instability(
     return domestic_events, signals_by_country
 
 
-def weighted_average(rows: List[dict], key: str) -> float:
-    total_weight = sum(row["population_weight"] for row in rows)
-    if total_weight == 0:
-        return 0.0
-    return sum(row[key] * row["population_weight"] for row in rows) / total_weight
-
-
-def scenario_output_dir(base_dir: Path, scenario_key: str) -> Path:
-    path = base_dir / scenario_key
-    path.mkdir(parents=True, exist_ok=True)
-    return path
-
-
 def compute_survival_pressure(state: State, metrics: Dict[str, float]) -> float:
     horizon_pressure = clamp((6.0 - metrics["horizon_turns"]) / 6.0)
     return clamp(
@@ -970,12 +719,6 @@ def compute_survival_pressure(state: State, metrics: Dict[str, float]) -> float:
         0.0,
         1.0,
     )
-
-
-def scenario_seed(config: dict, scenario: dict) -> int:
-    base_seed = int(config.get("meta", {}).get("seed", 20260416))
-    scenario_offset = sum((index + 1) * ord(char) for index, char in enumerate(scenario["key"]))
-    return (base_seed + scenario_offset) % (2**32 - 1)
 
 
 def conflict_mode_from_probabilities(
@@ -1270,468 +1013,199 @@ def apply_conflict_escalation(
     return selected, war_signals
 
 
-def write_csv(path: Path, rows: List[dict]) -> None:
-    if not rows:
-        return
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()))
-        writer.writeheader()
-        writer.writerows(rows)
+def run_scenario(config: dict, scenario: dict, rng: np.random.Generator) -> ScenarioRunResult:
+    states = build_initial_states(config)
+    event_map = {event["turn"]: event for event in config.get("events", [])}
+    selection_metadata = config.get("_selection_metadata", {})
+    rows: List[dict] = []
+    event_log: List[dict] = []
+    aggregate_rows: List[dict] = []
+    conflict_rows: List[dict] = []
 
+    for turn in range(1, config["meta"]["turns"] + 1):
+        event = event_map.get(turn, {})
+        modifiers = deepcopy(event.get("modifiers", {}))
+        expanded_country_effects = event.get("country_effects", {})
+        if selection_metadata:
+            expanded_country_effects = expand_event_country_effects(event, selection_metadata)
+        if expanded_country_effects:
+            apply_country_effects(states, expanded_country_effects)
 
-def write_json(path: Path, payload: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        turn_effects = {}
+        for code, state in states.items():
+            turn_effects[code] = self_update(state, scenario, modifiers)
 
-
-def write_jsonl(path: Path, rows: List[dict]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as handle:
-        for row in rows:
-            handle.write(json.dumps(row, ensure_ascii=False) + "\n")
-
-
-def write_markdown_summary(path: Path, summary: dict, final_rows: List[dict], event_log: List[dict]) -> None:
-    lines = [
-        f"# {summary['scenario_name']}",
-        "",
-        f"- Final global average `S`: `{summary['global_avg_S_final']}`",
-        f"- Final global average horizon: `{summary['global_avg_horizon_final']}` turns",
-        f"- Final global average cash stability: `{summary['global_avg_cash_final']}`",
-        f"- Final global average war burden: `{summary['global_avg_war_burden_final']}`",
-        f"- Final global average domestic burden: `{summary['global_avg_domestic_burden_final']}`",
-        f"- Final global average protest pressure: `{summary['global_avg_protest_pressure_final']}`",
-        f"- Top resilient: `{', '.join(summary['top_resilient'])}`",
-        f"- Most fragile: `{', '.join(summary['most_fragile'])}`",
-        f"- Most domestically fragile: `{', '.join(summary['most_domestically_fragile'])}`",
-        f"- Conflict mix: `gray={summary['gray_zone_events']}, proxy={summary['proxy_events']}, limited={summary['limited_war_events']}`",
-        f"- Domestic escalation mix: `protest={summary['protest_events']}, mass={summary['mass_protest_events']}, riot={summary['riot_events']}, insurgency={summary['insurgency_events']}, civil={summary['civil_conflict_events']}`",
-        "",
-        "## Final Country Snapshot",
-        "",
-        "| Code | S | Horizon | Support Needed | Cash | Domestic Stage | Domestic Burden | Protest | War Burden | War Pressure | Likely Mode |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
-    ]
-    for row in final_rows:
-        lines.append(
-            f"| {row['code']} | {row['S']} | {row['horizon_turns']} | {row['support_needed']} | "
-            f"{row['cash_stability']} | {row['domestic_stage']} | {row['domestic_burden']} | {row['protest_pressure']} | "
-            f"{row['war_burden']} | {row['war_pressure']} | {row['likely_mode']} |"
-        )
-
-    lines.extend(
-        [
-            "",
-            "## Event Timeline",
-            "",
-        ]
-    )
-    for entry in event_log:
-        transfer_text = ", ".join(
-            f"{item['donor']}->{item['target']}:{item['amount']}" for item in entry["cooperation_transfers"][:5]
-        )
-        if not transfer_text:
-            transfer_text = "none"
-        conflict_text = ", ".join(
-            f"{item['actor']}->{item['target']}:{item['mode']}:{item['intensity']}" for item in entry["conflict_events"]
-        )
-        if not conflict_text:
-            conflict_text = "none"
-        domestic_text = ", ".join(
-            f"{item['country']}:{item['from_stage']}->{item['to_stage']}" for item in entry.get("domestic_events", [])[:5]
-        )
-        if not domestic_text:
-            domestic_text = "none"
-        lines.append(
-            f"- Turn {entry['turn']}: {entry['name']} | transfers: {transfer_text} | conflict: {conflict_text} | domestic: {domestic_text}"
-        )
-
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-
-
-def write_comparison_report(base_dir: Path, scenario_results: Dict[str, dict]) -> None:
-    scenario_keys = list(scenario_results.keys())
-    if len(scenario_keys) < 2:
-        return
-
-    first = scenario_results[scenario_keys[0]]
-    second = scenario_results[scenario_keys[1]]
-
-    final_a = {row["code"]: row for row in first["final_rows"]}
-    final_b = {row["code"]: row for row in second["final_rows"]}
-
-    comparison_rows: List[dict] = []
-    lines = [
-        "# Major Powers 10-Turn Comparison",
-        "",
-        f"- `{first['summary']['scenario_name']}` final avg `S`: `{first['summary']['global_avg_S_final']}`",
-        f"- `{second['summary']['scenario_name']}` final avg `S`: `{second['summary']['global_avg_S_final']}`",
-        f"- Delta avg `S`: `{round(second['summary']['global_avg_S_final'] - first['summary']['global_avg_S_final'], 4)}`",
-        f"- Delta avg war burden: `{round(second['summary']['global_avg_war_burden_final'] - first['summary']['global_avg_war_burden_final'], 4)}`",
-        f"- Delta avg domestic burden: `{round(second['summary']['global_avg_domestic_burden_final'] - first['summary']['global_avg_domestic_burden_final'], 4)}`",
-        f"- Conflict mix `{first['summary']['scenario_name']}`: "
-        f"`gray={first['summary']['gray_zone_events']}, proxy={first['summary']['proxy_events']}, limited={first['summary']['limited_war_events']}`",
-        f"- Conflict mix `{second['summary']['scenario_name']}`: "
-        f"`gray={second['summary']['gray_zone_events']}, proxy={second['summary']['proxy_events']}, limited={second['summary']['limited_war_events']}`",
-        f"- Domestic mix `{first['summary']['scenario_name']}`: "
-        f"`riot={first['summary']['riot_events']}, insurgency={first['summary']['insurgency_events']}, civil={first['summary']['civil_conflict_events']}`",
-        f"- Domestic mix `{second['summary']['scenario_name']}`: "
-        f"`riot={second['summary']['riot_events']}, insurgency={second['summary']['insurgency_events']}, civil={second['summary']['civil_conflict_events']}`",
-        "",
-        "## Final Country Delta",
-        "",
-        "| Code | S low-adaptation | S high-adaptation | Delta S | Horizon delta | Support delta | War burden delta | Domestic burden delta |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- |",
-    ]
-    for code in sorted(final_a.keys()):
-        row_a = final_a[code]
-        row_b = final_b[code]
-        delta_s = round(row_b["S"] - row_a["S"], 4)
-        delta_h = round(row_b["horizon_turns"] - row_a["horizon_turns"], 2)
-        delta_support = round(row_b["support_needed"] - row_a["support_needed"], 4)
-        delta_war = round(row_b["war_burden"] - row_a["war_burden"], 4)
-        delta_domestic = round(row_b["domestic_burden"] - row_a["domestic_burden"], 4)
-        lines.append(
-            f"| {code} | {row_a['S']} | {row_b['S']} | {delta_s} | {delta_h} | {delta_support} | {delta_war} | {delta_domestic} |"
-        )
-        comparison_rows.append(
+        transfers = apply_cooperation(states, config.get("cooperation_links", []), scenario, modifiers)
+        domestic_events, domestic_signals = apply_domestic_instability(states, event, turn_effects, transfers, rng)
+        conflict_events, war_signals = apply_conflict_escalation(states, config, scenario, rng)
+        conflict_rows.extend(
             {
+                "scenario_key": scenario["key"],
+                "turn": turn,
+                **item,
+            }
+            for item in conflict_events
+        )
+
+        turn_rows: List[dict] = []
+        for code, state in states.items():
+            metrics = metric_snapshot(state)
+            row = {
+                "scenario_key": scenario["key"],
+                "scenario_name": scenario["name"],
+                "turn": turn,
                 "code": code,
-                "s_low_adaptation": row_a["S"],
-                "s_high_adaptation": row_b["S"],
-                "delta_s": delta_s,
-                "delta_horizon": delta_h,
-                "delta_support_needed": delta_support,
-                "delta_war_burden": delta_war,
-                "delta_domestic_burden": delta_domestic,
+                "name": state["name"],
+                "name_ja": state.get("name_ja", state["name"]),
+                "tier": state.get("tier", ""),
+                "region_id": state.get("region_id", ""),
+                "lon": round(state.get("lon", 0.0), 4),
+                "lat": round(state.get("lat", 0.0), 4),
+                "population_weight": state["population_weight"],
+                "energy_security": round(state["energy_security"], 4),
+                "food_security": round(state["food_security"], 4),
+                "compute_access": round(state["compute_access"], 4),
+                "distribution_capacity": round(state["distribution_capacity"], 4),
+                "social_cohesion": round(state["social_cohesion"], 4),
+                "cash_stability": round(state["cash_stability"], 4),
+                "capital_surplus": round(state["capital_surplus"], 4),
+                "labor_displacement": round(state["labor_displacement"], 4),
+                "inequality_pressure": round(state["inequality_pressure"], 4),
+                "sanction_exposure": round(state["sanction_exposure"], 4),
+                "conflict_risk": round(state["conflict_risk"], 4),
+                "climate_stress": round(state["climate_stress"], 4),
+                "alliance_support": round(state["alliance_support"], 4),
+                "war_burden": round(state["war_burden"], 4),
+                "military_posture": round(state["military_posture"], 4),
+                "tax_burden": round(state["tax_burden"], 4),
+                "housing_pressure": round(state["housing_pressure"], 4),
+                "youth_unemployment": round(state["youth_unemployment"], 4),
+                "policing_capacity": round(state["policing_capacity"], 4),
+                "elite_cohesion": round(state["elite_cohesion"], 4),
+                "economic_stress": round(state["economic_stress"], 4),
+                "legitimacy_stress": round(state["legitimacy_stress"], 4),
+                "mobilization_capacity": round(state["mobilization_capacity"], 4),
+                "elite_fragmentation": round(state["elite_fragmentation"], 4),
+                "communal_polarization": round(state["communal_polarization"], 4),
+                "domestic_burden": round(state["domestic_burden"], 4),
+                "domestic_stage": state["domestic_stage"],
+                "domestic_stage_index": int(state["domestic_stage_index"]),
+                "grievance_pressure": round(state["grievance_pressure"], 4),
+                "protest_pressure": round(state["protest_pressure"], 4),
+                "riot_pressure": round(state["riot_pressure"], 4),
+                "civil_conflict_pressure": round(state["civil_conflict_pressure"], 4),
+                "domestic_diversion_incentive": round(state["domestic_diversion_incentive"], 4),
+                "survival_pressure": round(war_signals[code]["survival_pressure"], 4),
+                "war_pressure": round(war_signals[code]["war_pressure"], 4),
+                "gray_zone_probability": round(war_signals[code]["gray_zone_probability"], 4),
+                "proxy_probability": round(war_signals[code]["proxy_probability"], 4),
+                "limited_war_probability": round(war_signals[code]["limited_war_probability"], 4),
+                "likely_mode": war_signals[code]["likely_mode"],
             }
-        )
+            row.update(turn_effects[code])
+            row.update(metrics)
+            row.update(domestic_signals[code])
+            rows.append(row)
+            turn_rows.append(row)
 
-    (base_dir / "comparison.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    write_csv(base_dir / "comparison.csv", comparison_rows)
+        gray_zone_events = sum(1 for item in conflict_events if item["mode"] == "gray_zone")
+        proxy_events = sum(1 for item in conflict_events if item["mode"] == "proxy")
+        limited_war_events = sum(1 for item in conflict_events if item["mode"] == "limited_war")
+        stage_counts = {name: sum(1 for row in turn_rows if row["domestic_stage"] == name) for name in DOMESTIC_STAGES}
+        domestic_event_counts = {name: sum(1 for item in domestic_events if item["to_stage"] == name) for name in DOMESTIC_STAGES}
 
-    if plt is not None:
-        plot_comparison(base_dir, scenario_results)
-
-
-def plot_scenario_dashboard(output_dir: Path, result: dict) -> None:
-    if plt is None:
-        return
-
-    turns = [row["turn"] for row in result["aggregate_rows"]]
-    avg_s = [row["avg_S"] for row in result["aggregate_rows"]]
-    avg_cash = [row["avg_cash_stability"] for row in result["aggregate_rows"]]
-    avg_war = [row["avg_war_burden"] for row in result["aggregate_rows"]]
-    avg_domestic = [row["avg_domestic_burden"] for row in result["aggregate_rows"]]
-    avg_conflict = [row["avg_conflict_risk"] for row in result["aggregate_rows"]]
-    avg_protest = [row["avg_protest_pressure"] for row in result["aggregate_rows"]]
-    avg_riot = [row["avg_riot_pressure"] for row in result["aggregate_rows"]]
-    avg_civil = [row["avg_civil_conflict_pressure"] for row in result["aggregate_rows"]]
-    gray_counts = [row["gray_zone_events"] for row in result["aggregate_rows"]]
-    proxy_counts = [row["proxy_events"] for row in result["aggregate_rows"]]
-    limited_counts = [row["limited_war_events"] for row in result["aggregate_rows"]]
-    grievance_counts = [row["grievance_stage_count"] for row in result["aggregate_rows"]]
-    protest_counts = [row["protest_stage_count"] for row in result["aggregate_rows"]]
-    mass_counts = [row["mass_protest_stage_count"] for row in result["aggregate_rows"]]
-    riot_counts = [row["riot_stage_count"] for row in result["aggregate_rows"]]
-    insurgency_counts = [row["insurgency_stage_count"] for row in result["aggregate_rows"]]
-    civil_counts = [row["civil_conflict_stage_count"] for row in result["aggregate_rows"]]
-
-    countries = [row["code"] for row in result["final_rows"]]
-    rows_by_country = {code: [] for code in countries}
-    for row in result["rows"]:
-        rows_by_country[row["code"]].append(row)
-    s_matrix = np.array([[entry["S"] for entry in rows_by_country[code]] for code in countries])
-
-    fig = plt.figure(figsize=(18, 10))
-    gs = fig.add_gridspec(2, 3, width_ratios=[1.0, 1.0, 1.0], height_ratios=[1.0, 1.0])
-
-    ax1 = fig.add_subplot(gs[0, 0])
-    ax1.plot(turns, avg_s, marker="o", label="avg S", color="#1b5e20")
-    ax1.plot(turns, avg_cash, marker="o", label="avg cash stability", color="#1565c0")
-    ax1.plot(turns, avg_domestic, marker="o", label="avg domestic burden", color="#8e24aa")
-    ax1.plot(turns, avg_war, marker="o", label="avg war burden", color="#b71c1c")
-    ax1.set_title(f"{result['summary']['scenario_name']}: global trajectory")
-    ax1.set_xlabel("Turn")
-    ax1.set_ylabel("0-1 scale")
-    ax1.grid(alpha=0.25)
-    ax1.legend(loc="best")
-
-    ax2 = fig.add_subplot(gs[0, 1])
-    ax2.plot(turns, avg_conflict, marker="o", label="avg conflict risk", color="#ef6c00")
-    ax2.plot(turns, avg_protest, marker="o", label="avg protest pressure", color="#ffb300")
-    ax2.plot(turns, avg_riot, marker="o", label="avg riot pressure", color="#fb8c00")
-    ax2.plot(turns, avg_civil, marker="o", label="avg civil conflict pressure", color="#6d4c41")
-    ax2.set_title("Conflict and domestic pressure")
-    ax2.set_xlabel("Turn")
-    ax2.set_ylabel("0-1 scale")
-    ax2.grid(alpha=0.25)
-    ax2.legend(loc="best")
-
-    ax3 = fig.add_subplot(gs[0, 2])
-    heat = ax3.imshow(s_matrix, aspect="auto", cmap="YlGnBu", vmin=0.20, vmax=0.55)
-    ax3.set_title("Country S heatmap")
-    ax3.set_xlabel("Turn")
-    ax3.set_ylabel("Country")
-    ax3.set_xticks(range(len(turns)))
-    ax3.set_xticklabels(turns)
-    ax3.set_yticks(range(len(countries)))
-    ax3.set_yticklabels(countries)
-    fig.colorbar(heat, ax=ax3, fraction=0.046, pad=0.04)
-
-    ax4 = fig.add_subplot(gs[1, 0])
-    final_s = [row["S"] for row in result["final_rows"]]
-    final_support = [row["support_needed"] for row in result["final_rows"]]
-    y = np.arange(len(countries))
-    ax4.barh(y - 0.18, final_s, height=0.32, label="final S", color="#2e7d32")
-    ax4.barh(y + 0.18, final_support, height=0.32, label="support needed", color="#ef6c00")
-    ax4.set_yticks(y)
-    ax4.set_yticklabels(countries)
-    ax4.set_xlabel("Score")
-    ax4.set_title("Final resilience vs support need")
-    ax4.invert_yaxis()
-    ax4.legend(loc="best")
-
-    ax5 = fig.add_subplot(gs[1, 1])
-    ax5.bar(turns, gray_counts, label="gray-zone", color="#6a1b9a")
-    ax5.bar(turns, proxy_counts, bottom=gray_counts, label="proxy", color="#e53935")
-    ax5.bar(
-        turns,
-        limited_counts,
-        bottom=np.array(gray_counts) + np.array(proxy_counts),
-        label="limited war",
-        color="#212121",
-    )
-    ax5.set_title("Conflict events by turn")
-    ax5.set_xlabel("Turn")
-    ax5.set_ylabel("Event count")
-    ax5.legend(loc="best")
-
-    ax6 = fig.add_subplot(gs[1, 2])
-    stage_bottom = np.zeros(len(turns))
-    stage_series = [
-        ("grievance", grievance_counts, "#5c6bc0"),
-        ("protest", protest_counts, "#fdd835"),
-        ("mass protest", mass_counts, "#fb8c00"),
-        ("riot", riot_counts, "#e53935"),
-        ("insurgency", insurgency_counts, "#8e24aa"),
-        ("civil conflict", civil_counts, "#212121"),
-    ]
-    for label, values, color in stage_series:
-        ax6.bar(turns, values, bottom=stage_bottom, label=label, color=color, alpha=0.92)
-        stage_bottom = stage_bottom + np.array(values)
-    ax6.set_title("Domestic stage counts by turn")
-    ax6.set_xlabel("Turn")
-    ax6.set_ylabel("Country count")
-    ax6.legend(loc="best", fontsize=8)
-
-    fig.tight_layout()
-    fig.savefig(output_dir / "dashboard.png", dpi=180)
-    plt.close(fig)
-
-
-def plot_comparison(base_dir: Path, scenario_results: Dict[str, dict]) -> None:
-    if plt is None:
-        return
-
-    scenario_keys = list(scenario_results.keys())
-    first = scenario_results[scenario_keys[0]]
-    second = scenario_results[scenario_keys[1]]
-
-    fig, axes = plt.subplots(2, 3, figsize=(18, 9))
-
-    for scenario_key, result in scenario_results.items():
-        label = result["summary"]["scenario_name"]
-        turns = [row["turn"] for row in result["aggregate_rows"]]
-        axes[0, 0].plot(turns, [row["avg_S"] for row in result["aggregate_rows"]], marker="o", label=label)
-        axes[0, 1].plot(
-            turns,
-            [row["avg_war_burden"] for row in result["aggregate_rows"]],
-            marker="o",
-            label=f"{label} war",
-        )
-        axes[0, 1].plot(
-            turns,
-            [row["avg_domestic_burden"] for row in result["aggregate_rows"]],
-            marker="o",
-            linestyle="--",
-            alpha=0.9,
-            label=f"{label} domestic",
-        )
-        axes[0, 2].plot(
-            turns,
-            [row["avg_protest_pressure"] for row in result["aggregate_rows"]],
-            marker="o",
-            label=f"{label} protest",
-        )
-        axes[0, 2].plot(
-            turns,
-            [row["avg_riot_pressure"] for row in result["aggregate_rows"]],
-            linestyle="--",
-            alpha=0.9,
-            label=f"{label} riot",
-        )
-
-    axes[0, 0].set_title("Average S by turn")
-    axes[0, 0].set_xlabel("Turn")
-    axes[0, 0].set_ylabel("Average S")
-    axes[0, 0].grid(alpha=0.25)
-    axes[0, 0].legend(loc="best")
-
-    axes[0, 1].set_title("War burden and domestic burden")
-    axes[0, 1].set_xlabel("Turn")
-    axes[0, 1].set_ylabel("Burden")
-    axes[0, 1].grid(alpha=0.25)
-    axes[0, 1].legend(loc="best", fontsize=8)
-
-    axes[0, 2].set_title("Domestic instability pressure")
-    axes[0, 2].set_xlabel("Turn")
-    axes[0, 2].set_ylabel("Pressure")
-    axes[0, 2].grid(alpha=0.25)
-    axes[0, 2].legend(loc="best", fontsize=8)
-
-    final_a = {row["code"]: row for row in first["final_rows"]}
-    final_b = {row["code"]: row for row in second["final_rows"]}
-    codes = sorted(final_a.keys())
-    delta_s = [final_b[code]["S"] - final_a[code]["S"] for code in codes]
-    delta_domestic = [final_b[code]["domestic_burden"] - final_a[code]["domestic_burden"] for code in codes]
-
-    axes[1, 0].barh(codes, delta_s, color=["#2e7d32" if value >= 0 else "#c62828" for value in delta_s])
-    axes[1, 0].set_title("Delta S: high adaptation minus low adaptation")
-    axes[1, 0].set_xlabel("Delta S")
-    axes[1, 0].axvline(0.0, color="black", linewidth=1)
-
-    y = np.arange(len(codes))
-    axes[1, 1].barh(y - 0.18, [final_a[code]["support_needed"] for code in codes], height=0.32, label="low adaptation", color="#ef9a9a")
-    axes[1, 1].barh(y + 0.18, [final_b[code]["support_needed"] for code in codes], height=0.32, label="high adaptation", color="#90caf9")
-    axes[1, 1].set_yticks(y)
-    axes[1, 1].set_yticklabels(codes)
-    axes[1, 1].set_xlabel("Support needed")
-    axes[1, 1].set_title("Final support needed by country")
-    axes[1, 1].legend(loc="best")
-
-    axes[1, 2].barh(
-        codes,
-        delta_domestic,
-        color=["#2e7d32" if value <= 0 else "#c62828" for value in delta_domestic],
-    )
-    axes[1, 2].set_title("Delta domestic burden: high minus low")
-    axes[1, 2].set_xlabel("Delta domestic burden")
-    axes[1, 2].axvline(0.0, color="black", linewidth=1)
-
-    for axis in axes.flat:
-        if axis not in (axes[1, 0], axes[1, 2]):
-            axis.grid(alpha=0.20)
-
-    fig.tight_layout()
-    fig.savefig(base_dir / "comparison.png", dpi=180)
-    plt.close(fig)
-
-
-def run_scenario(
-    config: dict,
-    scenario: dict,
-    output_dir: Path,
-    rng: np.random.Generator,
-) -> ScenarioRunResult:
-    result = sim_engine.run_scenario(config, scenario, rng)
-    sim_reporting.persist_scenario_result(output_dir, result)
-    return result
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run a coarse world simulation demo.")
-    parser.add_argument(
-        "--config",
-        default="scenarios/major_powers_world_demo.yaml",
-        help="Path to the world demo YAML config.",
-    )
-    parser.add_argument(
-        "--country-set",
-        default=None,
-        help="Override the configured country selection preset (for example: core_30, extended_50).",
-    )
-    return parser.parse_args()
-
-
-def main() -> None:
-    args = parse_args()
-    config_path = Path(args.config)
-    config = sim_io.load_yaml(config_path)
-    selection_result = sim_selection.resolve_country_selection(config, config_path, args.country_set)
-    config = selection_result.as_config()
-    sim_selection.validate_config_links(config)
-
-    base_dir = Path(config["meta"]["output_dir"])
-    if args.country_set:
-        base_dir = base_dir.with_name(f"{base_dir.name}_{args.country_set}")
-    base_dir.mkdir(parents=True, exist_ok=True)
-
-    scenario_results: Dict[str, ScenarioRunResult] = {}
-    for scenario in config["scenarios"]:
-        out_dir = sim_io.scenario_output_dir(base_dir, scenario["key"])
-        rng = np.random.default_rng(sim_io.scenario_seed(config, scenario))
-        scenario_results[scenario["key"]] = run_scenario(config, scenario, out_dir, rng)
-
-    sim_reporting.persist_comparison_report(base_dir, scenario_results)
-
-    manifest = {
-        "config": str(config_path),
-        "output_dir": str(base_dir),
-        "country_set": config.get("meta", {}).get("country_set"),
-        "country_count": config.get("meta", {}).get("country_count", len(config.get("countries", []))),
-        "scenarios": [
+        aggregate_rows.append(
             {
-                "key": scenario["key"],
-                "name": scenario["name"],
+                "scenario_key": scenario["key"],
+                "turn": turn,
+                "avg_S": round(weighted_average(turn_rows, "S"), 4),
+                "avg_horizon_turns": round(weighted_average(turn_rows, "horizon_turns"), 4),
+                "avg_cash_stability": round(weighted_average(turn_rows, "cash_stability"), 4),
+                "avg_labor_displacement": round(weighted_average(turn_rows, "labor_displacement"), 4),
+                "avg_conflict_risk": round(weighted_average(turn_rows, "conflict_risk"), 4),
+                "avg_war_burden": round(weighted_average(turn_rows, "war_burden"), 4),
+                "avg_domestic_burden": round(weighted_average(turn_rows, "domestic_burden"), 4),
+                "avg_economic_stress": round(weighted_average(turn_rows, "economic_stress"), 4),
+                "avg_legitimacy_stress": round(weighted_average(turn_rows, "legitimacy_stress"), 4),
+                "avg_protest_pressure": round(weighted_average(turn_rows, "protest_pressure"), 4),
+                "avg_riot_pressure": round(weighted_average(turn_rows, "riot_pressure"), 4),
+                "avg_civil_conflict_pressure": round(weighted_average(turn_rows, "civil_conflict_pressure"), 4),
+                "war_events_count": len(conflict_events),
+                "domestic_events_count": len(domestic_events),
+                "gray_zone_events": gray_zone_events,
+                "proxy_events": proxy_events,
+                "limited_war_events": limited_war_events,
+                "stable_stage_count": stage_counts["stable"],
+                "grievance_stage_count": stage_counts["grievance"],
+                "protest_stage_count": stage_counts["protest"],
+                "mass_protest_stage_count": stage_counts["mass_protest"],
+                "riot_stage_count": stage_counts["riot"],
+                "insurgency_stage_count": stage_counts["insurgency"],
+                "civil_conflict_stage_count": stage_counts["civil_conflict"],
+                "grievance_events": domestic_event_counts["grievance"],
+                "protest_events": domestic_event_counts["protest"],
+                "mass_protest_events": domestic_event_counts["mass_protest"],
+                "riot_events": domestic_event_counts["riot"],
+                "insurgency_events": domestic_event_counts["insurgency"],
+                "civil_conflict_events": domestic_event_counts["civil_conflict"],
             }
-            for scenario in config["scenarios"]
-        ],
-        "countries": [
+        )
+
+        event_log.append(
             {
-                "code": country["code"],
-                "name": country["name"],
-                "name_ja": country.get("name_ja", country["name"]),
-                "tier": country.get("tier", ""),
-                "region_id": country.get("region_id", ""),
-                "lon": country.get("lon"),
-                "lat": country.get("lat"),
+                "scenario_key": scenario["key"],
+                "turn": turn,
+                "name": event.get("name", "Baseline dynamics"),
+                "description": event.get("description", "No exogenous event."),
+                "modifiers": modifiers,
+                "country_effects": expanded_country_effects,
+                "cooperation_transfers": transfers,
+                "domestic_events": domestic_events,
+                "conflict_events": conflict_events,
             }
-            for country in config.get("countries", [])
+        )
+
+    final_rows = [row for row in rows if row["turn"] == config["meta"]["turns"]]
+    final_rows.sort(key=lambda item: item["S"], reverse=True)
+    summary = {
+        "scenario_key": scenario["key"],
+        "scenario_name": scenario["name"],
+        "turns": config["meta"]["turns"],
+        "global_avg_S_final": aggregate_rows[-1]["avg_S"],
+        "global_avg_horizon_final": aggregate_rows[-1]["avg_horizon_turns"],
+        "global_avg_cash_final": aggregate_rows[-1]["avg_cash_stability"],
+        "global_avg_war_burden_final": aggregate_rows[-1]["avg_war_burden"],
+        "global_avg_domestic_burden_final": aggregate_rows[-1]["avg_domestic_burden"],
+        "global_avg_protest_pressure_final": aggregate_rows[-1]["avg_protest_pressure"],
+        "gray_zone_events": sum(row["gray_zone_events"] for row in aggregate_rows),
+        "proxy_events": sum(row["proxy_events"] for row in aggregate_rows),
+        "limited_war_events": sum(row["limited_war_events"] for row in aggregate_rows),
+        "grievance_events": sum(row["grievance_events"] for row in aggregate_rows),
+        "protest_events": sum(row["protest_events"] for row in aggregate_rows),
+        "mass_protest_events": sum(row["mass_protest_events"] for row in aggregate_rows),
+        "riot_events": sum(row["riot_events"] for row in aggregate_rows),
+        "insurgency_events": sum(row["insurgency_events"] for row in aggregate_rows),
+        "civil_conflict_events": sum(row["civil_conflict_events"] for row in aggregate_rows),
+        "top_resilient": [row["code"] for row in final_rows[:3]],
+        "most_fragile": [row["code"] for row in final_rows[-3:]],
+        "most_domestically_fragile": [
+            row["code"]
+            for row in sorted(
+                final_rows,
+                key=lambda item: (
+                    item["domestic_stage_index"],
+                    item["domestic_burden"],
+                    item["civil_conflict_pressure"],
+                ),
+                reverse=True,
+            )[:3]
         ],
-        "viewer": {
-            "turn_duration_months": config.get("meta", {}).get("turn_duration_months", 1),
-            "default_scenario": config.get("meta", {}).get(
-                "default_scenario",
-                config["scenarios"][0]["key"],
-            ),
-        },
-        "graph": {
-            "cooperation": [
-                {
-                    "source": edge["donor"],
-                    "target": edge["target"],
-                    "weight": edge["weight"],
-                    "kind": "cooperation",
-                }
-                for edge in config.get("cooperation_links", [])
-            ],
-            "rivalries": [
-                {
-                    "source": edge["actor"],
-                    "target": edge["target"],
-                    "weight": edge["base_tension"],
-                    "domain": edge["domain"],
-                    "kind": "rivalry",
-                }
-                for edge in config.get("rivalries", [])
-            ],
-        },
     }
-    sim_io.write_json(base_dir / "manifest.json", manifest)
-    print(json.dumps(manifest, ensure_ascii=False, indent=2))
-
-
-if __name__ == "__main__":
-    main()
+    return ScenarioRunResult(
+        rows=rows,
+        aggregate_rows=aggregate_rows,
+        event_log=event_log,
+        summary=summary,
+        final_rows=final_rows,
+        conflict_rows=conflict_rows,
+    )
