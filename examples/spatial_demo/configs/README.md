@@ -7,7 +7,7 @@
 ルール:
 
 - ルート直下に `config*.yaml` を増やさない
-- 実行時は `python main.py --config examples/spatial_demo/configs/config.xxx.yaml` のように指定する
+- 実行時は `examples/spatial_demo/` に `cd` してから `python main.py --config configs/config.xxx.yaml` のように指定する
 - 旧2D実験の出力先は `outputs/spatial/`
 - 旧2D実験のログは `logs/spatial/`
 
