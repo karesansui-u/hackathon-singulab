@@ -8,6 +8,7 @@ import re
 import shlex
 import shutil
 import subprocess
+import time
 from typing import Any, Dict, List, Optional, Protocol, Sequence, Tuple, Union, runtime_checkable
 
 from ollama_client import OllamaClient
@@ -52,7 +53,11 @@ class CommandLLMClient:
         prompt_mode: str = "auto",
         env: Optional[Dict[str, str]] = None,
         working_directory: Optional[str] = None,
-        model: Optional[str] = None
+        model: Optional[str] = None,
+        max_retries: int = 0,
+        retry_backoff_seconds: float = 0.0,
+        start_new_session: bool = False,
+        stdout_filter_regex: Optional[Sequence[str]] = None,
     ):
         self.command = self._normalize_command(command)
         self.response_format = response_format
@@ -62,6 +67,12 @@ class CommandLLMClient:
         self.env = env or {}
         self.working_directory = working_directory
         self.model = model
+        self.max_retries = max(0, int(max_retries))
+        self.retry_backoff_seconds = max(0.0, float(retry_backoff_seconds))
+        self.start_new_session = bool(start_new_session)
+        self.stdout_filter_regexes: List[re.Pattern] = [
+            re.compile(pattern) for pattern in (stdout_filter_regex or [])
+        ]
 
     def _normalize_command(self, command: Union[Sequence[str], str]) -> List[str]:
         """Normalize the configured command into an argv list."""
@@ -114,8 +125,29 @@ class CommandLLMClient:
         return json.dumps(payload, ensure_ascii=False)
 
     def _clean_output(self, text: str) -> str:
-        """Remove ANSI escapes and surrounding whitespace from CLI output."""
-        return ANSI_ESCAPE_RE.sub("", text).strip()
+        """Remove ANSI escapes, configured noise lines, and surrounding whitespace."""
+        without_ansi = ANSI_ESCAPE_RE.sub("", text)
+        if not self.stdout_filter_regexes:
+            return without_ansi.strip()
+        kept: List[str] = []
+        for line in without_ansi.splitlines():
+            if any(pattern.search(line) for pattern in self.stdout_filter_regexes):
+                continue
+            kept.append(line)
+        return "\n".join(kept).strip()
+
+    def _preview_output(self, text: str, limit: int = 600) -> str:
+        """Return a single-line preview for logs."""
+        normalized = text.replace("\n", "\\n")
+        if len(normalized) <= limit:
+            return normalized
+        return normalized[:limit] + "...<truncated>"
+
+    def _sleep_before_retry(self, attempt: int) -> None:
+        """Sleep with a simple linear backoff before retrying."""
+        if self.retry_backoff_seconds <= 0:
+            return
+        time.sleep(self.retry_backoff_seconds * attempt)
 
     def generate(
         self,
@@ -127,58 +159,119 @@ class CommandLLMClient:
         del temperature
         del max_tokens
 
-        try:
-            argv, stdin_input = self._build_invocation(prompt)
-            run_env = os.environ.copy()
-            run_env.update(self.env)
-            completed = subprocess.run(
-                argv,
-                input=stdin_input,
-                capture_output=True,
-                text=True,
-                timeout=self.timeout_seconds,
-                cwd=self.working_directory,
-                env=run_env,
-                check=False,
-            )
-        except FileNotFoundError:
-            logger.error("Configured CLI backend executable was not found: %s", self.command[0])
-            return ""
-        except subprocess.TimeoutExpired:
-            logger.error(
-                "CLI backend timed out after %s seconds: %s",
-                self.timeout_seconds,
-                " ".join(self.command),
-            )
-            return ""
-        except Exception as e:
-            logger.error("Unexpected error while running CLI backend: %s", e)
-            return ""
-
-        stdout = self._clean_output(completed.stdout)
-        stderr = self._clean_output(completed.stderr)
-
-        if completed.returncode != 0:
-            logger.error(
-                "CLI backend exited with code %s: %s",
-                completed.returncode,
-                stderr or stdout or "(no output)",
-            )
-            return ""
-
-        if not stdout:
-            logger.warning("CLI backend returned no stdout output.")
-            return ""
-
-        if self.response_format == "json":
+        total_attempts = self.max_retries + 1
+        for attempt in range(1, total_attempts + 1):
             try:
-                payload = json.loads(stdout)
-                return self._extract_json_field(payload)
+                argv, stdin_input = self._build_invocation(prompt)
+                run_env = os.environ.copy()
+                run_env.update(self.env)
+                completed = subprocess.run(
+                    argv,
+                    input=stdin_input,
+                    capture_output=True,
+                    text=True,
+                    timeout=self.timeout_seconds,
+                    cwd=self.working_directory,
+                    env=run_env,
+                    check=False,
+                    start_new_session=self.start_new_session and os.name == "posix",
+                )
+            except FileNotFoundError:
+                logger.error(
+                    "Configured CLI backend executable was not found: %s",
+                    self.command[0]
+                )
+                return ""
+            except subprocess.TimeoutExpired:
+                if attempt < total_attempts:
+                    logger.warning(
+                        "CLI backend timed out after %s seconds on attempt %s/%s: %s",
+                        self.timeout_seconds,
+                        attempt,
+                        total_attempts,
+                        " ".join(self.command),
+                    )
+                    self._sleep_before_retry(attempt)
+                    continue
+                logger.error(
+                    "CLI backend timed out after %s seconds: %s",
+                    self.timeout_seconds,
+                    " ".join(self.command),
+                )
+                return ""
             except Exception as e:
-                logger.error("Failed to parse JSON from CLI backend output: %s", e)
+                if attempt < total_attempts:
+                    logger.warning(
+                        "Unexpected CLI backend error on attempt %s/%s: %s",
+                        attempt,
+                        total_attempts,
+                        e,
+                    )
+                    self._sleep_before_retry(attempt)
+                    continue
+                logger.error("Unexpected error while running CLI backend: %s", e)
                 return ""
 
-        return stdout
+            stdout = self._clean_output(completed.stdout)
+            stderr = self._clean_output(completed.stderr)
+
+            if completed.returncode != 0:
+                detail = self._preview_output(stderr or stdout or "(no output)")
+                if attempt < total_attempts:
+                    logger.warning(
+                        "CLI backend exited with code %s on attempt %s/%s: %s",
+                        completed.returncode,
+                        attempt,
+                        total_attempts,
+                        detail,
+                    )
+                    self._sleep_before_retry(attempt)
+                    continue
+                logger.error(
+                    "CLI backend exited with code %s: %s",
+                    completed.returncode,
+                    detail,
+                )
+                return ""
+
+            if not stdout:
+                if attempt < total_attempts:
+                    logger.warning(
+                        "CLI backend returned no stdout output on attempt %s/%s.",
+                        attempt,
+                        total_attempts,
+                    )
+                    self._sleep_before_retry(attempt)
+                    continue
+                logger.warning("CLI backend returned no stdout output.")
+                return ""
+
+            if self.response_format == "json":
+                try:
+                    payload = json.loads(stdout)
+                    return self._extract_json_field(payload)
+                except Exception as e:
+                    preview = self._preview_output(stdout)
+                    if attempt < total_attempts:
+                        logger.warning(
+                            "Unexpected JSON-shaped CLI output on attempt %s/%s: %s; stdout=%s",
+                            attempt,
+                            total_attempts,
+                            e,
+                            preview,
+                        )
+                        self._sleep_before_retry(attempt)
+                        continue
+                    logger.error(
+                        "Failed to parse JSON from CLI backend output: %s; stdout=%s",
+                        e,
+                        preview,
+                    )
+                    return ""
+
+            return stdout
+
+        return ""
 
     def check_connection(self) -> bool:
         """Check whether the configured executable is available."""
@@ -223,6 +316,10 @@ def create_llm_client(llm_config: Dict[str, Any]) -> LLMClientProtocol:
             env=env,
             working_directory=llm_config.get("working_directory"),
             model=llm_config.get("model"),
+            max_retries=int(llm_config.get("max_retries", 0)),
+            retry_backoff_seconds=float(llm_config.get("retry_backoff_seconds", 0.0)),
+            start_new_session=bool(llm_config.get("start_new_session", False)),
+            stdout_filter_regex=llm_config.get("stdout_filter_regex"),
         )
 
     raise ValueError(f"Unsupported llm.provider: '{provider}'")

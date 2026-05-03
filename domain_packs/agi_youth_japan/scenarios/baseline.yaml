@@ -1,0 +1,11 @@
+scenario_id: "baseline"
+scenario_name: "ベースライン"
+description: "現状延長として、既存イベント定義と世界イベントをそのまま使う。"
+
+time:
+  start_step: 1
+  steps: 24
+
+scenario_overrides:
+  event_intensity_multiplier: 1.0
+  world_pressure_multiplier: 1.0

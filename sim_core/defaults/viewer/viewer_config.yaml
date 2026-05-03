@@ -1,0 +1,10 @@
+viewer_id: future_emotion_map
+title: "未来感情・行動シミュレーション"
+layout:
+  map_type: four_room_emotion
+  sidebar: selected_agent
+data_bindings:
+  agent_turns: agent_turns.tsv
+  country_turns: country_turns.tsv
+hooks:
+  export_viewer: []

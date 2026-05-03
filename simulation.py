@@ -1,9 +1,11 @@
 """
 LLM-based agent in 2D worlds with multiple places.
 """
+from concurrent.futures import ThreadPoolExecutor
 import json
 import os
 import random
+import time
 import yaml
 import logging
 from typing import List, Tuple, Dict, Set, Optional
@@ -22,14 +24,14 @@ LOG_INTERVAL = 10
 class Simulation:
     """Main simulation class for LLM-based agent in 2D worlds with multiple places."""
     
-    def __init__(self, config_path: str = "config.yaml", output_dir: Optional[str] = None):
+    def __init__(self, config_path: str = "examples/spatial_demo/configs/config.yaml", output_dir: Optional[str] = None):
         """Initialize simulation from config file"""
         with open(config_path, 'r', encoding='utf-8') as f:
             self.config = yaml.safe_load(f)
 
         # Output directory for logs
         self.output_dir = output_dir
-        
+
         # Simulation parameters
         sim_config = self.config['simulation']
         self.duration = sim_config['duration']
@@ -130,6 +132,7 @@ class Simulation:
         llm_config = self.config['llm']
         self.llm_provider = llm_config.get('provider', 'ollama').lower()
         self.llm_client = create_llm_client(llm_config)
+        self.llm_parallelism = max(1, int(llm_config.get('parallelism', 1)))
         self.llm_target = llm_config.get('model')
         if not self.llm_target:
             if self.llm_provider in {'command', 'cli'}:
@@ -168,6 +171,15 @@ class Simulation:
                 'cumulative_job_losses': [],
                 'structure_credits_issued': [],
             })
+
+    def _run_in_parallel(self, items: List, worker):
+        """Run a pure worker across items, preserving order."""
+        if self.llm_parallelism <= 1 or len(items) <= 1:
+            return [worker(item) for item in items]
+
+        max_workers = min(self.llm_parallelism, len(items))
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            return list(executor.map(worker, items))
 
     def _is_position_in_place(self, position: Tuple[int, int]) -> bool:
         """Check if a position is inside any place"""
@@ -597,7 +609,14 @@ class Simulation:
         }
 
         # Phase 1: Collect message decisions from all agents (without position information)
-        message_decisions = []
+        message_phase_started = time.perf_counter()
+        logger.info(
+            "Step %s: starting message decisions for %s agents (parallelism=%s)",
+            self.step,
+            len(self.agents),
+            self.llm_parallelism,
+        )
+        message_inputs = []
         for agent in self.agents:
             nearby_agents = agent.get_nearby_agents(self.agents)
             # Get place status for the place the agent is in (or None if outside)
@@ -605,6 +624,12 @@ class Simulation:
             if agent.in_place and agent.current_place:
                 agent_place_status = self.get_place_status(agent.current_place)
             fire_info = self.get_fire_info_for_agent(agent)
+            message_inputs.append(
+                (agent, nearby_agents, agent_place_status, fire_info)
+            )
+
+        def collect_message_decision(item):
+            agent, nearby_agents, agent_place_status, fire_info = item
             message_decision = agent.decide_message(
                 agent_place_status,
                 nearby_agents,
@@ -612,9 +637,20 @@ class Simulation:
                 fire_info=fire_info,
                 economy_context=economy_context
             )
-            message_decisions.append(
-                (agent, message_decision, nearby_agents, agent_place_status, fire_info)
+            return (
+                agent,
+                message_decision,
+                nearby_agents,
+                agent_place_status,
+                fire_info,
             )
+
+        message_decisions = self._run_in_parallel(message_inputs, collect_message_decision)
+        logger.info(
+            "Step %s: completed message decisions in %.2fs",
+            self.step,
+            time.perf_counter() - message_phase_started,
+        )
 
         # Phase 2: Send messages (using decision-time nearby agents, before movement)
         for agent, message_decision, nearby_agents, agent_place_status, fire_info in message_decisions:
@@ -645,14 +681,26 @@ class Simulation:
         economy_context = self.get_economy_status()
 
         # Phase 3: Collect action decisions from all agents (with position information and message content)
-        action_decisions = []
-        memory_reasoning_records = []  # Batch records for efficient I/O
+        action_phase_started = time.perf_counter()
+        logger.info(
+            "Step %s: starting action decisions for %s agents (parallelism=%s)",
+            self.step,
+            len(message_decisions),
+            self.llm_parallelism,
+        )
+        action_inputs = []
         for agent, message_decision, nearby_agents, _, _ in message_decisions:
             agent_place_status = None
             if agent.in_place and agent.current_place:
                 agent_place_status = self.get_place_status(agent.current_place)
             message_content = message_decision.get('message', '')
             fire_info = self.get_fire_info_for_agent(agent)
+            action_inputs.append(
+                (agent, nearby_agents, agent_place_status, message_content, fire_info)
+            )
+
+        def collect_action_decision(item):
+            agent, nearby_agents, agent_place_status, message_content, fire_info = item
             action_decision = agent.decide_action(
                 agent_place_status,
                 nearby_agents,
@@ -661,16 +709,26 @@ class Simulation:
                 fire_info=fire_info,
                 economy_context=economy_context
             )
-            action_decisions.append((agent, action_decision))
-            
-            # Collect memory and reasoning records for batch writing
-            memory_reasoning_records.append({
+            memory_reasoning_record = {
                 "step": self.step,
                 "id": agent.id,
                 "memory": action_decision.get('memory', ''),
                 "reasoning": action_decision.get('reasoning', '')
-            })
-        
+            }
+            return (agent, action_decision, memory_reasoning_record)
+
+        action_results = self._run_in_parallel(action_inputs, collect_action_decision)
+        action_decisions = []
+        memory_reasoning_records = []  # Batch records for efficient I/O
+        for agent, action_decision, memory_reasoning_record in action_results:
+            action_decisions.append((agent, action_decision))
+            memory_reasoning_records.append(memory_reasoning_record)
+        logger.info(
+            "Step %s: completed action decisions in %.2fs",
+            self.step,
+            time.perf_counter() - action_phase_started,
+        )
+
         # Write all memory/reasoning records in batch (more efficient than individual writes)
         self._log_memory_reasoning_batch(memory_reasoning_records)
 

@@ -1,0 +1,6 @@
+feedback_id	source_action_category	source_emotion	target_state_id	direction	coefficient	delay_steps	cap	rationale	evidence_level
+F001	撤退		制度信頼	decrease	0.04	1	12	撤退が増えると制度への期待が弱まる	D
+F002	参加・連帯		連帯資本	increase	0.05	1	15	連帯行動が増えると共同で乗り切る感覚が増える	D
+F003	抗議・発信	怒り	制度要求圧	increase	0.06	1	20	怒りが発信されると制度要求が顕在化する	D
+F004	学習・就活	希望	役割経路開放度	increase	0.04	2	12	学習移行が増えると役割再獲得の経路が増える	D
+F005	生活防衛	不安	生活コスト圧	increase	0.03	1	10	生活防衛が増えると生活圧の体感が集団化する	D

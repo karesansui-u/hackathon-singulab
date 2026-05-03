@@ -1,0 +1,6 @@
+metric_id	metric_name	description	direction
+hope_share	希望層比率	良好評価の人口重み比率	higher_is_better
+risk_share	危険層比率	危険評価の人口重み比率	lower_is_better
+withdrawal_pressure	撤退圧	撤退行動の人口重み集約	lower_is_better
+solidarity_pressure	連帯圧	参加・連帯行動の人口重み集約	higher_is_better
+institution_demand_pressure	制度要求圧	制度利用・抗議発信の集約	context_dependent

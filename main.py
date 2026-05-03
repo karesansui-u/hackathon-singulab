@@ -5,6 +5,7 @@ import argparse
 import logging
 import yaml
 import os
+import signal
 import shutil
 import time
 import numpy as np
@@ -16,6 +17,7 @@ from visualization import Visualizer
 DEFAULT_FRAME_INTERVAL_INTERACTIVE = 10
 DEFAULT_FRAME_INTERVAL_CONFIG = 50
 VISUALIZATION_UPDATE_DELAY = 0.2
+LAST_SIGNAL = None
 
 
 def setup_logging(config: dict):
@@ -53,7 +55,7 @@ def check_llm_setup(sim: Simulation, logger: logging.Logger) -> bool:
         available_models = sim.llm_client.list_models()
         if available_models:
             logger.info(f"Available models: {', '.join(available_models)}")
-            logger.info("Please update 'llm.model' in config.yaml or download the model:")
+            logger.info("Please update 'llm.model' in examples/spatial_demo/configs/config.yaml or download the model:")
             logger.info(f"  ollama pull {sim.llm_client.model}")
         else:
             logger.error("No models found in Ollama. Please download a model first.")
@@ -82,7 +84,7 @@ def determine_visualization_settings(args, config: dict) -> Tuple[bool, bool, in
     if args.visualize and not args.save_frames and not args.frame_interval:
         frame_interval = DEFAULT_FRAME_INTERVAL_INTERACTIVE
     
-    output_dir = config.get('visualization', {}).get('output_dir', 'output')
+    output_dir = config.get('visualization', {}).get('output_dir', 'outputs/spatial/output')
     
     return should_visualize, config_save_frames, frame_interval, output_dir
 
@@ -175,7 +177,7 @@ def main():
     parser.add_argument(
         '--config',
         type=str,
-        default='config.yaml',
+        default='examples/spatial_demo/configs/config.yaml',
         help='Path to configuration file'
     )
     parser.add_argument(
@@ -234,6 +236,31 @@ def main():
             places=sim.places,
             num_agents=sim.num_agents
         )
+
+    def handle_signal(signum, frame):
+        """Log the received signal with run context before unwinding."""
+        del frame
+        global LAST_SIGNAL
+        LAST_SIGNAL = signum
+        signal_name = signal.Signals(signum).name
+        logger.warning(
+            "Received %s at step %s (pid=%s, ppid=%s)",
+            signal_name,
+            sim.step,
+            os.getpid(),
+            os.getppid(),
+        )
+        if signum == signal.SIGINT:
+            raise KeyboardInterrupt
+        raise SystemExit(128 + signum)
+
+    previous_sigint = signal.getsignal(signal.SIGINT)
+    previous_sigterm = signal.getsignal(signal.SIGTERM)
+    previous_sighup = signal.getsignal(signal.SIGHUP) if hasattr(signal, "SIGHUP") else None
+    signal.signal(signal.SIGINT, handle_signal)
+    signal.signal(signal.SIGTERM, handle_signal)
+    if hasattr(signal, "SIGHUP"):
+        signal.signal(signal.SIGHUP, handle_signal)
     
     # Run simulation
     try:
@@ -273,9 +300,28 @@ def main():
                 logger.info(f"Saved statistics plot: {stats_path}")
         
     except KeyboardInterrupt:
-        logger.info("Simulation interrupted by user")
+        if LAST_SIGNAL is not None:
+            logger.info(
+                "Simulation interrupted by signal %s",
+                signal.Signals(LAST_SIGNAL).name,
+            )
+        else:
+            logger.info("Simulation interrupted by KeyboardInterrupt")
+    except SystemExit as e:
+        if LAST_SIGNAL is not None:
+            logger.info(
+                "Simulation terminated by signal %s",
+                signal.Signals(LAST_SIGNAL).name,
+            )
+        else:
+            raise e
     except Exception as e:
         logger.error(f"Error during simulation: {e}", exc_info=True)
+    finally:
+        signal.signal(signal.SIGINT, previous_sigint)
+        signal.signal(signal.SIGTERM, previous_sigterm)
+        if hasattr(signal, "SIGHUP") and previous_sighup is not None:
+            signal.signal(signal.SIGHUP, previous_sighup)
 
 
 if __name__ == "__main__":

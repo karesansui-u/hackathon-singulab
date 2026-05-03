@@ -1,0 +1,10 @@
+旧ファイル	現在の移動先	現在の扱い	理由
+docs/post-capitalist-structure-sustain-simulation-design.md	docs/アーカイブ/思想背景/post-capitalist-structure-sustain-simulation-design.md	移動済み	現在の製品仕様ではなく思想背景として保管
+docs/world-data-ingestion-architecture.md	docs/アーカイブ/世界モデル/world-data-ingestion-architecture.md	移動済み	世界モデルの実データ較正方針。製品仕様に昇格する場合は再整理
+docs/world-simulation-component-architecture.md	docs/アーカイブ/旧実装設計/world-simulation-component-architecture.md	移動済み	削除済みWorld Demo系の旧実装整理
+docs/world-simulation-country-selection.md	docs/アーカイブ/世界モデル/world-simulation-country-selection.md	移動済み	国家モデルの対象国選定根拠として保管
+docs/presentation-framing-world-realism.md	docs/アーカイブ/発表メモ/presentation-framing-world-realism.md	移動済み	旧発表文脈のメモ
+docs/presentation-realism-categories.md	docs/アーカイブ/発表メモ/presentation-realism-categories.md	移動済み	世界モデルのリアル感説明用メモ
+docs/ai-labor-market-evidence-2026.md	docs/アーカイブ/調査/ai-labor-market-evidence-2026.md	移動済み	AI雇用影響の調査メモ。domain pack証拠に変換する余地あり
+docs/ip-draft-structure-state-update-engine.md	なし	未検出	現在のワークツリーには存在しない
+docs/structure-sustain-real-world-application-and-ip.md	docs/アーカイブ/知財/structure-sustain-real-world-application-and-ip.md	移動済み	製品仕様ではなく応用/知財検討

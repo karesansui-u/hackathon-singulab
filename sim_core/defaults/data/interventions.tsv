@@ -1,0 +1,2 @@
+intervention_id	name	description	target_segment	start_step	duration_steps
+NONE	介入なし	ベースライン用の空介入	全体	1	0

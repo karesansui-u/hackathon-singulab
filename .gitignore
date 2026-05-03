@@ -4,12 +4,10 @@ __pycache__/
 
 venv/
 
+outputs/
+logs/
 output/
-output_smoke/
-output_claude/
-output_claude_smoke/
-output_codex/
-output_codex_smoke/
+output_*/
 
 *.log
 

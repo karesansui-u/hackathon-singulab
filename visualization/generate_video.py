@@ -4,8 +4,8 @@
 viewer.htmlと同様のレイアウト（左: 画像、右上: メッセージ、右下: 行動理由）で描画する。
 
 使い方:
-    python generate_video.py output_fire/
-    python generate_video.py output_fire/ -o result.mp4 --fps 20
+    python generate_video.py outputs/spatial/output/
+    python generate_video.py outputs/spatial/output/ -o result.mp4 --fps 20
 """
 
 import argparse

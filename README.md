@@ -11,43 +11,39 @@ https://github.com/user-attachments/assets/e405f2c3-9518-489d-87c3-c155d7fca38b
 
 デモ動画：火災近傍では、単純な退避にとどまらず、合流指示・物資確保・他者待機・監視などの創発的な判断が観察された。
 
-## 設計メモ
+## 製品パッケージ
 
-- [ポスト資本主義ではなく「持続主義で資本主義を補完する」シミュレーション設計メモ](/Users/sunagawa/Project/hackathon-singulab/docs/post-capitalist-structure-sustain-simulation-design.md)
-- [世界モデル向けデータ注入アーキテクチャ](/Users/sunagawa/Project/hackathon-singulab/docs/world-data-ingestion-architecture.md)
-- [プレゼン用メモ: なぜ世界設計をここまで現実寄りにするのか](/Users/sunagawa/Project/hackathon-singulab/docs/presentation-framing-world-realism.md)
+現在の本線は、制度設計・シナリオ予測に使える創発観測装置としての整理です。
 
-## World Demo
+- [製品パッケージ入口](/Users/sunagawa/Project/hackathon-singulab/docs/製品パッケージ/README.md)
+- [プロダクト実装アーキテクチャ](/Users/sunagawa/Project/hackathon-singulab/docs/製品パッケージ/02_実装仕様/プロダクト実装アーキテクチャ.md)
+- [AGI若者日本ドメインパック](/Users/sunagawa/Project/hackathon-singulab/domain_packs/agi_youth_japan/README.md)
 
-- Config: [scenarios/major_powers_world_demo.yaml](/Users/sunagawa/Project/hackathon-singulab/scenarios/major_powers_world_demo.yaml)
-- Runner: [scripts/run_world_demo.py](/Users/sunagawa/Project/hackathon-singulab/scripts/run_world_demo.py)
-- Command: `venv/bin/python scripts/run_world_demo.py`
-- Output: `output/world_demo/major_powers_10turn/`
-- Main figures: `comparison.png`, `fracture/dashboard.png`, `complement/dashboard.png`
-- Step renderer: [scripts/render_world_demo_steps.py](/Users/sunagawa/Project/hackathon-singulab/scripts/render_world_demo_steps.py)
-- Step command: `venv/bin/python scripts/render_world_demo_steps.py`
-- Step outputs: `fracture/frames/*.png`, `fracture/animation.gif`, `complement/frames/*.png`, `complement/animation.gif`
-- Japan-centered map asset builder: [scripts/build_japan_centered_world_map.py](/Users/sunagawa/Project/hackathon-singulab/scripts/build_japan_centered_world_map.py)
-- Map asset command: `venv/bin/python scripts/build_japan_centered_world_map.py`
-- Browser viewer: [visualization/world_demo_viewer.html](/Users/sunagawa/Project/hackathon-singulab/visualization/world_demo_viewer.html)
-- Viewer launcher: [scripts/open_world_demo_viewer.py](/Users/sunagawa/Project/hackathon-singulab/scripts/open_world_demo_viewer.py)
-- Launcher command: `venv/bin/python scripts/open_world_demo_viewer.py`
-- Browser usage: `world_demo_viewer.html` を開くと既定の demo を自動読込。別の root に変えたいときだけ `Root を選ぶ` を押し、その後は scenario をプルダウンで切替
-- Viewer notes: 地図の横に `Turn Chat` と `Country Reasoning` を表示し、マクロ発話と国家ごとの考慮メモを synthetic に可視化
+旧World Demo系のコードとビューアは本線から外したため削除済みです。旧調査・旧構想メモは [docs/アーカイブ](/Users/sunagawa/Project/hackathon-singulab/docs/アーカイブ/README.md) に移動しています。
 
-## 20-Year Outlook
+## 若者世代デモの実行設定
 
-- Config: [scenarios/major_powers_20year_outlook.yaml](/Users/sunagawa/Project/hackathon-singulab/scenarios/major_powers_20year_outlook.yaml)
-- Command: `venv/bin/python scripts/run_world_demo.py --config scenarios/major_powers_20year_outlook.yaml`
-- Output: `output/world_demo/major_powers_20year_outlook/`
-- Default scenario: `managed_transition`
-- Notes: `extends` で `major_powers_world_demo.yaml` を継承しつつ、`1 turn = 12 months` の年次ステップに切り替えた長期予測用 config
-- 40-step variant: [scenarios/major_powers_20year_40step.yaml](/Users/sunagawa/Project/hackathon-singulab/scenarios/major_powers_20year_40step.yaml)
-- 40-step command: `venv/bin/python scripts/run_world_demo.py --config scenarios/major_powers_20year_40step.yaml`
-- 40-step output: `output/world_demo/major_powers_20year_40step/`
-- 40-step notes: `1 turn = 6 months` にした半期刻み版。年次20ターン版より中間の domestic escalation を細かく追える
+若者・現役世代の未来感情シミュレーションは、旧2D空間用の `examples/spatial_demo/configs/*.yaml` ではなく、ドメインパック形式へ寄せています。
 
-### Fire Event（火事イベント）
+- ドメインパック: [domain_packs/agi_youth_japan](/Users/sunagawa/Project/hackathon-singulab/domain_packs/agi_youth_japan/README.md)
+- シナリオ: `domain_packs/agi_youth_japan/scenarios/baseline.yaml`, `stress.yaml`
+- 実行器: `scripts/run_closed_loop_llm_demo.py`
+- 生成row: `outputs/runs/{run_id}/`
+
+現状の `scripts/run_closed_loop_llm_demo.py` は移行期の実行器で、内部では `docs/構造持続理論ベースの新しい文明OSシミュレーション/` 配下の若者・現役・国家モデルTSVを直接読んでいます。
+`domain_packs/agi_youth_japan` は、同じ入力を汎用プロダクト用に正本化するための配置です。
+
+軽量な閉ループrow生成の例:
+
+```bash
+python3 scripts/run_closed_loop_llm_demo.py \
+  --steps 24 \
+  --output-dir outputs/runs/closed_loop_llm_24steps
+```
+
+この実行器は、国家LLM、世界から日本社会状態への変換、若者/現役世代LLM、社会フィードバックを順に呼び出します。
+
+## Fire Event（火事イベント）
 
 シミュレーションの途中で、指定位置（またはランダムな位置）に複数の火事を発生させることができます。火事には以下の特徴があります:
 
@@ -169,8 +165,8 @@ ollama pull qwen2.5
 ```
 
 **モデルの選択**:
-- シミュレーションは`config.yaml`の`llm.model`で指定されたモデルを使用します
-- **重要**: `config.yaml`の`llm.model`を、ご自身の環境にインストール済みのモデル名に変更してください:
+- シミュレーションは`examples/spatial_demo/configs/config.yaml`の`llm.model`で指定されたモデルを使用します
+- **重要**: `examples/spatial_demo/configs/config.yaml`の`llm.model`を、ご自身の環境にインストール済みのモデル名に変更してください:
 
 ```yaml
 llm:
@@ -188,13 +184,13 @@ llm:
   - `gpt-oss:20b` ✅ （特定のタグを指定）
 
 **注意**: 
-- `config.yaml`の`llm.model`で指定したモデル名と一致するモデルが使用されます
+- `examples/spatial_demo/configs/config.yaml`の`llm.model`で指定したモデル名と一致するモデルが使用されます
 - 指定したモデルが存在しない場合、シミュレーション開始時にエラーメッセージが表示されます
-- 複数のモデルがダウンロードされていても、`config.yaml`で指定した1つのモデルのみが使用されます
+- 複数のモデルがダウンロードされていても、`examples/spatial_demo/configs/config.yaml`で指定した1つのモデルのみが使用されます
 - `ollama list`で表示される`NAME`列の値をそのまま使用するのが最も確実です
 
 ### 4. 設定ファイルの確認
-   - `config.yaml`でパラメータを確認・調整
+   - `examples/spatial_demo/configs/config.yaml`でパラメータを確認・調整
    - `provider: ollama` を使う場合は、**特に `llm.model` を、ご自身の環境にインストール済みのモデル名に変更してください**（`ollama list` で確認できます）
    - `provider: command` を使う場合は、実行したいCLIコマンドを `llm.command` に設定してください
 
@@ -232,14 +228,13 @@ llm:
 
 このリポジトリには、すぐ試せる Claude Code CLI 用の設定ファイルも含めています。
 
-- `config.claude.smoke.yaml`: 小さく安全に試すための設定
-- `config.claude.yaml`: 通常サイズの設定
+- `examples/spatial_demo/configs/config.claude.smoke.yaml`: 小さく安全に試すための設定
 
 初回は以下を推奨します。
 
 ```bash
 claude --version
-python main.py --config config.claude.smoke.yaml
+python main.py --config examples/spatial_demo/configs/config.claude.smoke.yaml
 ```
 
 `claude` が未認証なら、事前に `claude login` を実行してください。
@@ -248,29 +243,47 @@ Codex CLI を使う例:
 
 このリポジトリには、Codex 用のラッパースクリプト [scripts/run_codex_prompt.sh](/Users/sunagawa/Project/hackathon-singulab/scripts/run_codex_prompt.sh:1) と設定ファイルも含めています。
 
-- `config.codex.smoke.yaml`: 小さく安全に試すための設定
-- `config.codex.yaml`: 通常サイズの設定
+- `examples/spatial_demo/configs/config.codex.smoke.yaml`: 小さく安全に試すための設定
 
 最初に一度だけログインしておけば、その後は設定ファイル経由でそのまま実行できます。
 
 ```bash
 codex login
-python main.py --config config.codex.smoke.yaml
-```
-
-通常実行:
-
-```bash
-python main.py --config config.codex.yaml
+python main.py --config examples/spatial_demo/configs/config.codex.smoke.yaml
 ```
 
 必要ならモデルだけ後から変えることもできます。
 
 ```bash
-CODEX_MODEL=gpt-5.4 python main.py --config config.codex.smoke.yaml
+CODEX_MODEL=gpt-5.4 python main.py --config examples/spatial_demo/configs/config.codex.smoke.yaml
 ```
 
 Codex など別のCLIを使う場合も同じ仕組みで差し替えできます。ただし、CLIによっては人間向けの進捗表示やツール実行を含むことがあるため、**このシミュレーション向けには最終テキストだけを返す薄いラッパースクリプトを挟む構成**が安全です。
+
+Gemini CLI を使う例:
+
+このリポジトリには、Gemini 用の設定ファイルも含めています。
+
+- `examples/spatial_demo/configs/config.gemini.smoke.yaml`: 小さく安全に試すための設定
+
+Gemini CLI には `gemini login` のような専用サブコマンドはありません。**初回に `gemini` を起動した瞬間にブラウザで Google アカウントの認証フローが走り**、認証が済めば以降は非対話モード（`-p`）でそのまま使えます。
+
+```bash
+gemini   # 初回のみ。ブラウザでログインしたら Ctrl+C で抜ける
+python main.py --config examples/spatial_demo/configs/config.gemini.smoke.yaml
+```
+
+設定のポイント:
+
+- `gemini -p "{prompt}" -o json --approval-mode plan` を呼び出す形で、JSON 出力の `response` フィールドから本文を取り出します（`response_json_field: response`）。
+- `--approval-mode plan` は読み取り専用モードで、ファイル編集やコマンド実行などのツールを一切行いません。シミュレーション用途では必須の設定です。
+- `gemini` 起動時に `Warning: 256-color support...` や `Ripgrep is not available...` といった注意行が **stderr** に出ます。`-o json` を使う限り stdout は綺麗な JSON ですが、念のため `stdout_filter_regex` でこれらを落とす設定をデフォルトで入れています。
+- 個人 Google アカウントログインの無料枠は、利用条件が変わる可能性があります。`examples/spatial_demo/configs/config.gemini.smoke.yaml` は小さな確認用です。
+- モデル指定が必要な場合は `command` の先頭に `-m <model>` を追加します（例: `gemini -m gemini-2.5-pro -p "{prompt}" -o json --approval-mode plan`）。
+
+注意点:
+
+- Gemini CLI は内部で大きな system prompt を自動付与するため、短い prompt でも入力トークンが 1 万を超えます。無料枠は req 数ベースなので問題になりませんが、token 課金枠を使う場合は事前に消費量を見積もってください。
 
 ## 使用方法
 
@@ -314,18 +327,22 @@ python main.py --config custom_config.yaml
 Claude Code CLI を使う例:
 
 ```bash
-python main.py --config config.claude.smoke.yaml
-python main.py --config config.claude.yaml
+python main.py --config examples/spatial_demo/configs/config.claude.smoke.yaml
 ```
 
 Codex CLI を使う例:
 
 ```bash
-python main.py --config config.codex.smoke.yaml
-python main.py --config config.codex.yaml
+python main.py --config examples/spatial_demo/configs/config.codex.smoke.yaml
 ```
 
-## 設定ファイル（config.yaml）
+Gemini CLI を使う例:
+
+```bash
+python main.py --config examples/spatial_demo/configs/config.gemini.smoke.yaml
+```
+
+## 設定ファイル（examples/spatial_demo/configs/config.yaml）
 
 主要なパラメータ:
 
@@ -426,14 +443,15 @@ python main.py --config config.codex.yaml
       center_y: 10
   ```
 
-- **llm**: LLM設定（詳細は `config.yaml` を参照）
+- **llm**: LLM設定（詳細は `examples/spatial_demo/configs/config.yaml` を参照）
   - `provider`: `ollama` または `command`
   - `model`: モデル名。`ollama` では必須、`command` では任意の識別子
   - `base_url`: Ollama APIエンドポイント（`provider: ollama` のとき使用）
   - `command`: 実行するCLIコマンド。文字列または配列で指定可能（`provider: command` のとき使用）
   - `prompt_mode`: `auto` / `append_arg` / `stdin`。CLIへのプロンプト渡し方を制御
   - `response_format`: `text` または `json`
-  - `response_json_field`: JSON出力から取り出すフィールド名（例: `result`）
+  - `response_json_field`: JSON出力から取り出すフィールド名（例: `result`、Gemini なら `response`）
+  - `stdout_filter_regex`: stdout から除去したい行の正規表現リスト（CLI が出す警告行などを落とすため。例: `["^Warning:", "^Ripgrep is not available"]`）
   - `timeout_seconds`: CLI実行タイムアウト秒数
   - `env`: CLI実行時に追加する環境変数
   - `temperature`: サンプリング温度（低いほど一貫した行動、高いほど多様な行動）
@@ -454,25 +472,25 @@ python main.py --config config.codex.yaml
 - ただし、場所の占有状況（エージェント数、収容上限、占有率）は、その場所内にいるエージェントのみが直接受け取ります
 
 **モデルの選択について**:
-- `provider: ollama` の場合は `config.yaml` の `llm.model` で使用するモデルを指定
+- `provider: ollama` の場合は `examples/spatial_demo/configs/config.yaml` の `llm.model` で使用するモデルを指定
 - 利用可能な Ollama モデルを確認するには: `ollama list`
 - Ollama モデルをダウンロードするには: `ollama pull <モデル名>`
 - `provider: command` の場合は `llm.command` が実行可能かどうかが重要で、モデル一覧の確認はCLI側の仕様に依存します
 
 ## 出力
 
-- `output/`: 可視化フレームと統計グラフが保存されます
+- `outputs/spatial/output/`: 可視化フレームと統計グラフが保存されます
   - 可視化では、エージェントの**性別を色**（男=青、女=赤）、**場所内/外をマーカー形状**（場所内=★、場所外=●）で表現
   - 火事発生後は各火事の**火事中心（赤三角）**と**知覚半径（破線円）**が描画される（複数火事対応）。火事の範囲はintensityに応じた**カラーマップ（YlOrRd）**で塗られ、右側に常時表示される**カラーバー（0.0〜1.0、"Intensity of Fire"）**で強度を確認できる
   - 統計グラフには「火事半径内エージェント数の時系列」サブプロットが追加され、各火事の発生ステップに垂直線が描画される
-- `output/messages.jsonl`: エージェント間メッセージ履歴（火事情報の伝播パターンの分析に有用）
-- `output/memory_reasoning.jsonl`: エージェントの記憶と推論ログ
-- `output/economy_events.jsonl`: 失職イベントと構造持続通貨の発行ログ
-- `simulation.log`: シミュレーションログ
+- `outputs/spatial/output/messages.jsonl`: エージェント間メッセージ履歴（火事情報の伝播パターンの分析に有用）
+- `outputs/spatial/output/memory_reasoning.jsonl`: エージェントの記憶と推論ログ
+- `outputs/spatial/output/economy_events.jsonl`: 失職イベントと構造持続通貨の発行ログ
+- `logs/spatial/simulation.log`: シミュレーションログ
 
 ## シミュレーション結果の可視化ツール
 
-`visualization/` ディレクトリに、シミュレーション結果を閲覧・動画化するためのツールが含まれています。いずれも `output/` ディレクトリに保存されたフレーム画像（`frame_*.png`）とログファイル（`messages.jsonl`、`memory_reasoning.jsonl`）を読み込んで使用します。
+`visualization/` ディレクトリに、シミュレーション結果を閲覧・動画化するためのツールが含まれています。いずれも `outputs/spatial/output/` ディレクトリに保存されたフレーム画像（`frame_*.png`）とログファイル（`messages.jsonl`、`memory_reasoning.jsonl`）を読み込んで使用します。
 
 ### ブラウザビューア（viewer.html）
 
@@ -481,7 +499,7 @@ python main.py --config config.codex.yaml
 **使い方**:
 
 1. `visualization/viewer.html` をブラウザで開く
-2. シミュレーション結果が入ったディレクトリ（例: `output/`）を選択する
+2. シミュレーション結果が入ったディレクトリ（例: `outputs/spatial/output/`）を選択する
    - **Chrome / Edge（推奨）**: 「ディレクトリを選択」ボタンからフォルダごと選択
    - **Firefox / Safari**: 「ファイルを選択」ボタンから `messages.jsonl` を選択（ただしPNG画像が読み込めない場合があります）
 3. ステップごとの画像・メッセージ・行動理由が統合表示される
@@ -513,14 +531,14 @@ sudo apt install ffmpeg
 **使い方**:
 
 ```bash
-# 基本的な使い方（output/ ディレクトリから動画を生成）
-python visualization/generate_video.py output/
+# 基本的な使い方（outputs/spatial/output/ ディレクトリから動画を生成）
+python visualization/generate_video.py outputs/spatial/output/
 
 # 出力ファイル名とフレームレートを指定
-python visualization/generate_video.py output/ -o result.mp4 --fps 20
+python visualization/generate_video.py outputs/spatial/output/ -o result.mp4 --fps 20
 
 # DPIを指定（デフォルト: 150）
-python visualization/generate_video.py output/ --dpi 200
+python visualization/generate_video.py outputs/spatial/output/ --dpi 200
 ```
 
 **オプション**:

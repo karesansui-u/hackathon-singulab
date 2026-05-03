@@ -1,0 +1,11 @@
+scenario_id: "stress"
+scenario_name: "ストレス"
+description: "世界圧力と国内不安が強まる比較シナリオ。"
+
+time:
+  start_step: 1
+  steps: 24
+
+scenario_overrides:
+  event_intensity_multiplier: 1.25
+  world_pressure_multiplier: 1.35

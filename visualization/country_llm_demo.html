@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>国家外圧シミュレーション</title>
+  <style>
+    :root {
+      --bg: #f7f8fb;
+      --surface: #ffffff;
+      --surface-alt: #f1f5f9;
+      --ink: #172033;
+      --muted: #64748b;
+      --line: #d8e0ea;
+      --blue: #2563eb;
+      --green: #16a34a;
+      --yellow: #f59e0b;
+      --orange: #f97316;
+      --red: #e11d48;
+      --black: #111827;
+      --shadow: 0 18px 44px rgba(15, 23, 42, 0.10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button { font: inherit; }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(14px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.2;
+      font-weight: 900;
+    }
+
+    .subtitle {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .view-nav {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--surface-alt);
+      flex: none;
+    }
+
+    .view-nav a {
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 12px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .view-nav a[aria-current="page"] {
+      background: var(--ink);
+      color: #ffffff;
+    }
+
+    .controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .control-button {
+      width: 42px;
+      height: 38px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--ink);
+      font-size: 20px;
+      line-height: 1;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .turn-chip {
+      min-width: 92px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 11px;
+      background: var(--ink);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 900;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(360px, 0.8fr);
+      gap: 16px;
+      padding: 16px 22px 22px;
+      min-height: 0;
+    }
+
+    .panel {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .map-panel {
+      display: grid;
+      grid-template-rows: auto minmax(520px, 1fr) auto;
+      min-height: 660px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.2;
+      font-weight: 900;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    .swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--blue);
+      border: 1px solid rgba(15, 23, 42, 0.18);
+    }
+
+    .map-wrap {
+      position: relative;
+      min-height: 0;
+      background: #fbfdff;
+      border-bottom: 1px solid var(--line);
+      overflow: hidden;
+    }
+
+    .map-wrap::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(#e2e8f0 1px, transparent 1px),
+        linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
+      background-size: 50px 50px;
+      opacity: 0.45;
+      z-index: 0;
+    }
+
+    .world-map,
+    .overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .world-map {
+      object-fit: cover;
+      opacity: 0.72;
+      filter: saturate(0.55) contrast(0.96);
+      z-index: 1;
+    }
+
+    .overlay {
+      z-index: 3;
+    }
+
+    .event-burst {
+      position: absolute;
+      left: 50%;
+      top: 47%;
+      transform: translate(-50%, -50%) scale(var(--burst-scale, 1));
+      z-index: 5;
+      display: none;
+      width: min(460px, calc(100% - 44px));
+      pointer-events: none;
+    }
+
+    .event-burst.is-active {
+      display: block;
+      animation: burst-pop 900ms ease-out;
+    }
+
+    .event-burst svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(0 10px 18px rgba(15, 23, 42, 0.24));
+    }
+
+    .event-burst-title {
+      font-size: 18px;
+      font-weight: 900;
+      fill: #ffffff;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+
+    @keyframes burst-pop {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(calc(var(--burst-scale, 1) * 0.62)) rotate(-3deg); }
+      18% { opacity: 1; transform: translate(-50%, -50%) scale(calc(var(--burst-scale, 1) * 1.08)) rotate(1deg); }
+      70% { opacity: 1; transform: translate(-50%, -50%) scale(var(--burst-scale, 1)) rotate(0deg); }
+      100% { opacity: 0.96; transform: translate(-50%, -50%) scale(var(--burst-scale, 1)) rotate(0deg); }
+    }
+
+    .country-node {
+      cursor: pointer;
+    }
+
+    .country-node circle {
+      filter: drop-shadow(0 6px 10px rgba(15, 23, 42, 0.22));
+    }
+
+    .node-ring {
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .country-node.is-selected .node-ring {
+      opacity: 0.95;
+      animation: selected-pulse 1500ms ease-in-out infinite;
+    }
+
+    .country-node.is-selected .node-core {
+      stroke: #ffffff;
+      stroke-width: 7;
+    }
+
+    @keyframes selected-pulse {
+      0%, 100% { transform: scale(0.92); opacity: 0.22; }
+      50% { transform: scale(1.18); opacity: 0.48; }
+    }
+
+    .country-label {
+      pointer-events: none;
+      text-anchor: middle;
+      dominant-baseline: central;
+      font-size: 22px;
+      font-weight: 900;
+      fill: #172033;
+      paint-order: stroke;
+      stroke: rgba(255, 255, 255, 0.88);
+      stroke-width: 4px;
+    }
+
+    .country-code {
+      pointer-events: none;
+      text-anchor: middle;
+      dominant-baseline: central;
+      font-size: 13px;
+      font-weight: 900;
+      fill: #334155;
+      paint-order: stroke;
+      stroke: rgba(255, 255, 255, 0.86);
+      stroke-width: 3px;
+    }
+
+    .map-footer {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 12px 16px 16px;
+      background: #ffffff;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: var(--surface-alt);
+      min-width: 0;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .metric-value {
+      margin-top: 3px;
+      font-size: 19px;
+      line-height: 1.1;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .side {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .country-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 12px 14px;
+    }
+
+    .country-pick {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 9px;
+      background: var(--surface-alt);
+      color: var(--ink);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .country-pick[aria-pressed="true"] {
+      border-color: var(--ink);
+      background: var(--ink);
+      color: #ffffff;
+    }
+
+    .detail-body {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+      align-content: start;
+    }
+
+    .country-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px 14px;
+      background: #ffffff;
+      display: grid;
+      gap: 5px;
+    }
+
+    .country-name {
+      font-size: 24px;
+      line-height: 1.15;
+      font-weight: 900;
+    }
+
+    .country-meta {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      font-weight: 700;
+    }
+
+    .stage-pill {
+      width: fit-content;
+      border-radius: 999px;
+      padding: 5px 10px;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .statement-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .statement {
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--blue);
+      border-radius: 8px;
+      padding: 9px 10px;
+      background: #ffffff;
+    }
+
+    .statement-label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .statement-text {
+      margin-top: 4px;
+      font-size: 13px;
+      line-height: 1.5;
+      font-weight: 750;
+    }
+
+    .pressure-list {
+      display: grid;
+      gap: 7px;
+    }
+
+    .pressure-row {
+      display: grid;
+      grid-template-columns: 118px 1fr 38px;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+    }
+
+    .bar-track {
+      height: 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #f8fafc;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--blue);
+    }
+
+    .bar-value {
+      color: var(--muted);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    @media (max-width: 1100px) {
+      .topbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .view-nav {
+        width: fit-content;
+      }
+
+      .content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar,
+      .content {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .map-panel {
+        min-height: 560px;
+        grid-template-rows: auto minmax(420px, 1fr) auto;
+      }
+
+      .map-footer {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <h1>国家外圧シミュレーション</h1>
+        <p class="subtitle">LLM国家モデルが生成する、日本の若者・現役世代への地政学的外圧</p>
+      </div>
+      <nav class="view-nav" aria-label="デモ画面">
+        <a href="./future_emotion_map.html">若者・現役</a>
+        <a href="./country_llm_demo.html" aria-current="page">世界国家</a>
+      </nav>
+      <div class="controls">
+        <button type="button" class="control-button" id="prevButton" aria-label="前のステップ">‹</button>
+        <button type="button" class="control-button" id="playButton" aria-label="再生">▶</button>
+        <button type="button" class="control-button" id="nextButton" aria-label="次のステップ">›</button>
+        <output class="turn-chip" id="turnLabel">ステップ1</output>
+      </div>
+    </header>
+
+    <section class="content">
+      <section class="panel map-panel">
+        <header class="panel-header">
+          <h2 class="panel-title">世界国家レイヤー</h2>
+          <div class="legend" id="legend"></div>
+        </header>
+        <div class="map-wrap">
+          <img class="world-map" src="./assets/world_admin_japan_centered.svg" alt="日本中心の世界地図">
+          <svg class="overlay" id="overlay" viewBox="0 0 2000 1000" preserveAspectRatio="xMidYMid meet" aria-label="国家ノード"></svg>
+          <div class="event-burst" id="eventBurst" aria-live="polite">
+            <svg viewBox="0 0 500 150" role="img" aria-label="戦争発生イベント">
+              <polygon id="eventBurstShape" points="250,5 274,38 326,18 324,58 386,56 348,88 414,114 338,120 344,146 292,132 274,148 250,126 226,148 208,132 156,146 162,120 86,114 152,88 114,56 176,58 174,18 226,38" fill="#111827" stroke="#e11d48" stroke-width="5"></polygon>
+              <text id="eventBurstTitle" x="250" y="86" class="event-burst-title">戦争</text>
+            </svg>
+          </div>
+        </div>
+        <footer class="map-footer">
+          <div class="metric">
+            <div class="metric-label">地政学リスク</div>
+            <div class="metric-value" id="metricGeo">0</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">エネルギー価格</div>
+            <div class="metric-value" id="metricEnergy">0</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">雇用不確実性</div>
+            <div class="metric-value" id="metricLabor">0</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">日本の緩衝余力</div>
+            <div class="metric-value" id="metricBuffer">0</div>
+          </div>
+        </footer>
+      </section>
+
+      <aside class="side">
+        <section class="panel">
+          <header class="panel-header">
+            <h2 class="panel-title">表示国</h2>
+          </header>
+          <div class="country-list" id="countryList"></div>
+        </section>
+
+        <section class="panel">
+          <header class="panel-header">
+            <h2 class="panel-title">国家判断</h2>
+          </header>
+          <div class="detail-body">
+            <div class="country-card" id="countryCard">
+              <div class="stage-pill" id="riskStage">圧力上昇</div>
+              <div class="country-name" id="countryName">日本</div>
+              <div class="country-meta" id="countryMeta">JPN / 東アジア</div>
+            </div>
+            <div class="statement-list">
+              <div class="statement">
+                <div class="statement-label">国家判断</div>
+                <div class="statement-text" id="stanceText">読み込み中</div>
+              </div>
+              <div class="statement">
+                <div class="statement-label">外交・経済行動</div>
+                <div class="statement-text" id="foreignActionText">読み込み中</div>
+              </div>
+              <div class="statement">
+                <div class="statement-label">国内向け説明</div>
+                <div class="statement-text" id="domesticMessageText">読み込み中</div>
+              </div>
+              <div class="statement">
+                <div class="statement-label">本音・制約</div>
+                <div class="statement-text" id="constraintText">読み込み中</div>
+              </div>
+              <div class="statement">
+                <div class="statement-label">日本の若者への影響</div>
+                <div class="statement-text" id="impactText">読み込み中</div>
+              </div>
+            </div>
+            <div class="pressure-list" id="pressureList"></div>
+          </div>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const turnsPath = "../outputs/runs/country_llm_smoke/turns.tsv";
+    const coords = {
+      USA: { lon: -98.5, lat: 39.8 },
+      CHN: { lon: 104.0, lat: 35.0 },
+      JPN: { lon: 138.0, lat: 36.2 },
+      TWN: { lon: 121.0, lat: 23.7 },
+      KOR: { lon: 127.8, lat: 36.4 },
+      RUS: { lon: 97.0, lat: 61.0 },
+      UKR: { lon: 31.0, lat: 49.0 },
+      IRN: { lon: 53.7, lat: 32.4 },
+      ISR: { lon: 34.8, lat: 31.0 },
+      SAU: { lon: 45.0, lat: 23.8 },
+      IND: { lon: 78.5, lat: 22.8 },
+      EU: { lon: 10.5, lat: 50.2 }
+    };
+    const stageColors = {
+      平時: "#16a34a",
+      圧力上昇: "#f59e0b",
+      境界的圧力: "#f97316",
+      間接衝突: "#e11d48",
+      限定戦争: "#111827"
+    };
+    const pressureLabels = [
+      ["geopolitical_risk", "地政学リスク"],
+      ["energy_price_pressure", "エネルギー価格"],
+      ["labor_market_uncertainty", "雇用不確実性"],
+      ["compute_supply_constraint", "計算資源制約"],
+      ["fiscal_pressure", "財政圧力"],
+      ["supply_chain_fragility", "供給網不安"],
+      ["sns_anxiety_amplification", "SNS不安"],
+      ["japan_policy_buffer", "緩衝政策"]
+    ];
+    const centerLon = 140;
+    const state = {
+      turn: 1,
+      selectedCode: "JPN",
+      playing: false,
+      timer: null,
+      rows: [],
+      maxTurn: 1
+    };
+
+    const overlay = document.getElementById("overlay");
+    const turnLabel = document.getElementById("turnLabel");
+    const playButton = document.getElementById("playButton");
+
+    initialize();
+
+    async function initialize() {
+      try {
+        state.rows = parseTsv(await (await fetch(turnsPath)).text());
+        state.maxTurn = Math.max(...state.rows.map(row => Number(row.step)));
+        state.turn = Math.min(...state.rows.map(row => Number(row.step)));
+        if (!rowsForTurn().some(row => row.country_code === state.selectedCode)) {
+          state.selectedCode = rowsForTurn()[0]?.country_code || "JPN";
+        }
+      } catch (error) {
+        console.error(error);
+        state.rows = [];
+      }
+      render();
+    }
+
+    function parseTsv(text) {
+      const lines = text.trim().split(/\r?\n/);
+      const headers = lines.shift().split("\t");
+      return lines.filter(Boolean).map(line => {
+        const values = line.split("\t");
+        return Object.fromEntries(headers.map((header, index) => [header, values[index] || ""]));
+      });
+    }
+
+    function rowsForTurn() {
+      return state.rows.filter(row => Number(row.step) === state.turn);
+    }
+
+    function render() {
+      const rows = rowsForTurn();
+      renderLegend();
+      renderMap(rows);
+      renderCountryList(rows);
+      renderMetrics(rows);
+      renderDetail(rows.find(row => row.country_code === state.selectedCode) || rows[0]);
+      renderEventBurst(rows);
+      turnLabel.value = `ステップ${state.turn}`;
+    }
+
+    function renderLegend() {
+      document.getElementById("legend").innerHTML = Object.entries(stageColors).map(([label, color]) => `
+        <span><i class="swatch" style="background:${color}"></i>${label}</span>
+      `).join("");
+    }
+
+    function project(code) {
+      const geo = coords[code] || { lon: centerLon, lat: 0 };
+      const wrapped = ((geo.lon - centerLon + 540) % 360) - 180;
+      return {
+        x: ((wrapped + 180) / 360) * 2000,
+        y: ((90 - geo.lat) / 180) * 1000
+      };
+    }
+
+    function renderMap(rows) {
+      overlay.innerHTML = rows.map(row => {
+        const pos = project(row.country_code);
+        const color = stageColors[row.risk_stage] || "#64748b";
+        const selected = row.country_code === state.selectedCode ? "is-selected" : "";
+        const radius = 16 + Number(row.geopolitical_risk || 0) * 0.12;
+        return `
+          <g class="country-node ${selected}" data-code="${row.country_code}" transform="translate(${pos.x.toFixed(1)} ${pos.y.toFixed(1)})">
+            <circle class="node-ring" r="${radius + 10}" fill="${color}" opacity="0.18" style="transform-origin:center"></circle>
+            <circle class="node-core" r="${radius}" fill="${color}" stroke="#ffffff" stroke-width="4"></circle>
+            <text class="country-label" y="${radius + 22}">${row.country_name}</text>
+            <text class="country-code" y="${radius + 43}">${row.country_code}</text>
+          </g>
+        `;
+      }).join("");
+
+      overlay.querySelectorAll(".country-node").forEach(node => {
+        node.addEventListener("click", () => {
+          state.selectedCode = node.dataset.code;
+          render();
+        });
+      });
+    }
+
+    function renderCountryList(rows) {
+      document.getElementById("countryList").innerHTML = rows.map(row => `
+        <button type="button" class="country-pick" data-code="${row.country_code}" aria-pressed="${row.country_code === state.selectedCode}">
+          ${row.country_name}
+        </button>
+      `).join("");
+      document.querySelectorAll(".country-pick").forEach(button => {
+        button.addEventListener("click", () => {
+          state.selectedCode = button.dataset.code;
+          render();
+        });
+      });
+    }
+
+    function average(rows, field) {
+      if (!rows.length) return 0;
+      return rows.reduce((sum, row) => sum + Number(row[field] || 0), 0) / rows.length;
+    }
+
+    function renderMetrics(rows) {
+      document.getElementById("metricGeo").textContent = Math.round(average(rows, "geopolitical_risk"));
+      document.getElementById("metricEnergy").textContent = Math.round(average(rows, "energy_price_pressure"));
+      document.getElementById("metricLabor").textContent = Math.round(average(rows, "labor_market_uncertainty"));
+      document.getElementById("metricBuffer").textContent = Math.round(average(rows, "japan_policy_buffer"));
+    }
+
+    function renderDetail(row) {
+      if (!row) return;
+      const color = stageColors[row.risk_stage] || "#64748b";
+      document.getElementById("riskStage").textContent = row.risk_stage;
+      document.getElementById("riskStage").style.background = color;
+      document.getElementById("countryCard").style.borderColor = color;
+      document.getElementById("countryName").textContent = row.country_name;
+      document.getElementById("countryMeta").textContent = `${row.country_code} / ${row.region}`;
+      document.getElementById("stanceText").textContent = row.stance;
+      document.getElementById("foreignActionText").textContent = row.foreign_action;
+      document.getElementById("domesticMessageText").textContent = row.domestic_message;
+      document.getElementById("constraintText").textContent = row.private_constraint;
+      document.getElementById("impactText").textContent = row.japan_impact_summary;
+      document.getElementById("pressureList").innerHTML = pressureLabels.map(([field, label]) => {
+        const value = Number(row[field] || 0);
+        const barColor = field === "japan_policy_buffer" ? "#16a34a" : color;
+        return `
+          <div class="pressure-row">
+            <div>${label}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${value}%;background:${barColor}"></div></div>
+            <div class="bar-value">${Math.round(value)}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderEventBurst(rows) {
+      const burst = document.getElementById("eventBurst");
+      const title = document.getElementById("eventBurstTitle");
+      if (!burst || !title) return;
+
+      const previousRows = state.rows.filter(row => Number(row.step) === state.turn - 1);
+      const previousWarCodes = new Set(
+        previousRows
+          .filter(row => row.risk_stage === "限定戦争")
+          .map(row => row.country_code)
+      );
+      const newWarRows = rows.filter(row => row.risk_stage === "限定戦争" && !previousWarCodes.has(row.country_code));
+
+      if (!newWarRows.length) {
+        burst.classList.remove("is-active");
+        return;
+      }
+
+      const names = newWarRows.map(row => row.country_name).join("・");
+      title.textContent = `戦争: ${truncateText(names, 12)}`;
+      burst.style.setProperty("--burst-scale", String(0.88 + Math.min(newWarRows.length, 3) * 0.16));
+      burst.classList.remove("is-active");
+      void burst.offsetWidth;
+      burst.classList.add("is-active");
+    }
+
+    function truncateText(text, maxLength) {
+      return text.length > maxLength ? `${text.slice(0, maxLength)}…` : text;
+    }
+
+    function stepBy(delta) {
+      state.turn += delta;
+      if (state.turn < 1) state.turn = state.maxTurn;
+      if (state.turn > state.maxTurn) state.turn = 1;
+      if (!rowsForTurn().some(row => row.country_code === state.selectedCode)) {
+        state.selectedCode = rowsForTurn()[0]?.country_code || state.selectedCode;
+      }
+      render();
+    }
+
+    function togglePlay() {
+      state.playing = !state.playing;
+      playButton.textContent = state.playing ? "Ⅱ" : "▶";
+      if (state.playing) {
+        state.timer = window.setInterval(() => stepBy(1), 2200);
+      } else {
+        window.clearInterval(state.timer);
+        state.timer = null;
+      }
+    }
+
+    document.getElementById("prevButton").addEventListener("click", () => stepBy(-1));
+    document.getElementById("nextButton").addEventListener("click", () => stepBy(1));
+    playButton.addEventListener("click", togglePlay);
+  </script>
+</body>
+</html>

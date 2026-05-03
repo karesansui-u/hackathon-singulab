@@ -1,0 +1,22 @@
+viewer_id: future_emotion_map
+title: "未来感情・行動シミュレーション"
+domain_pack_id: agi_youth_japan
+layout:
+  map_type: four_room_emotion
+  rooms:
+    - 良好
+    - 中立
+    - 注意
+    - 危険
+  sidebar: selected_agent
+data_bindings:
+  agent_turns: agent_turns.tsv
+  country_turns: country_turns.tsv
+  feedback: agent_feedback.tsv
+theme:
+  gender_colors:
+    male: "#2563eb"
+    female: "#ef4444"
+hooks:
+  export_viewer:
+    - future_emotion_map_export

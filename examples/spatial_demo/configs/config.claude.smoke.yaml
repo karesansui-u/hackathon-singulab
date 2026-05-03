@@ -1,0 +1,85 @@
+# Smoke-test configuration using Claude Code CLI (`claude -p`)
+
+simulation:
+  duration: 4
+  half_space_size: 20
+  half_place_size: 5
+
+agents:
+  num_agents: 6
+  communication_radius: 5
+  memory_limit: 10
+  memory_size: 3
+  message_history_limit: 6
+  message_context_size: 2
+
+places:
+  - name: "left_bar"
+    type: "bar"
+    center_x: -10
+    center_y: 0
+    half_size: 4
+    capacity: 4
+  - name: "right_bar"
+    type: "bar"
+    center_x: 10
+    center_y: 0
+    half_size: 4
+    capacity: 4
+
+llm:
+  provider: "command"
+  model: "claude-code-cli"
+  command:
+    - "claude"
+    - "-p"
+    - "--output-format"
+    - "json"
+    - "{prompt}"
+  response_format: "json"
+  response_json_field: "result"
+  timeout_seconds: 180
+
+fires:
+  - name: "fire_1"
+    start_step: 2
+    intensity: 0.7
+    radius: 8
+    center_x: 10
+    center_y: 5
+
+economy:
+  enabled: true
+  base_wage: 2.0
+  living_cost: 1.2
+  initial_cash_balance: 3.0
+  initial_structure_credits: 0.0
+  structure_credit_name: "structure credits"
+  message_reward: 0.25
+  fire_coordination_reward: 1.00
+  decongestion_reward: 0.75
+  fire_escape_reward: 1.25
+  crowding_threshold: 0.80
+  llm_automation:
+    enabled: true
+    start_step: 2
+    interval: 1
+    job_losses_per_wave: 1
+  job_types:
+    - name: "routine_clerk"
+      automation_risk: 0.95
+    - name: "customer_support"
+      automation_risk: 0.85
+    - name: "teacher"
+      automation_risk: 0.40
+    - name: "care_worker"
+      automation_risk: 0.20
+
+visualization:
+  save_frames: true
+  frame_interval: 1
+  output_dir: "outputs/spatial/output_claude_smoke"
+
+logging:
+  level: "INFO"
+  log_file: "logs/spatial/simulation_claude_smoke.log"

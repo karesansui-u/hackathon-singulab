@@ -1,0 +1,7 @@
+state_id	name	description	min_value	max_value	initial_value	source
+制度信頼	制度信頼	政府、会社、学校、地域制度への信頼	0	100	50	default
+構造支援度	構造支援度	制度・組織・地域が生活を支える実感	0	100	50	default
+役割経路開放度	役割経路開放度	新しい役割を獲得できる見込み	0	100	50	default
+生活コスト圧	生活コスト圧	家賃、物価、教育費、医療費などの圧力	0	100	50	default
+連帯資本	連帯資本	共同で乗り切れる関係資本	0	100	50	default
+制度要求圧	制度要求圧	制度変更や説明責任を求める圧力	0	100	30	default

@@ -1,0 +1,14 @@
+対象項目	出典候補	発行主体	更新頻度	対象年度	参照URL	現在の反映状況	確認メモ
+年齢階層人口比	人口推計	総務省統計局	年次	2025-2026	https://www.stat.go.jp/data/jinsui/new.html	確認済み（公式URL）	15-29歳と30-59歳の比率校正に利用可能
+就業状態（正規/非正規/無業）	労働力調査（基本集計）	総務省統計局	月次/年次	2025-2026	https://www.stat.go.jp/data/roudou/index.html	確認済み（公式URL）	若年・現役の雇用状態分布の基準に利用可能
+世帯所得階層	国民生活基礎調査	厚生労働省	年次	2024-2026	https://www.mhlw.go.jp/toukei/list/20-21kekka.html	確認済み（公式URL）	五分位近似の校正に利用可能
+奨学金利用・負担	奨学金の返還者に関する属性調査	JASSO	年次	2023-2026	https://www.jasso.go.jp/statistics/shogakukin_henkan_zokusei/index.html	確認済み（公式URL）	奨学金負債レンジの校正に利用可能
+婚姻状況・婚姻率	人口動態統計（年報）	厚生労働省	年次	2024-2026	https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/suii06/index.html	確認済み（公式URL）	M状態初期分布の校正に利用可能
+出生・出生順位・母年齢	人口動態統計（年報）	厚生労働省	年次	2024-2026	https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/suii06/index.html	確認済み（公式URL）	C4/C5関連初期値の校正に利用可能
+妊活・不妊治療受療傾向	不妊治療関連公表統計（行政・学会）	厚生労働省・学会	不定期	2023-2026	https://www.mhlw.go.jp/toukei/list/81-1a.html	一次確認（公式入口）	C2→C4/C3遷移の校正に利用可能。次段で個別統計表の特定が必要
+保育利用・待機児童	保育所等関連状況取りまとめ	こども家庭庁	年次	2025	https://www.cfa.go.jp/policies/hoiku/torimatome/r7	確認済み（公式URL）	子育て世帯の制約変数に利用可能
+介護負担・介護離職	就業構造基本調査/雇用動向調査等	総務省/厚生労働省	年次	2022-2026	https://www.e-stat.go.jp/survey-search?page=1&toukei=00200532	一次確認（e-Stat入口）	現役区分7の重みと遷移補正に利用可能。表番号の固定は次段対応
+住宅費負担・住居形態	住宅・土地統計調査/家計調査	総務省統計局	年次	2023-2026	https://www.stat.go.jp/data/jyutaku/index.html	確認済み（公式URL）	住居安定度・生活コスト圧力の校正に利用可能
+SNS利用率・情報接触	情報通信白書/通信利用動向調査	総務省	年次	2024-2025	https://www.soumu.go.jp/johotsusintokei/whitepaper/	確認済み（公式URL）	SNS影響感受性の層別初期値に利用可能
+若者意識（希望・将来不安）	こども白書	こども家庭庁	年次	2024-2025	https://www.cfa.go.jp/resources/white-paper	確認済み（公式URL）	希望指数・制度信頼の初期分布校正に利用可能
+国際比較の補助	OECD Family Database	OECD	年次	2023-2025	https://www.oecd.org/en/data/datasets/oecd-family-database.html	確認済み（公式URL）	婚姻・出生・家族形成の国際比較ベンチマークに利用可能

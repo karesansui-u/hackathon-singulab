@@ -1,0 +1,9 @@
+外圧変数	生成元国家モデル	若者側影響	現役世代側影響	UI表示名	初期実装優先度
+geopolitical_risk	CHN/TWN/RUS/UKR/IRN/ISR/USA	不安上昇・長期計画困難・制度信頼低下	防衛費負担・事業リスク上昇	地政学リスク	高
+energy_price_pressure	IRN/SAU/RUS/USA/JPN	生活コスト上昇・子ども意向低下	家計圧迫・賃金要求・中小企業負担	エネルギー価格圧力	高
+labor_market_uncertainty	USA/CHN/JPN/EU/IND	希望指数低下・進路不安・怒り	雇用不安・再教育圧力	雇用不確実性	高
+compute_supply_constraint	TWN/CHN/USA/KOR/JPN	AI利用格差・学習機会格差	企業投資格差・教育格差	計算資源制約	中
+fiscal_pressure	JPN/USA/CHN/EU	制度信頼低下・裏切られ感	税負担・社会保険料負担	財政圧力	高
+supply_chain_fragility	CHN/TWN/KOR/USA/JPN	物価不安・将来予見性低下	企業収益悪化・雇用悪化	供給網不安	中
+sns_anxiety_amplification	USA/CHN/JPN/IRN/ISR	不安・怒り・逃避の増幅	分断・政治不信	地政学SNS不安	中
+japan_policy_buffer	JPN	安心・希望・連帯感の回復	制度運用余力・現役世代の納得感	日本の緩衝政策	高
