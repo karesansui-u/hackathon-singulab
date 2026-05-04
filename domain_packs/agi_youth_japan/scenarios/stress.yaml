@@ -4,7 +4,8 @@ description: "世界圧力と国内不安が強まる比較シナリオ。"
 
 time:
   start_step: 1
-  steps: 24
+  steps: 71
+  schedule: "${pack}/data/time_schedule.tsv"
 
 scenario_overrides:
   event_intensity_multiplier: 1.25

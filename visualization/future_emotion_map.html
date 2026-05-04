@@ -163,6 +163,10 @@
       background: var(--surface-alt);
     }
 
+    #agentFilterTabs {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
     .segmented button {
       min-height: 38px;
       padding: 0 14px;
@@ -445,11 +449,20 @@
 
     .agent {
       cursor: pointer;
+      transform-box: fill-box;
+      transform-origin: center;
       transition: opacity 120ms ease;
+      animation: agent-idle-float 4.8s ease-in-out infinite;
     }
 
     .agent:hover {
       opacity: 0.82;
+    }
+
+    @keyframes agent-idle-float {
+      0%, 100% { transform: translate(0, 0); }
+      35% { transform: translate(var(--idle-x, 1px), var(--idle-y, -2px)); }
+      70% { transform: translate(calc(var(--idle-x, 1px) * -0.7), calc(var(--idle-y, -2px) * 0.65)); }
     }
 
     .selected-agent-glow {
@@ -465,6 +478,23 @@
       stroke: #ffffff;
       stroke-width: 4;
       opacity: 0.95;
+    }
+
+    .social-exit-ring {
+      pointer-events: none;
+      fill: none;
+      stroke: #334155;
+      stroke-width: 3;
+      stroke-dasharray: 5 5;
+      opacity: 0.78;
+    }
+
+    .agent.is-social-exit {
+      opacity: 0.62;
+    }
+
+    .agent.is-exit-risk {
+      opacity: 0.82;
     }
 
     @keyframes selected-pulse {
@@ -504,7 +534,8 @@
       fill: rgba(255, 255, 255, 0.88);
       stroke: rgba(15, 23, 42, 0.16);
       stroke-width: 1;
-      pointer-events: none;
+      pointer-events: all;
+      cursor: pointer;
     }
 
     .emotion-label {
@@ -513,7 +544,8 @@
       font-weight: 800;
       text-anchor: middle;
       dominant-baseline: central;
-      pointer-events: none;
+      pointer-events: all;
+      cursor: pointer;
     }
 
     .map-footer {
@@ -1060,10 +1092,10 @@
     <header class="topbar">
       <div class="brand">
         <h1 class="brand-title">未来感情・行動シミュレーション</h1>
-        <p class="brand-subtitle">AGI社会移行における若者・現役世代の希望経路と構造支援</p>
+        <p class="brand-subtitle">AGI社会移行における若者・家族形成・次世代の希望経路と構造支援</p>
       </div>
       <nav class="view-nav" aria-label="デモ画面">
-        <a href="./future_emotion_map.html" aria-current="page">若者・現役</a>
+        <a href="./future_emotion_map.html" aria-current="page">未来感情</a>
         <a href="./country_llm_demo.html">世界国家</a>
       </nav>
       <section class="top-metrics" aria-label="summary metrics">
@@ -1094,6 +1126,9 @@
       <div class="segmented" id="agentFilterTabs">
         <button type="button" data-agent-filter="llm" aria-pressed="true">LLM対象のみ</button>
         <button type="button" data-agent-filter="all" aria-pressed="false">全体</button>
+        <button type="button" data-agent-filter="youth" aria-pressed="false">若者</button>
+        <button type="button" data-agent-filter="family" aria-pressed="false">家族形成</button>
+        <button type="button" data-agent-filter="generation" aria-pressed="false">次世代</button>
       </div>
     </section>
 
@@ -1164,7 +1199,7 @@
             <div class="signal-value" id="eventText">AGI能力上昇の初期観測</div>
           </div>
           <div class="signal">
-            <div class="signal-label">若者の支配状態</div>
+            <div class="signal-label" id="dominantSignalLabel">LLM対象の支配状態</div>
             <div class="signal-value" id="youthSignal">中立が中心</div>
           </div>
           <div class="signal">
@@ -1188,7 +1223,8 @@
             <h2 class="panel-title">4分類サマリー</h2>
             <div class="shape-key">
               <span>● 若者</span>
-              <span>◆ 現役</span>
+              <span>● 家族形成</span>
+              <span>● 次世代</span>
               <span style="color:var(--male)">青 男性</span>
               <span style="color:var(--female)">赤 女性</span>
             </div>
@@ -1275,28 +1311,35 @@
       注意: "caution",
       危険: "danger"
     };
-    const youthTsvPath = "../docs/構造持続理論ベースの新しい文明OSシミュレーション/若者エージェント.tsv";
-    const workingTsvPath = "../docs/構造持続理論ベースの新しい文明OSシミュレーション/現役世代エージェント.tsv";
-    const llmTurnsTsvPath = "../outputs/runs/civilization_os_llm_smoke/turns.tsv";
+    const youthTsvPath = "../domain_packs/agi_youth_japan/data/youth_agents.tsv";
+    const workingTsvPath = "../domain_packs/agi_youth_japan/data/working_agents.tsv";
+    const timeScheduleTsvPath = "../domain_packs/agi_youth_japan/data/time_schedule.tsv";
+    const llmTurnsTsvPath = "../outputs/runs/closed_loop_40panel_step1_smoke/agent_turns.tsv";
     const llmTurnsOverlayPaths = [
-      "../outputs/runs/civilization_os_llm_world_connected/turns.tsv",
-      "../outputs/runs/civilization_os_llm_feedback_loop/turns.tsv",
-      "../outputs/runs/closed_loop_llm_24steps_light/agent_turns.tsv"
+      "../outputs/runs/generation_cohort_step66_70_smoke/turns.tsv"
     ];
     const countryTurnsTsvPaths = [
+      "../outputs/runs/closed_loop_40panel_step1_smoke/country_turns.tsv",
       "../outputs/runs/closed_loop_llm_24steps_light/country_turns.tsv",
       "../outputs/runs/country_llm_smoke/turns.tsv"
     ];
+    const autoEventTsvPaths = [
+      "../outputs/runs/closed_loop_40panel_step1_smoke/auto_events_with_organization.tsv",
+      "../outputs/runs/closed_loop_40panel_step1_smoke/auto_events_with_feedback.tsv",
+      "../outputs/runs/closed_loop_llm_24steps_light/auto_events_with_feedback.tsv"
+    ];
     const rooms = {
-      caution: { xMin: 100, xMax: 455, yMin: 166, yMax: 306 },
-      good: { xMin: 545, xMax: 900, yMin: 166, yMax: 306 },
-      danger: { xMin: 100, xMax: 455, yMin: 458, yMax: 598 },
-      neutral: { xMin: 545, xMax: 900, yMin: 458, yMax: 598 }
+      caution: { xMin: 72, xMax: 483, yMin: 144, yMax: 326 },
+      good: { xMin: 517, xMax: 928, yMin: 144, yMax: 326 },
+      danger: { xMin: 72, xMax: 483, yMin: 436, yMax: 622 },
+      neutral: { xMin: 517, xMax: 928, yMin: 436, yMax: 622 }
     };
     const groups = [
-      { key: "youth", label: "若者", count: 30 },
-      { key: "working", label: "現役", count: 30 }
+      { key: "youth", label: "若者", count: 12 },
+      { key: "family", label: "家族形成", count: 8 },
+      { key: "generation", label: "次世代", count: 8 }
     ];
+    const groupLabelByKey = Object.fromEntries(groups.map((group) => [group.key, group.label]));
 
     const events = {
       baseline: [
@@ -1314,7 +1357,7 @@
         "希望経路と世代継承意欲が回復"
       ]
     };
-    const eventSchedule = [
+    let eventSchedule = [
       { turn: 4, type: "shock", strength: 0.80, name: "AI自動化急加速", direction: "雇用安定↓ 希望↓" },
       { turn: 6, type: "shock", strength: 0.70, name: "生活コスト上昇", direction: "可処分所得↓ 子ども意向↓" },
       { turn: 8, type: "shock", strength: 0.55, name: "SNS悲観バイアス増幅", direction: "希望↓ 分断感↑" },
@@ -1341,8 +1384,12 @@
     let agents = buildFallbackAgents();
     let llmTurnsByKey = new Map();
     let llmAgentIds = new Set();
+    let renderedRowsById = new Map();
+    let timeScheduleByStep = new Map();
+    let timeScheduleMaxStep = 0;
     let countryTurnsByStep = new Map();
     let countryMaxStep = 0;
+    let minTurn = 0;
     let maxTurn = 79;
     const mapSvg = document.getElementById("mapSvg");
     const agentLayer = document.getElementById("agentLayer");
@@ -1359,6 +1406,18 @@
         const workingRows = await loadTsvRows(workingTsvPath);
         agents = buildAgentsFromTsvRows(youthRows, workingRows);
         try {
+          const timeScheduleRows = await loadTsvRows(timeScheduleTsvPath);
+          timeScheduleByStep = buildTimeScheduleMap(timeScheduleRows);
+          timeScheduleMaxStep = Math.max(0, ...timeScheduleRows.map((row) => Number(row.step) || 0));
+          if (timeScheduleMaxStep) {
+            minTurn = 1;
+            maxTurn = timeScheduleMaxStep;
+            if (state.turn < minTurn) state.turn = minTurn;
+          }
+        } catch (timeScheduleError) {
+          console.warn("Time schedule was not loaded; using generated max step.", timeScheduleError);
+        }
+        try {
           const baseLlmRows = await loadTsvRows(llmTurnsTsvPath);
           const overlayRows = [];
           for (const path of llmTurnsOverlayPaths) {
@@ -1369,10 +1428,14 @@
             }
           }
           const llmRows = [...baseLlmRows, ...overlayRows];
+          agents = mergeLlmOnlyAgents(agents, llmRows);
           llmTurnsByKey = buildLlmTurnMap(llmRows);
           llmAgentIds = new Set(llmRows.map((row) => row.agent_id).filter(Boolean));
           const llmMaxStep = Math.max(0, ...llmRows.map((row) => Number(row.step) || 0));
           if (llmMaxStep) maxTurn = llmMaxStep;
+          if (llmMaxStep) minTurn = 1;
+          if (llmMaxStep && state.turn < minTurn) state.turn = minTurn;
+          if (llmMaxStep && state.turn > maxTurn) state.turn = maxTurn;
           if (!llmAgentIds.size) state.agentFilter = "all";
         } catch (llmError) {
           console.warn("LLM smoke output was not loaded; using deterministic demo updates.", llmError);
@@ -1384,6 +1447,15 @@
           countryMaxStep = Math.max(0, ...countryRows.map((row) => Number(row.step) || 0));
         } catch (countryError) {
           console.warn("Country LLM output was not loaded; hiding world pressure signal.", countryError);
+        }
+        try {
+          const autoEventRows = await loadFirstAvailableTsv(autoEventTsvPaths);
+          eventSchedule = [
+            ...eventSchedule,
+            ...buildAutoEventSchedule(autoEventRows)
+          ];
+        } catch (autoEventError) {
+          console.warn("Auto events were not loaded; using static event schedule.", autoEventError);
         }
         const defaultAgent = state.agentFilter === "llm"
           ? agents.find((agent) => llmAgentIds.has(agent.id))
@@ -1427,7 +1499,12 @@
     }
 
     function buildLlmTurnMap(rows) {
-      return new Map(rows.map((row) => [`${row.step}:${row.agent_id}`, row]));
+      const byKey = new Map();
+      rows.forEach((row) => {
+        const key = `${row.step}:${row.agent_id}`;
+        if (!byKey.has(key)) byKey.set(key, row);
+      });
+      return byKey;
     }
 
     function buildCountryTurnMap(rows) {
@@ -1440,20 +1517,96 @@
       return byStep;
     }
 
+    function buildTimeScheduleMap(rows) {
+      const byStep = new Map();
+      rows.forEach((row) => {
+        const step = Number(row.step) || 0;
+        if (step) byStep.set(step, row);
+      });
+      return byStep;
+    }
+
+    function buildAutoEventSchedule(rows) {
+      return rows
+        .filter((row) => row.step && row["イベント名"])
+        .map((row) => {
+          const category = row["区分"] || "";
+          const name = row["イベント名"] || "";
+          const type = category.includes("政策")
+            ? "policy"
+            : category.includes("若者")
+              ? "youth"
+              : category.includes("組織")
+                ? "organization"
+                : "shock";
+          return {
+            turn: Number(row.step) || 0,
+            type,
+            strength: Number(row["強度_0to1"]) || 0.50,
+            name,
+            direction: row["主な影響方向"] || ""
+          };
+        });
+    }
+
     function buildAgentsFromTsvRows(youthRows, workingRows) {
       const youthAgents = buildTsvAgents(youthRows, "youth", "若者", 191);
-      const workingAgents = buildTsvAgents(workingRows, "working", "現役", 419);
+      const workingAgents = buildTsvAgents(workingRows, "family", "家族形成", 419);
       return [...youthAgents, ...workingAgents];
+    }
+
+    function mergeLlmOnlyAgents(baseAgents, llmRows) {
+      const byId = new Map(baseAgents.map((agent) => [agent.id, agent]));
+      const firstStepByAgent = new Map();
+      llmRows.forEach((row) => {
+        const id = row.agent_id || "";
+        const step = Number(row.step) || 0;
+        if (!id || !step) return;
+        firstStepByAgent.set(id, Math.min(firstStepByAgent.get(id) || step, step));
+      });
+      llmRows.forEach((row, index) => {
+        const id = row.agent_id || "";
+        if (!id || byId.has(id)) return;
+        const isGeneration = id.startsWith("YG_");
+        const group = groupKeyFromLayerOrAge(row.layer, row.current_age || row.base_age, isGeneration ? "generation" : "youth");
+        byId.set(id, {
+          id,
+          name: row.name || id,
+          group,
+          label: groupLabelByKey[group] || row.layer || "LLM",
+          source: "llm",
+          seed: seeded(idNumber(id) + index + 733),
+          drift: seeded(idNumber(id) * 23 + index + 911),
+          age: row.base_age || row.current_age || "",
+          activeFromTurn: isGeneration ? firstStepByAgent.get(id) || Number(row.step) || 0 : 0,
+          gender: isGeneration ? "世代代表" : "不明",
+          classificationCode: isGeneration ? "次世代コホート" : "LLM生成",
+          persona: row.name || row.layer || "LLM生成エージェント",
+          initialEvaluation: evaluationKeyByLabel[row.evaluation] || "neutral",
+          mainEmotion: row.emotion || "平静",
+          initialPathway: parsePercent(row.pathway, 0.5),
+          initialSupport: parsePercent(row.support, 0.5),
+          initialIntensity: parsePercent(row.intensity, 0.35),
+          hopeIndex: parsePercent(row.pathway, 0.5),
+          childIntent: 0.35,
+          trust: parsePercent(row.support, 0.5),
+          agency: parsePercent(row.pathway, 0.5),
+          employmentStability: 0.50,
+          careLoad: 0.0
+        });
+      });
+      return [...byId.values()];
     }
 
     function buildTsvAgents(rows, groupKey, groupLabel, seedOffset) {
       return rows.map((row, index) => {
         const id = row["エージェントID"] || `A${String(index + 1).padStart(2, "0")}`;
+        const group = groupKeyFromLayerOrAge("", row["年齢"], groupKey);
         return {
           id,
           name: row["氏名"] || id,
-          group: groupKey,
-          label: groupLabel,
+          group,
+          label: groupLabelByKey[group] || groupLabel,
           source: "tsv",
           seed: seeded(index + seedOffset),
           drift: seeded(index * 23 + seedOffset + 116),
@@ -1474,6 +1627,25 @@
           careLoad: careScore(row["ケア責任"])
         };
       });
+    }
+
+    function groupKeyFromLayerOrAge(layer, ageValue, fallback = "youth") {
+      if ((layer || "").includes("次世代")) return "generation";
+      if ((layer || "").includes("家族形成")) return "family";
+      if ((layer || "").includes("若者")) return "youth";
+      const age = Number(ageValue);
+      if (Number.isFinite(age)) {
+        if (age >= 15 && age <= 22) return "youth";
+        if (age >= 23 && age <= 40) return "family";
+        if (age < 15) return "generation";
+      }
+      return fallback;
+    }
+
+    function idNumber(id) {
+      const matches = String(id || "").match(/\d+/g);
+      if (matches?.length) return Number(matches.join(""));
+      return String(id || "").split("").reduce((sum, char) => sum + char.charCodeAt(0), 0) || 1;
     }
 
     function parsePercent(value, fallback) {
@@ -1626,6 +1798,7 @@
       let actionDetail = actionDetailFor(action, actionCategory);
 
       const llmTurn = llmTurnsByKey.get(`${turn}:${agent.id}`);
+      const llmDisplayAge = llmTurn?.current_age || "";
       if (llmTurn) {
         dominant = evaluationKeyByLabel[llmTurn.evaluation] || dominant;
         pathway = parsePercent(llmTurn.pathway, pathway);
@@ -1636,12 +1809,19 @@
         actionCategory = llmTurn.action_category || actionCategoryFor(action, dominant);
         actionDetail = llmTurn.action_detail || actionDetailFor(action, actionCategory);
       }
-      const position = roomPosition(agent, dominant);
+      const displayAge = llmDisplayAge || projectedAge(agent, turn);
+      const displayGroup = groupKeyFromLayerOrAge(llmTurn?.layer || agent.label, displayAge, agent.group);
+      const displayLabel = groupLabelByKey[displayGroup] || agent.label;
+      const positionedAgent = { ...agent, group: displayGroup };
+      const position = roomPosition(positionedAgent, dominant, turn);
       const x = position.x;
       const y = position.y;
 
       return {
         ...agent,
+        group: displayGroup,
+        label: displayLabel,
+        displayAge,
         x,
         y,
         pathway,
@@ -1663,20 +1843,73 @@
         reasoningBasis: llmTurn?.reasoning_basis || "",
         memoryUpdate: llmTurn?.memory_update || "",
         carryoverConcern: llmTurn?.carryover_concern || "",
-        isLlmGenerated: Boolean(llmTurn)
+        isLlmGenerated: Boolean(llmTurn),
+        socialExitStatus: socialExitStatus({
+          ...agent,
+          displayAge,
+          dominant,
+          intensity,
+          emotion,
+          action,
+          actionCategory,
+          pathway,
+          support,
+          agency
+        })
       };
     }
 
-    function roomPosition(agent, category) {
+    function elapsedYearsForTurn(turn) {
+      if (turn <= 0) return 0;
+      const scheduleRow = timeScheduleByStep.get(Number(turn));
+      const relativeYear = Number(scheduleRow?.["相対年"]);
+      if (Number.isFinite(relativeYear)) return relativeYear;
+      if (turn <= 60) return turn / 12;
+      if (turn <= 65) return turn - 55;
+      return 10 + (turn - 65) * 5;
+    }
+
+    function projectedAge(agent, turn) {
+      const baseAge = Number(agent.age);
+      if (!Number.isFinite(baseAge)) return "";
+      return Math.floor(baseAge + elapsedYearsForTurn(turn));
+    }
+
+    function socialExitStatus(row) {
+      const actionText = `${row.action || ""} ${row.actionCategory || ""}`;
+      const escapeAction = /撤退|孤立|諦|回避|縮小|巣ごもり|消耗|麻痺/.test(actionText)
+        || ["撤退", "回避・縮小"].includes(row.actionCategory);
+      const severeMentalLoad = ["絶望", "諦念", "喪失感"].includes(row.emotion)
+        && row.intensity > 0.76
+        && row.agency < 0.44
+        && Math.min(row.pathway, row.support) < 0.40;
+      const angerExitRisk = row.emotion === "怒り"
+        && row.intensity > 0.74
+        && row.support < 0.36
+        && row.agency < 0.48;
+      if (severeMentalLoad) return "メンタル不調リスク";
+      if (escapeAction) return "社会的逃避";
+      if (angerExitRisk) return "反発・離脱リスク";
+      if (row.dominant === "danger" && row.intensity > 0.70) return "孤立リスク";
+      return "";
+    }
+
+    function roomPosition(agent, category, turn = 0) {
       const room = rooms[category];
-      const n = Number(agent.id.slice(1));
-      const lane = agent.group === "youth" ? 0 : agent.group === "working" ? 1 : 2;
+      const n = idNumber(agent.id);
+      const lane = agent.group === "youth" ? 0 : agent.group === "family" ? 1 : 2;
       const hashX = seeded(n * 19 + lane * 101 + category.length * 11);
       const hashY = seeded(n * 29 + lane * 73 + category.length * 17);
       const groupOffset = (lane - 1) * 14;
+      const phase = turn * 0.74 + n * 0.41 + lane * 1.9 + category.length;
+      const driftX = Math.sin(phase) * 18 + Math.cos(phase * 0.63 + n) * 8;
+      const driftY = Math.cos(phase * 0.82) * 12 + Math.sin(phase * 0.47 + lane) * 6;
+      const margin = 26;
+      const baseX = room.xMin + hashX * (room.xMax - room.xMin);
+      const baseY = room.yMin + hashY * (room.yMax - room.yMin) + groupOffset;
       return {
-        x: room.xMin + hashX * (room.xMax - room.xMin),
-        y: clamp(room.yMin + hashY * (room.yMax - room.yMin) + groupOffset, room.yMin, room.yMax)
+        x: clamp(baseX + driftX, room.xMin + margin, room.xMax - margin),
+        y: clamp(baseY + driftY, room.yMin + margin, room.yMax - margin)
       };
     }
 
@@ -1726,7 +1959,7 @@
       if (category === "neutral") return "平静";
       if (category === "good") {
         if (values.support > 0.66 && values.trust > 0.58) return "安心";
-        if (agent.group === "working" && values.support > 0.56) return "連帯感";
+        if (agent.group === "family" && values.support > 0.56) return "連帯感";
         return "希望";
       }
       if (category === "caution") {
@@ -1741,8 +1974,9 @@
 
     function render() {
       const allRows = agents.map((agent) => agentState(agent, state.scenario, state.turn));
-      const rows = visibleRowsFor(allRows);
-      const selected = rows.find((row) => row.id === state.selectedId) || rows[0] || allRows[0];
+      const rows = packRowsInRooms(visibleRowsFor(allRows));
+      renderedRowsById = new Map(rows.map((row) => [row.id, row]));
+      const selected = renderedRowsById.get(state.selectedId) || rows[0] || allRows[0];
       state.selectedId = selected.id;
       renderLegend();
       renderAgents(rows);
@@ -1757,10 +1991,60 @@
       turnLabel.value = turnToYear(state.turn);
     }
 
+    function hasLlmForTurn(agentId, turn = state.turn) {
+      return llmTurnsByKey.has(`${turn}:${agentId}`);
+    }
+
     function visibleRowsFor(rows) {
-      if (state.agentFilter !== "llm") return rows;
-      const llmRows = rows.filter((row) => llmAgentIds.has(row.id));
-      return llmRows.length ? llmRows : rows;
+      const activeRows = rows.filter((row) => !row.activeFromTurn || state.turn >= row.activeFromTurn);
+      if (state.agentFilter === "youth") return activeRows.filter((row) => row.group === "youth");
+      if (state.agentFilter === "family") return activeRows.filter((row) => row.group === "family");
+      if (state.agentFilter === "generation") return activeRows.filter((row) => row.group === "generation");
+      if (state.agentFilter === "llm") {
+        const currentLlmRows = activeRows.filter((row) => hasLlmForTurn(row.id));
+        if (currentLlmRows.length) return currentLlmRows;
+        const historicalLlmRows = activeRows.filter((row) => llmAgentIds.has(row.id));
+        return historicalLlmRows.length ? historicalLlmRows : activeRows;
+      }
+      return activeRows;
+    }
+
+    function packRowsInRooms(rows) {
+      const result = rows.map((row) => ({ ...row }));
+      categories.forEach((category) => {
+        const roomRows = result
+          .filter((row) => row.dominant === category.key)
+          .sort((a, b) => {
+            const groupOrder = (a.group || "").localeCompare(b.group || "");
+            return groupOrder || String(a.id).localeCompare(String(b.id), "ja", { numeric: true });
+          });
+        if (!roomRows.length) return;
+
+        const room = rooms[category.key];
+        const paddingX = 16;
+        const paddingY = 16;
+        const width = room.xMax - room.xMin - paddingX * 2;
+        const height = room.yMax - room.yMin - paddingY * 2;
+        const aspect = Math.max(1, width / Math.max(1, height));
+        const cols = Math.max(1, Math.ceil(Math.sqrt(roomRows.length * aspect)));
+        const rowCount = Math.max(1, Math.ceil(roomRows.length / cols));
+
+        roomRows.forEach((row, index) => {
+          const gridRow = Math.floor(index / cols);
+          const rowStart = gridRow * cols;
+          const rowSize = Math.min(cols, roomRows.length - rowStart);
+          const col = index - rowStart;
+          const baseX = room.xMin + paddingX + width * ((col + 1) / (rowSize + 1));
+          const baseY = room.yMin + paddingY + height * ((gridRow + 1) / (rowCount + 1));
+        const seedNumber = idNumber(row.id) || index + 1;
+          const phase = state.turn * 0.72 + seedNumber * 0.57 + category.key.length;
+          const jitterX = Math.sin(phase) * 10;
+          const jitterY = Math.cos(phase * 0.86) * 8;
+          row.x = clamp(baseX + jitterX, room.xMin + 20, room.xMax - 20);
+          row.y = clamp(baseY + jitterY, room.yMin + 22, room.yMax - 22);
+        });
+      });
+      return result;
     }
 
     function renderLegend() {
@@ -1787,13 +2071,20 @@
         const categoryColor = categoryByKey[row.dominant].color;
         const size = 7 + row.intensity * 9;
         const node = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        node.setAttribute("class", "agent");
+        const exitClass = ["社会的逃避", "メンタル不調リスク"].includes(row.socialExitStatus)
+          ? " is-social-exit"
+          : row.socialExitStatus
+            ? " is-exit-risk"
+            : "";
+        node.setAttribute("class", `agent${exitClass}`);
         node.setAttribute("data-id", row.id);
         node.setAttribute("filter", "url(#agentShadow)");
-        node.addEventListener("click", () => {
-          state.selectedId = row.id;
-          render();
-        });
+        const idleSeed = idNumber(row.id) || 1;
+        const idleX = (Math.sin(idleSeed * 1.7) * 2.4).toFixed(2);
+        const idleY = (Math.cos(idleSeed * 1.3) * 2.8).toFixed(2);
+        node.style.setProperty("--idle-x", `${idleX}px`);
+        node.style.setProperty("--idle-y", `${idleY}px`);
+        node.style.animationDelay = `${-(idleSeed % 9) * 0.23}s`;
 
         const selected = row.id === state.selectedId;
         appendFaceIcon(node, row, size, color, categoryColor, selected);
@@ -1818,6 +2109,15 @@
         ring.setAttribute("r", size + 6);
         ring.setAttribute("class", "selected-agent-ring");
         node.appendChild(ring);
+      }
+
+      if (row.socialExitStatus) {
+        const exitRing = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        exitRing.setAttribute("cx", row.x);
+        exitRing.setAttribute("cy", row.y);
+        exitRing.setAttribute("r", size + 9);
+        exitRing.setAttribute("class", "social-exit-ring");
+        node.appendChild(exitRing);
       }
 
       const head = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -1865,7 +2165,8 @@
       face.circles.forEach((circle) => addCircle(...circle));
       face.paths.forEach((path) => addPath(path));
       face.texts.forEach((text) => addText(...text));
-      appendEmotionLabel(node, row.x, row.y - size - 13, emotion);
+      const ageEmotionLabel = row.displayAge ? `${row.displayAge}歳 ${emotion}` : emotion;
+      appendEmotionLabel(node, row.x, row.y - size - 13, ageEmotionLabel);
     }
 
     function appendEmotionLabel(node, x, y, text) {
@@ -2008,7 +2309,14 @@
       const event = activeEvents[activeEvents.length - 1];
       const isPolicy = event.type === "policy";
       const isYouth = event.type === "youth";
-      title.textContent = isPolicy ? `政策: ${event.name}` : isYouth ? `若者発: ${event.name}` : `世界: ${event.name}`;
+      const isOrganization = event.type === "organization";
+      title.textContent = isPolicy
+        ? `政策: ${event.name}`
+        : isYouth
+          ? `若者発: ${event.name}`
+          : isOrganization
+            ? `組織: ${event.name}`
+            : `世界: ${event.name}`;
       const style = eventStyle(event);
       shape.setAttribute("fill", style.fill);
       shape.setAttribute("stroke", style.stroke);
@@ -2030,6 +2338,9 @@
       if (event.type === "youth") {
         return { fill: "#fef9c3", stroke: "#ca8a04", left: "35%", top: "55%", scale };
       }
+      if (event.type === "organization") {
+        return { fill: "#dbeafe", stroke: "#2563eb", left: "50%", top: "50%", scale };
+      }
       return { fill: "#fee2e2", stroke: "#ef4444", left: "50%", top: "50%", scale };
     }
 
@@ -2037,10 +2348,22 @@
       const phase = Math.min(4, Math.floor(state.turn / 16));
       document.getElementById("eventText").textContent = events[state.scenario][phase];
 
-      const youthRows = rows.filter((row) => row.group === "youth");
-      const signalRows = youthRows.length ? youthRows : rows;
+      const targetRows = ["youth", "family", "generation"].includes(state.agentFilter)
+        ? rows.filter((row) => row.group === state.agentFilter)
+        : rows;
+      const signalRows = targetRows.length ? targetRows : rows;
       const signalSummary = summarize(signalRows);
       const signalTop = Object.entries(signalSummary.counts).sort((a, b) => b[1] - a[1])[0][0];
+      const signalLabel = state.agentFilter === "family"
+        ? "家族形成の支配状態"
+        : state.agentFilter === "generation"
+          ? "次世代の支配状態"
+          : state.agentFilter === "youth"
+            ? "若者の支配状態"
+            : state.agentFilter === "all"
+              ? "全体の支配状態"
+              : "LLM対象の支配状態";
+      document.getElementById("dominantSignalLabel").textContent = signalLabel;
       document.getElementById("youthSignal").textContent = `${categoryByKey[signalTop].label}が中心`;
 
       const institutionText = state.scenario === "sustain"
@@ -2127,9 +2450,10 @@
       }
       document.getElementById("selectedActionMain").textContent = row.actionCategory || actionCategoryFor(row.action, row.dominant);
       document.getElementById("selectedActionDetail").textContent = row.actionDetail || actionDetailFor(row.action, row.actionCategory);
-      const ageText = row.age ? `${row.age}歳` : "年齢不明";
+      const ageText = row.displayAge ? `${row.displayAge}歳` : "年齢不明";
       document.getElementById("agentName").textContent = `${displayName} / ${ageText} / ${row.gender || "性別不明"} / ${category.label}`;
-      document.getElementById("agentSummary").textContent = `${emotionText}が主状態。信頼 ${row.trust.toFixed(2)}。`;
+      const exitText = row.socialExitStatus ? ` / ${row.socialExitStatus}` : "";
+      document.getElementById("agentSummary").textContent = `${emotionText}が主状態。信頼 ${row.trust.toFixed(2)}${exitText}。`;
       document.getElementById("kvPathway").textContent = row.pathway.toFixed(2);
       document.getElementById("kvSupport").textContent = row.support.toFixed(2);
       document.getElementById("kvIntensity").textContent = row.intensity.toFixed(2);
@@ -2150,28 +2474,18 @@
     }
 
     function messageTemplates(row) {
+      const fallbackMessages = fallbackContextMessages(row);
       if (row.isLlmGenerated) {
-        const messages = contextMessages(row.thought, row.privateTalk, row.socialPost);
-        if (row.perceivedSituation || row.reasoningBasis) {
-          messages.push({
-            kind: "basis",
-            mark: "因",
-            title: "知覚と根拠",
-            tone: "観測条件",
-            text: [row.perceivedSituation, row.reasoningBasis].filter(Boolean).join(" / ")
-          });
-        }
-        if (row.memoryUpdate || row.carryoverConcern) {
-          messages.push({
-            kind: "memory",
-            mark: "記",
-            title: "次へ残る記憶",
-            tone: "持ち越し",
-            text: [row.memoryUpdate, row.carryoverConcern].filter(Boolean).join(" / ")
-          });
-        }
-        return messages;
+        return appendBasisAndMemory(row, contextMessages(
+          row.thought || fallbackMessages[0].text,
+          row.privateTalk || fallbackMessages[1].text,
+          row.socialPost || fallbackMessages[2].text
+        ));
       }
+      return appendBasisAndMemory(row, fallbackMessages);
+    }
+
+    function fallbackContextMessages(row) {
       if (row.dominant === "good") {
         return contextMessages(
           "次の役割が見えてきた。学び直しと地域の修復活動をつなげられそう。",
@@ -2203,6 +2517,40 @@
       return contextMessages("状態を観測中。", "まだ様子見かな。", "変化を見ながら考える。");
     }
 
+    function appendBasisAndMemory(row, messages) {
+      messages.push({
+        kind: "basis",
+        mark: "因",
+        title: "因果・根拠",
+        tone: row.isLlmGenerated ? "LLM観測" : "状態値から推定",
+        text: basisTextFor(row)
+      });
+      messages.push({
+        kind: "memory",
+        mark: "記",
+        title: "次へ残る記憶",
+        tone: "持ち越し",
+        text: memoryTextFor(row)
+      });
+      return messages;
+    }
+
+    function basisTextFor(row) {
+      const llmBasis = [row.perceivedSituation, row.reasoningBasis].filter(Boolean).join(" / ");
+      if (llmBasis) return llmBasis;
+      const category = categoryByKey[row.dominant];
+      const actionCategory = row.actionCategory || actionCategoryFor(row.action, row.dominant);
+      return `${category.label}判定。未来経路 ${row.pathway.toFixed(2)}、構造支援 ${row.support.toFixed(2)}、制度信頼 ${row.trust.toFixed(2)}、自己効力感 ${row.agency.toFixed(2)}。次の行動は${actionCategory}寄り。`;
+    }
+
+    function memoryTextFor(row) {
+      const llmMemory = [row.memoryUpdate, row.carryoverConcern].filter(Boolean).join(" / ");
+      if (llmMemory) return llmMemory;
+      if (row.socialExitStatus) return `${row.socialExitStatus}が次ステップへ残る。支援・役割・つながりのどこが回復するかを見る必要がある。`;
+      const actionCategory = row.actionCategory || actionCategoryFor(row.action, row.dominant);
+      return `${row.emotion || "平静"}と${actionCategory}の傾向が次ステップに持ち越される。イベントや制度応答があれば移動しやすい。`;
+    }
+
     function contextMessages(inner, friend, social) {
       return [
         { kind: "inner", mark: "心", title: "内心", tone: "本音・未整理", text: inner },
@@ -2225,8 +2573,10 @@
 
       const query = (agentSearchInput?.value || "").trim().toLowerCase();
       const orderedRows = [...rows].sort((a, b) => {
-        const llmDiff = Number(llmAgentIds.has(b.id)) - Number(llmAgentIds.has(a.id));
-        if (llmDiff !== 0) return llmDiff;
+        const currentLlmDiff = Number(hasLlmForTurn(b.id)) - Number(hasLlmForTurn(a.id));
+        if (currentLlmDiff !== 0) return currentLlmDiff;
+        const historicalLlmDiff = Number(llmAgentIds.has(b.id)) - Number(llmAgentIds.has(a.id));
+        if (historicalLlmDiff !== 0) return historicalLlmDiff;
         return a.id.localeCompare(b.id, "ja");
       });
       const matchedRows = orderedRows
@@ -2242,24 +2592,31 @@
       }
 
       agentSearchResults.innerHTML = matchedRows.map((row) => {
-        const isLlm = llmAgentIds.has(row.id);
+        const isLlm = hasLlmForTurn(row.id);
+        const hasHistoricalLlm = llmAgentIds.has(row.id);
         const selected = row.id === state.selectedId;
         const name = row.name && row.name !== row.id ? row.name : row.label;
         return `
           <button type="button" class="agent-pick ${isLlm ? "is-llm" : ""}" data-agent-id="${row.id}" aria-pressed="${selected}">
-            ${row.id} ${name}${isLlm ? " LLM" : ""}
+            ${row.id} ${name}${isLlm ? " LLM" : hasHistoricalLlm ? " LLM別step" : ""}
           </button>
         `;
       }).join("");
     }
 
     function turnToYear(turn) {
+      if (turn <= 0) return "開始前";
+      const scheduleLabel = timeScheduleByStep.get(Number(turn))?.["表示期間"];
+      if (scheduleLabel) return scheduleLabel;
       if (turn <= 60) {
-        const year = Math.floor(turn / 12);
-        const month = turn % 12;
-        return `${year}年${month}か月`;
+        const year = Math.floor((turn - 1) / 12) + 1;
+        const month = ((turn - 1) % 12) + 1;
+        return `${year}年目${month}か月`;
       }
-      const year = 5 + Math.round((turn - 60) * 5);
+      if (turn <= 65) {
+        return `${turn - 55}年目`;
+      }
+      const year = 10 + (turn - 65) * 5;
       return `${year}年`;
     }
 
@@ -2283,8 +2640,19 @@
       });
     }
 
+    function selectAgent(agentId) {
+      if (!agentId) return;
+      const visibleRow = renderedRowsById.get(agentId);
+      if (!visibleRow && state.agentFilter === "llm") {
+        state.agentFilter = "all";
+        syncAgentFilterTabs();
+      }
+      state.selectedId = agentId;
+      render();
+    }
+
     function stepBy(delta) {
-      state.turn = clamp(state.turn + delta, 0, maxTurn);
+      state.turn = clamp(state.turn + delta, minTurn, maxTurn);
       render();
     }
 
@@ -2293,7 +2661,7 @@
       playButton.textContent = state.playing ? "Ⅱ" : "▶";
       if (state.playing) {
         state.timer = window.setInterval(() => {
-          state.turn = state.turn >= maxTurn ? 0 : state.turn + 1;
+          state.turn = state.turn >= maxTurn ? minTurn : state.turn + 1;
           render();
         }, 1800);
       } else {
@@ -2318,11 +2686,15 @@
     prevButton.addEventListener("click", () => stepBy(-1));
     nextButton.addEventListener("click", () => stepBy(1));
     agentSearchInput?.addEventListener("input", () => render());
+    agentLayer.addEventListener("click", (event) => {
+      const node = event.target.closest(".agent[data-id]");
+      if (!node) return;
+      selectAgent(node.getAttribute("data-id"));
+    });
     agentSearchResults?.addEventListener("click", (event) => {
       const button = event.target.closest("button[data-agent-id]");
       if (!button) return;
-      state.selectedId = button.dataset.agentId;
-      render();
+      selectAgent(button.dataset.agentId);
     });
 
     initialize();

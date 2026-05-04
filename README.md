@@ -33,8 +33,8 @@ https://github.com/user-attachments/assets/e405f2c3-9518-489d-87c3-c155d7fca38b
 |---|---|
 | ドメイン定義 | `domain_packs/agi_youth_japan/domain.yaml` |
 | エージェント | `data/youth_agents.tsv`, `working_agents.tsv`, `country_agents.tsv`, `organization_agents.tsv` |
-| 本番デモ用パネル（40体） | `data/demo_panel_40.tsv`（国家12・若者12・現役8・組織8） |
-| 時間設計（74ステップ） | `data/time_schedule.tsv` |
+| 本番デモ用パネル（48枠） | `data/demo_panel_48.tsv`（国家12・0〜14歳コホート8・15〜22歳12・23〜40歳8・組織8） |
+| 時間設計（71ステップ） | `data/time_schedule.tsv` |
 | 世界イベント | `data/world_events.tsv` |
 | 国家→日本の波及経路 | `data/country_to_japan_channels.tsv` |
 | シナリオ | `scenarios/baseline.yaml`, `scenarios/stress.yaml` |
@@ -45,7 +45,7 @@ https://github.com/user-attachments/assets/e405f2c3-9518-489d-87c3-c155d7fca38b
 
 - ステップ 1-60: 直近5年を月次
 - ステップ 61-65: 次の5年を年次
-- ステップ 66-74: 20年目から100年目までを10年単位
+- ステップ 66-71: 15年目から40年目までを5年単位
 
 ## 必要な環境
 
@@ -75,8 +75,8 @@ claude login
 
 ```bash
 python3 scripts/run_closed_loop_llm_demo.py \
-  --steps 74 \
-  --output-dir outputs/runs/closed_loop_llm_74steps
+  --steps 71 \
+  --output-dir outputs/runs/closed_loop_llm_71steps_40years
 ```
 
 同じ `--output-dir` で再実行すると、完了済みの国家step/組織step/エージェントstepはスキップして途中から再開します。
@@ -85,14 +85,14 @@ python3 scripts/run_closed_loop_llm_demo.py \
 
 ```bash
 python3 scripts/run_closed_loop_llm_demo.py \
-  --steps 74 \
+  --steps 71 \
   --scenario-mode no_intervention \
-  --output-dir outputs/runs/no_intervention_74steps
+  --output-dir outputs/runs/no_intervention_71steps_40years
 
 python3 scripts/run_closed_loop_llm_demo.py \
-  --steps 74 \
+  --steps 71 \
   --scenario-mode structure_intervention \
-  --output-dir outputs/runs/structure_intervention_74steps
+  --output-dir outputs/runs/structure_intervention_71steps_40years
 ```
 
 | `--scenario-mode` | 内容 |
@@ -105,13 +105,13 @@ python3 scripts/run_closed_loop_llm_demo.py \
 
 | オプション | デフォルト | 説明 |
 |---|---|---|
-| `--steps` | `74` | 実行ステップ数 |
+| `--steps` | `71` | 実行ステップ数 |
 | `--start-step` | `1` | 開始ステップ |
 | `--model` | `sonnet` | `claude --model` に渡す値 |
 | `--country-codes` | `USA,CHN,JPN,...` | 国家エージェントの絞り込み |
-| `--agent-ids` | `A04,A06,...,W29` | 若者・現役世代エージェントの絞り込み |
+| `--agent-ids` | `A01,A02,...,W22` | 15〜22歳・23〜40歳エージェントの絞り込み |
 | `--organization-ids` | `O02,...,O15` | 組織エージェントの絞り込み |
-| `--agent-panel-tsv` | `demo_panel_40.tsv` | 代表重みパネル |
+| `--agent-panel-tsv` | `demo_panel_48.tsv` | 代表重みパネル |
 | `--country-budget` / `--organization-budget` / `--agent-budget` | — | 各層のLLM時間予算（秒） |
 | `--timeout` | `420` | LLM 1呼び出しのタイムアウト |
 | `--parallel-by-country` / `--parallel-by-organization` / `--parallel-by-agent` | off | 各層を並列実行 |

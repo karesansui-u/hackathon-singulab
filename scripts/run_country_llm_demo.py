@@ -8,18 +8,24 @@ import csv
 import json
 import re
 import subprocess
+import tempfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
 
 
 ROOT = Path(__file__).resolve().parents[1]
-COUNTRY_DIR = ROOT / "docs" / "構造持続理論ベースの新しい文明OSシミュレーション" / "国家モデル"
-DEFAULT_COUNTRIES = COUNTRY_DIR / "国家エージェント初期値.tsv"
-DEFAULT_OBJECTIVES = COUNTRY_DIR / "国家エージェント目的重み.tsv"
-DEFAULT_WORLD_EVENTS = COUNTRY_DIR / "世界イベント24ステップ.tsv"
+DOMAIN_PACK_DATA = ROOT / "domain_packs" / "agi_youth_japan" / "data"
+DEFAULT_COUNTRIES = DOMAIN_PACK_DATA / "country_agents.tsv"
+DEFAULT_OBJECTIVES = DOMAIN_PACK_DATA / "country_objective_weights.tsv"
+DEFAULT_WORLD_EVENTS = DOMAIN_PACK_DATA / "world_events.tsv"
+DEFAULT_TIME_SCHEDULE = DOMAIN_PACK_DATA / "time_schedule.tsv"
 DEFAULT_OUTPUT = ROOT / "outputs" / "runs" / "country_llm_smoke"
-DEFAULT_CODES = ["USA", "CHN", "JPN", "TWN", "KOR", "RUS", "UKR", "IRN", "ISR", "SAU", "IND", "EU"]
+DEFAULT_CODES = [
+    "USA", "CHN", "JPN", "TWN", "KOR", "PRK", "RUS", "UKR", "IRN", "ISR",
+    "SAU", "IND", "EU", "GBR", "AUS", "CAN", "DEU", "FRA", "TUR", "IDN",
+    "VNM", "PHL", "THA", "MYS", "SGP", "BRA", "MEX", "ARE", "QAT", "EGY",
+]
 
 PRESSURE_FIELDS = [
     "geopolitical_risk",
@@ -115,15 +121,35 @@ def compact_country(row: Dict[str, str], objective: Dict[str, str] | None = None
     }
 
 
-def build_world_events_by_step(rows: List[Dict[str, str]]) -> Dict[int, Dict[str, str]]:
+def build_time_schedule_by_step(rows: List[Dict[str, str]]) -> Dict[int, Dict[str, str]]:
+    schedule: Dict[int, Dict[str, str]] = {}
+    for row in rows:
+        if not row.get("step"):
+            continue
+        schedule[int(float(row["step"]))] = row
+    return schedule
+
+
+def build_world_events_by_step(
+    rows: List[Dict[str, str]],
+    schedule_by_step: Dict[int, Dict[str, str]] | None = None,
+) -> Dict[int, Dict[str, str]]:
     events: Dict[int, Dict[str, str]] = {}
+    schedule_by_step = schedule_by_step or {}
     for row in rows:
         if not row.get("step"):
             continue
         step = int(float(row["step"]))
         name = row.get("世界イベント名") or row.get("イベント名") or row.get("name") or ""
         description = row.get("説明") or row.get("description") or ""
-        events[step] = {"name": name, "description": description}
+        schedule = schedule_by_step.get(step, {})
+        events[step] = {
+            "name": name,
+            "description": description,
+            "period_label": schedule.get("表示期間", ""),
+            "phase": schedule.get("本番フェーズ", ""),
+            "duration_years": schedule.get("期間幅_年", ""),
+        }
     return events
 
 
@@ -258,12 +284,8 @@ JSON形式:
 """.strip()
 
 
-def extract_json_from_claude(stdout: str) -> Dict[str, Any]:
-    outer = json.loads(stdout)
-    result = outer.get("result", stdout)
-    if isinstance(result, dict):
-        return result
-    text = str(result).strip()
+def extract_json_from_text(text: str) -> Dict[str, Any]:
+    text = str(text).strip()
     try:
         return json.loads(text)
     except json.JSONDecodeError:
@@ -273,7 +295,68 @@ def extract_json_from_claude(stdout: str) -> Dict[str, Any]:
         return json.loads(match.group(0))
 
 
+def extract_json_from_claude(stdout: str) -> Dict[str, Any]:
+    outer = json.loads(stdout)
+    result = outer.get("result", stdout)
+    if isinstance(result, dict):
+        return result
+    return extract_json_from_text(str(result))
+
+
+def is_codex_model(model: str) -> bool:
+    return model == "codex" or model.startswith("codex:") or model.startswith("gpt-")
+
+
+def codex_model_name(model: str) -> str:
+    if model == "codex":
+        return "gpt-5.2"
+    if model.startswith("codex:"):
+        return model.split(":", 1)[1]
+    return model
+
+
+def run_codex(prompt: str, model: str, timeout: int) -> Dict[str, Any]:
+    output_path = Path(tempfile.mkstemp(prefix="codex_llm_", suffix=".txt")[1])
+    cmd = [
+        "codex",
+        "--ask-for-approval",
+        "never",
+        "exec",
+        "--ignore-user-config",
+        "--ignore-rules",
+        "--ephemeral",
+        "-m",
+        codex_model_name(model),
+        "-c",
+        'model_reasoning_effort="low"',
+        "--sandbox",
+        "read-only",
+        "--skip-git-repo-check",
+        "--output-last-message",
+        str(output_path),
+        "-",
+    ]
+    try:
+        completed = subprocess.run(
+            cmd,
+            cwd=ROOT,
+            input=prompt,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            check=False,
+        )
+        if completed.returncode != 0:
+            raise RuntimeError(completed.stderr or completed.stdout)
+        text = output_path.read_text(encoding="utf-8").strip() or completed.stdout
+        return extract_json_from_text(text)
+    finally:
+        output_path.unlink(missing_ok=True)
+
+
 def run_claude(prompt: str, model: str, budget: float, timeout: int) -> Dict[str, Any]:
+    if is_codex_model(model):
+        return run_codex(prompt, model, timeout)
     cmd = [
         "claude",
         "-p",
@@ -433,6 +516,7 @@ def main() -> None:
     parser.add_argument("--countries-tsv", type=Path, default=DEFAULT_COUNTRIES)
     parser.add_argument("--objectives-tsv", type=Path, default=DEFAULT_OBJECTIVES)
     parser.add_argument("--world-events-tsv", type=Path, default=DEFAULT_WORLD_EVENTS)
+    parser.add_argument("--time-schedule-tsv", type=Path, default=DEFAULT_TIME_SCHEDULE)
     parser.add_argument("--country-codes", default=",".join(DEFAULT_CODES))
     parser.add_argument("--start-step", type=int, default=1)
     parser.add_argument("--steps", type=int, default=6)
@@ -450,7 +534,8 @@ def main() -> None:
     objective_rows = read_tsv(args.objectives_tsv) if args.objectives_tsv.exists() else []
     objectives_by_code = {row["国家コード"]: row for row in objective_rows}
     world_event_rows = read_tsv(args.world_events_tsv)
-    world_events_by_step = build_world_events_by_step(world_event_rows)
+    schedule_by_step = build_time_schedule_by_step(read_optional_tsv(args.time_schedule_tsv))
+    world_events_by_step = build_world_events_by_step(world_event_rows, schedule_by_step)
     build_events(args.start_step, args.steps, world_events_by_step)
     codes = [code.strip() for code in args.country_codes.split(",") if code.strip()]
     countries = select_countries(country_rows, codes)
@@ -539,6 +624,7 @@ def main() -> None:
         "countries": codes,
         "objectives_tsv": str(args.objectives_tsv),
         "world_events_tsv": str(args.world_events_tsv),
+        "time_schedule_tsv": str(args.time_schedule_tsv) if schedule_by_step else "",
         "world_event_steps": sorted(world_events_by_step),
         "previous_country_turns_tsv": str(args.previous_country_turns_tsv or ""),
         "outputs": ["turns.tsv", "country_turns.jsonl", "raw_claude_response.json"],

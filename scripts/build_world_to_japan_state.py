@@ -11,9 +11,9 @@ from typing import Any, Dict, Iterable, List
 
 
 ROOT = Path(__file__).resolve().parents[1]
-COUNTRY_DIR = ROOT / "docs" / "構造持続理論ベースの新しい文明OSシミュレーション" / "国家モデル"
+DOMAIN_PACK_DATA = ROOT / "domain_packs" / "agi_youth_japan" / "data"
 DEFAULT_COUNTRY_TURNS = ROOT / "outputs" / "runs" / "country_llm_smoke" / "turns.tsv"
-DEFAULT_COUNTRIES = COUNTRY_DIR / "国家エージェント初期値.tsv"
+DEFAULT_COUNTRIES = DOMAIN_PACK_DATA / "country_agents.tsv"
 DEFAULT_OUTPUT = ROOT / "outputs" / "runs" / "country_llm_smoke"
 
 PRESSURE_FIELDS = [

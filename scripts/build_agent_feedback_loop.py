@@ -11,11 +11,14 @@ from typing import Any, Dict, Iterable, List
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA_DIR = ROOT / "docs" / "構造持続理論ベースの新しい文明OSシミュレーション"
+DOMAIN_PACK_DATA = ROOT / "domain_packs" / "agi_youth_japan" / "data"
 DEFAULT_AGENT_TURNS = ROOT / "outputs" / "runs" / "civilization_os_llm_world_connected" / "turns.tsv"
 DEFAULT_JAPAN_STATE = ROOT / "outputs" / "runs" / "country_llm_smoke" / "japan_state.tsv"
 DEFAULT_AUTO_EVENTS = ROOT / "outputs" / "runs" / "country_llm_smoke" / "auto_events.tsv"
 DEFAULT_OUTPUT = ROOT / "outputs" / "runs" / "civilization_os_llm_feedback"
+DEFAULT_AGENT_PANEL = DOMAIN_PACK_DATA / "demo_panel_48.tsv"
+DEFAULT_CHILD_COHORTS = DOMAIN_PACK_DATA / "child_cohorts.tsv"
+DEFAULT_GENERATION_INFLOW_TEMPLATES = DOMAIN_PACK_DATA / "generation_inflow_templates.tsv"
 
 STATE_FIELDS = [
     "geopolitical_risk",
@@ -79,12 +82,48 @@ def rows_by_step(rows: List[Dict[str, str]]) -> Dict[int, List[Dict[str, str]]]:
     return grouped
 
 
-def read_agent_metadata() -> Dict[str, Dict[str, str]]:
+def read_agent_metadata(agent_panel_tsv: Path | None = None) -> Dict[str, Dict[str, str]]:
     rows = [
-        *read_optional_tsv(DATA_DIR / "若者エージェント.tsv"),
-        *read_optional_tsv(DATA_DIR / "現役世代エージェント.tsv"),
+        *read_optional_tsv(DOMAIN_PACK_DATA / "youth_agents.tsv"),
+        *read_optional_tsv(DOMAIN_PACK_DATA / "working_agents.tsv"),
     ]
-    return {row["エージェントID"]: row for row in rows if row.get("エージェントID")}
+    metadata = {row["エージェントID"]: row for row in rows if row.get("エージェントID")}
+    metadata.update(read_generation_metadata())
+    for panel_row in read_optional_tsv(agent_panel_tsv or DEFAULT_AGENT_PANEL):
+        agent_id = panel_row.get("ID", "")
+        if not agent_id.startswith(("A", "W", "YG_")) or agent_id not in metadata:
+            continue
+        patched = dict(metadata[agent_id])
+        population_weight = (
+            panel_row.get("全体代表重み_パーセント")
+            or panel_row.get("代表重み_パーセント")
+        )
+        if population_weight:
+            patched["人口重み_パーセント"] = population_weight
+        metadata[agent_id] = patched
+    return metadata
+
+
+def read_generation_metadata() -> Dict[str, Dict[str, str]]:
+    cohorts = {
+        row.get("コホートID", ""): row
+        for row in read_optional_tsv(DEFAULT_CHILD_COHORTS)
+        if row.get("コホートID")
+    }
+    metadata: Dict[str, Dict[str, str]] = {}
+    for template in read_optional_tsv(DEFAULT_GENERATION_INFLOW_TEMPLATES):
+        agent_id = template.get("生成ID接頭辞", "")
+        cohort = cohorts.get(template.get("流入元コホートID", ""))
+        if not agent_id or not cohort:
+            continue
+        metadata[agent_id] = {
+            "エージェントID": agent_id,
+            "氏名": template.get("表示名方針", "") or cohort.get("表示名", ""),
+            "人口重み_パーセント": cohort.get("代表重み_パーセント", "1.0"),
+            "発信影響重み": "0.8",
+            "ケア責任": "なし",
+        }
+    return metadata
 
 
 def action_signal(row: Dict[str, str], metadata: Dict[str, str], key: str) -> float:
@@ -409,13 +448,14 @@ def main() -> None:
     parser.add_argument("--agent-turns", type=Path, default=DEFAULT_AGENT_TURNS)
     parser.add_argument("--japan-state-tsv", type=Path, default=DEFAULT_JAPAN_STATE)
     parser.add_argument("--auto-events-tsv", type=Path, default=DEFAULT_AUTO_EVENTS)
+    parser.add_argument("--agent-panel-tsv", type=Path, default=DEFAULT_AGENT_PANEL)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
 
     agent_turns = read_tsv(args.agent_turns)
     japan_state_rows = read_tsv(args.japan_state_tsv)
     auto_events = read_optional_tsv(args.auto_events_tsv)
-    metadata_by_id = read_agent_metadata()
+    metadata_by_id = read_agent_metadata(args.agent_panel_tsv)
 
     feedback_rows = build_feedback_rows(agent_turns, metadata_by_id)
     feedback_state_rows = build_feedback_state_rows(japan_state_rows, feedback_rows)

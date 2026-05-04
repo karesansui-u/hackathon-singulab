@@ -4,7 +4,8 @@ description: "現状延長として、既存イベント定義と世界イベン
 
 time:
   start_step: 1
-  steps: 24
+  steps: 71
+  schedule: "${pack}/data/time_schedule.tsv"
 
 scenario_overrides:
   event_intensity_multiplier: 1.0

@@ -6,8 +6,9 @@ language: "ja"
 
 time:
   start_step: 1
-  step_unit: "month"
-  steps: 24
+  step_unit: "mixed"
+  steps: 71
+  schedule: "${pack}/data/time_schedule.tsv"
 
 data:
   agents:
@@ -20,10 +21,29 @@ data:
   cognition_layers: "${pack}/data/cognition_layers.tsv"
   ripple_channel_dictionary: "${pack}/data/ripple_channel_dictionary.tsv"
   world_events: "${pack}/data/world_events.tsv"
+  country_agents: "${pack}/data/country_agents.tsv"
+  country_objective_weights: "${pack}/data/country_objective_weights.tsv"
+  country_to_japan_channels: "${pack}/data/country_to_japan_channels.tsv"
+  organization_agents: "${pack}/data/organization_agents.tsv"
+  organization_decision_schema: "${pack}/data/organization_decision_schema.tsv"
+  organization_to_agent_channels: "${pack}/data/organization_to_agent_channels.tsv"
+  demo_panel: "${pack}/data/demo_panel_48.tsv"
+  demo_panel_48: "${pack}/data/demo_panel_48.tsv"
+  demo_panel_40: "${pack}/data/demo_panel_40.tsv"
+  time_schedule: "${pack}/data/time_schedule.tsv"
+  age_observation_policy: "${pack}/data/age_observation_policy.tsv"
+  child_cohorts: "${pack}/data/child_cohorts.tsv"
+  family_formation_cohorts: "${pack}/data/family_formation_cohort_definitions.tsv"
+  family_formation_states: "${pack}/data/family_formation_states.tsv"
+  lifecycle_transition_rules: "${pack}/data/lifecycle_transition_rules.tsv"
+  family_formation_metrics: "${pack}/data/family_formation_metrics.tsv"
+  generation_flow_rules: "${pack}/data/generation_flow_rules.tsv"
+  generation_inflow_templates: "${pack}/data/generation_inflow_templates.tsv"
 
 prompts:
   system_context: "${pack}/prompts/system_context.md"
   agent_observation: "${pack}/prompts/agent_observation.md"
+  organization_observation: "${pack}/prompts/organization_observation.md"
 
 viewer:
   viewer_id: "future_emotion_map"
