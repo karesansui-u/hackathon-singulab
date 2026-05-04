@@ -316,6 +316,7 @@ def write_manifest(output_dir: Path, args: argparse.Namespace) -> None:
             "japan_state_feedback.tsv",
             "auto_events_with_feedback.tsv",
             "agent_turns.tsv",
+            "scheduled_events_used.tsv",
             "agent_feedback.tsv",
         ],
     }
@@ -365,6 +366,7 @@ def main() -> None:
     country_turns = output_dir / "country_turns.tsv"
     organization_turns = output_dir / "organization_turns.tsv"
     agent_turns = output_dir / "agent_turns.tsv"
+    scheduled_events_used = output_dir / "scheduled_events_used.tsv"
     country_ids = [item.strip() for item in args.country_codes.split(",") if item.strip()]
     organization_ids = [item.strip() for item in args.organization_ids.split(",") if item.strip()]
     agent_ids = [item.strip() for item in args.agent_ids.split(",") if item.strip()]
@@ -502,6 +504,7 @@ def main() -> None:
             run_command(agent_cmd, args.dry_run, log_path, step, "agent_llm")
             if not args.dry_run:
                 append_tsv(agent_step_dir / "turns.tsv", agent_turns)
+                append_tsv(agent_step_dir / "scheduled_events_used.tsv", scheduled_events_used)
 
         if args.dry_run or feedback_ready(agent_turns):
             build_agent_feedback(

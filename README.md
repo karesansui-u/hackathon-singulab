@@ -101,6 +101,8 @@ python3 scripts/run_closed_loop_llm_demo.py \
 | `structure_intervention` | 政策イベント（P系）も含む、構造持続論ベースの介入あり |
 | `all` | 上記両方を順に実行 |
 
+生成後は `scheduled_events_used.tsv` に、そのステップで個人LLMへ渡した予定イベントを保存します。介入あり/なし比較では、P系政策イベントが実際に入力されたかをこのファイルで確認できます。
+
 ### 主なオプション
 
 | オプション | デフォルト | 説明 |

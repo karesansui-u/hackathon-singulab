@@ -1,0 +1,10 @@
+ルールID	名称	発行対象	基本式	比較対象	検証係数	不発行条件	負の調整	主な参照ファイル	備考
+NR01	構造側純消耗抑制nat	施策,組織判断,地域活動	max(0, B_baseline - B_after)	同一ステップ・同一対象の介入なしrun	寄与率×検証信頼度×持続性係数	対象G,V,m,時間地平が事前固定されていない	別層の未来経路を潰した分を控除	structure_maintenance_conditions.tsv,structure_sustain_channels.tsv	最小の発行候補
+NR02	構造持続ポテンシャル改善nat	施策パッケージ,制度設計	max(0, log(S_after / S_baseline))	介入なしrunまたは凍結された基準シナリオ	寄与率×検証信頼度×外部不経済控除	Mが増えてもBが悪化し権利縮小や排除で安定している	短期安定のための強制・排除を無効化	structure_maintenance_conditions.tsv	資源側Mも含める上位式
+NR03	修復経路回復nat	相談,医療,住居,訓練,復職支援	max(0, r_after - r_baseline)	同じショックを受けた対象層の基準run	到達率×継続率×再発防止係数	支援到達者だけ改善し未到達者が悪化	待機列・申請負荷・対象外怒りを控除	structure_sustain_channels.tsv	困った後に戻れる経路を評価
+NR04	役割再獲得nat	学び直し,移行雇用,社会持続活動	max(0, role_path_after - role_path_baseline) をnat近似	自動化ショック下の介入なしrun	雇用接続率×本人納得度×持続性係数	訓練参加だけで実行経路が増えていない	低賃金固定・名目役割化を控除	structure_sustain_channels.tsv	P03/P06/組織判断に効く
+NR05	次世代継承nat	教育接続,地域維持,家族形成支援	max(0, next_gen_trust_after - next_gen_trust_baseline) をnat近似	子どもコホート流入時の基準run	世代重み×信頼継承係数×時間割引	現在世代だけ改善し次世代重みが減る	少子化・格差固定・地域喪失を控除	child_cohorts.tsv,generation_flow_rules.tsv	40年デモの発行候補
+NR06	逆進性補正	通貨制度そのもの	発行済natの分布補正	補正なし制度	低所得・ケア責任・地方重み	高所得・高時間余力層へ発行が偏る	偏りが強い場合は発行保留または再配分	structure_sustain_channels.tsv	P10に対応
+NR07	二重計上禁止	全ルール	同一の構造改善は一度だけ発行	全チャネル横断	監査ID×対象G×時間地平	同じ活動を時間・成果・波及で重複請求	重複分を0にする	run manifest,ledger	実通貨化時の必須監査
+NR08	負の発行・返還	全ルール	min(0, log(S_after / S_baseline))	過去発行時の凍結基準	遅延副作用係数×責任範囲	後続ステップで構造消耗が判明した	返還,次期控除,発行停止	agent_feedback,auto_events	制度の信頼性確保
+NR09	ケア・子育て基盤nat	家族介護,出産子育て支援,代替ケア,所得保障	max(0, care_family_path_after - care_family_path_baseline) をnat近似	同じ家族形成・ケア制約を持つ基準run	本人選好確認×到達率×持続性係数×非強制係数	出生数や家族介護実績だけを成果にしている	出生圧力,家族責任強化,ケア負担固定を控除	structure_sustain_channels.tsv,structure_sustain_guardrails.tsv	出産・子育て・介護を家庭内負担でなく構造持続活動として扱う

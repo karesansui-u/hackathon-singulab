@@ -153,6 +153,32 @@ def active_events(events: List[Dict[str, str]], step: int) -> List[Dict[str, str
     return active
 
 
+def scheduled_event_usage_rows(
+    events: List[Dict[str, str]],
+    start_step: int,
+    steps: int,
+    scenario_mode: str,
+) -> List[Dict[str, Any]]:
+    rows: List[Dict[str, Any]] = []
+    for step in range(start_step, start_step + steps):
+        for event in active_events(events, step):
+            rows.append({
+                "step": step,
+                "scenario_mode": scenario_mode,
+                "event_id": event.get("イベントID", ""),
+                "event_type": event.get("区分", ""),
+                "event_name": event.get("イベント名", ""),
+                "start_step": event.get("開始ステップ", ""),
+                "end_step": event.get("終了ステップ", ""),
+                "intensity_0to1": event.get("強度_0to1", ""),
+                "probability_0to1": event.get("発生確率_0to1", ""),
+                "target": event.get("対象", ""),
+                "direction": event.get("主な影響方向", ""),
+                "description": event.get("説明", ""),
+            })
+    return rows
+
+
 def build_time_schedule_by_step(rows: List[Dict[str, str]]) -> Dict[int, Dict[str, str]]:
     schedule: Dict[int, Dict[str, str]] = {}
     for row in rows:
@@ -1167,6 +1193,30 @@ def main() -> None:
             "carryover_concern",
         ],
     )
+    scheduled_events_used_path = args.output_dir / "scheduled_events_used.tsv"
+    write_tsv(
+        scheduled_events_used_path,
+        scheduled_event_usage_rows(
+            event_rows,
+            args.start_step,
+            args.steps,
+            args.scenario_mode,
+        ),
+        [
+            "step",
+            "scenario_mode",
+            "event_id",
+            "event_type",
+            "event_name",
+            "start_step",
+            "end_step",
+            "intensity_0to1",
+            "probability_0to1",
+            "target",
+            "direction",
+            "description",
+        ],
+    )
     manifest = {
         "kind": "civilization_os_llm_smoke",
         "model": args.model,
@@ -1186,7 +1236,12 @@ def main() -> None:
         "previous_agent_turns_tsv": str(args.previous_agent_turns_tsv or ""),
         "agents": list(agents_by_id),
         "generation_agents": [row["エージェントID"] for row in generation_agents],
-        "outputs": ["turns.tsv", "agent_states.jsonl", "raw_claude_response.json"],
+        "outputs": [
+            "turns.tsv",
+            "scheduled_events_used.tsv",
+            "agent_states.jsonl",
+            "raw_claude_response.json",
+        ],
     }
     (args.output_dir / "manifest.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2),

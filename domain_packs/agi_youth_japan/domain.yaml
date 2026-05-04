@@ -39,11 +39,22 @@ data:
   family_formation_metrics: "${pack}/data/family_formation_metrics.tsv"
   generation_flow_rules: "${pack}/data/generation_flow_rules.tsv"
   generation_inflow_templates: "${pack}/data/generation_inflow_templates.tsv"
+  structure_maintenance_conditions: "${pack}/data/structure_maintenance_conditions.tsv"
+  structure_sustain_channels: "${pack}/data/structure_sustain_channels.tsv"
+  structure_sustain_currency_rules: "${pack}/data/structure_sustain_currency_rules.tsv"
+  structure_sustain_penalty_rules: "${pack}/data/structure_sustain_penalty_rules.tsv"
+  structure_sustain_guardrails: "${pack}/data/structure_sustain_guardrails.tsv"
+  structure_sustain_automation_roles: "${pack}/data/structure_sustain_automation_roles.tsv"
+  structure_sustain_anomaly_audit: "${pack}/data/structure_sustain_anomaly_audit.tsv"
+  structure_sustain_finance_rules: "${pack}/data/structure_sustain_finance_rules.tsv"
+  structure_stress_test_agents: "${pack}/data/structure_stress_test_agents.tsv"
+  structure_stress_test_run_policy: "${pack}/data/structure_stress_test_run_policy.tsv"
 
 prompts:
   system_context: "${pack}/prompts/system_context.md"
   agent_observation: "${pack}/prompts/agent_observation.md"
   organization_observation: "${pack}/prompts/organization_observation.md"
+  structure_stress_agent_observation: "${pack}/prompts/structure_stress_agent_observation.md"
 
 viewer:
   viewer_id: "future_emotion_map"
