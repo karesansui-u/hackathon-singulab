@@ -2289,7 +2289,7 @@
     <header class="topbar">
       <div class="brand">
         <h1 class="brand-title">未来感情・行動シミュレーション</h1>
-        <p class="brand-subtitle">AGI社会移行における若者・家族形成・次世代の希望経路と構造支援</p>
+        <p class="brand-subtitle">シンギュラリティ後の社会移行を、若者・家族形成・次世代の希望経路と構造支援から検証する</p>
       </div>
       <nav class="view-nav" aria-label="デモ画面">
         <a href="./future_emotion_map.html" aria-current="page">未来感情</a>
@@ -2328,8 +2328,8 @@
           <option value="sustain" selected>構造持続通貨 介入</option>
           <option value="birthGrant">構造持続+出産 介入</option>
           <option value="hopeFamily">構造持続+希望 介入</option>
-          <option value="policyNoSustain">LLM政策探索（持続なし）</option>
-          <option value="policyWithSustain">LLM政策探索（持続あり）</option>
+          <option value="policyNoSustain">政策設計AI介入（新通貨なし）</option>
+          <option value="policyWithSustain">政策設計AI介入（新通貨あり）</option>
         </select>
       </label>
       <section class="scenario-brief" aria-label="選択中のシミュレーション概要">
@@ -2657,7 +2657,7 @@
         scheduledEventPaths: ["../data/runs/birth_grant_only_83steps_panel48/scheduled_events_used.tsv"]
       },
       policyNoSustain: {
-        label: "LLM政策探索（持続なし）",
+        label: "政策設計AI介入（新通貨なし）",
         agentTurnsPaths: ["../data/runs/policy_search_no_sustain_12steps_panel48/agent_turns.tsv"],
         countryTurnsPaths: ["../data/runs/policy_search_no_sustain_12steps_panel48/country_turns.tsv"],
         autoEventPaths: [
@@ -2667,7 +2667,7 @@
         scheduledEventPaths: ["../data/runs/policy_search_no_sustain_12steps_panel48/scheduled_events_used.tsv"]
       },
       policyWithSustain: {
-        label: "LLM政策探索（持続あり）",
+        label: "政策設計AI介入（新通貨あり）",
         agentTurnsPaths: ["../data/runs/policy_search_with_sustain_12steps_panel48/agent_turns.tsv"],
         countryTurnsPaths: ["../data/runs/policy_search_with_sustain_12steps_panel48/country_turns.tsv"],
         autoEventPaths: [
@@ -2747,9 +2747,9 @@
         ]
       },
       policyNoSustain: {
-        title: "LLM政策探索（持続なし）",
-        summary: "構造持続通貨の概念を使わず、LLM政策プランナーが副作用、二極化、政策疲労を見ながら、現実的な補助金、説明、窓口、規制緩和、手続き簡素化を打ち続ける比較です。",
-        lead: "このシミュレーションは、LLMに『ありとあらゆる現実的な手』を探させる一方で、構造持続通貨やnat報酬は使えない条件にしています。政策を増やせば救えるのか、それとも財政不安、対象外感、手続き疲れ、制度不信が膨らむのかを観測します。",
+        title: "政策設計AI介入（新通貨なし）",
+        summary: "構造持続通貨の概念を使わず、政策設計AIが副作用、二極化、政策疲労を見ながら、現実的な補助金、説明、窓口、規制緩和、手続き簡素化を打ち続ける比較です。",
+        lead: "このシミュレーションは、政策設計AIに『ありとあらゆる現実的な手』を探させる一方で、構造持続通貨やnat報酬は使えない条件にしています。政策を増やせば救えるのか、それとも財政不安、対象外感、手続き疲れ、制度不信が膨らむのかを観測します。",
         sections: [
           {
             title: "検証している問い",
@@ -2770,9 +2770,9 @@
         ]
       },
       policyWithSustain: {
-        title: "LLM政策探索（持続あり）",
-        summary: "LLM政策プランナーが副作用を監査しながら、構造持続通貨、社会維持活動報酬、住居、ケア、学び直し、地域更新を組み替え続ける比較です。",
-        lead: "このシミュレーションは、構造持続の概念を最初から正解扱いしません。通常政策と同じく副作用を出し、二極化や政策疲労を観測したうえで、LLMが施策の順序、対象、説明、補完策を調整できるかを見ます。",
+        title: "政策設計AI介入（新通貨あり）",
+        summary: "政策設計AIが副作用を監査しながら、構造持続通貨、社会維持活動報酬、住居、ケア、学び直し、地域更新を組み替え続ける比較です。",
+        lead: "このシミュレーションは、構造持続の概念を最初から正解扱いしません。通常政策と同じく副作用を出し、二極化や政策疲労を観測したうえで、政策設計AIが施策の順序、対象、説明、補完策を調整できるかを見ます。",
         sections: [
           {
             title: "検証している問い",
@@ -2879,7 +2879,7 @@
           "イベント: 世界圧力、政策介入、社会反応、組織判断、長期評価を分け、何が効いたかを後から読めるようにしています。",
           "観測: 感情だけでなく、行動、内心、友達との会話、SNS発信、因果、持ち越し記憶を固定スキーマの観測データとして保存しています。",
           "創発: LLMには結論を命令せず、状態と文脈を情報として渡し、エージェントが信じる、疑う、使う、怒る、動かない分岐を残します。",
-          "検証: 介入なし、出産支援のみ、構造持続通貨、構造持続+出産、構造持続+希望、LLM政策探索の持続なし/ありを同じ時点で比較し、効いた施策と効かなかった施策を両方説明できます。"
+          "検証: 介入なし、出産支援のみ、構造持続通貨、構造持続+出産、構造持続+希望、政策設計AI介入の新通貨なし/ありを同じ時点で比較し、効いた施策と効かなかった施策を両方説明できます。"
         ]
       },
       {
@@ -3113,14 +3113,14 @@
         "希望化には構造条件が不足"
       ],
       policyNoSustain: [
-        "LLMが通常政策を探索開始",
+        "政策設計AIが通常政策を設計開始",
         "補助金・説明・窓口を順次投入",
         "対象外感と政策疲労を監査",
         "副作用に応じて簡素化へ修正",
         "構造概念なしの限界を比較"
       ],
       policyWithSustain: [
-        "LLMが構造持続ありで探索開始",
+        "政策設計AIが新通貨ありで設計開始",
         "役割・報酬・ケアを束ね直す",
         "非対象者の参加経路を補完",
         "副作用を見て施策順序を調整",
