@@ -163,10 +163,6 @@
       background: var(--surface-alt);
     }
 
-    #agentFilterTabs {
-      grid-template-columns: repeat(4, 1fr);
-    }
-
     .segmented button {
       min-height: 38px;
       padding: 0 14px;
@@ -181,6 +177,20 @@
       background: var(--ink);
       color: #ffffff;
       font-weight: 700;
+    }
+
+    .data-badge {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 12px;
+      background: var(--surface-alt);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
     }
 
     .timeline {
@@ -267,6 +277,13 @@
       margin: 0;
       font-size: 16px;
       line-height: 1.2;
+      font-weight: 800;
+    }
+
+    .panel-title-sub {
+      margin-left: 8px;
+      color: var(--muted);
+      font-size: 12px;
       font-weight: 800;
     }
 
@@ -593,14 +610,6 @@
       min-width: 0;
     }
 
-    .world-pressure-link {
-      color: var(--blue);
-      font-size: 11px;
-      font-weight: 800;
-      text-decoration: none;
-      white-space: nowrap;
-    }
-
     .world-pressure-chips {
       display: flex;
       flex-wrap: wrap;
@@ -791,7 +800,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      max-height: 92px;
+      max-height: 150px;
       overflow: auto;
     }
 
@@ -1096,7 +1105,6 @@
       </div>
       <nav class="view-nav" aria-label="デモ画面">
         <a href="./future_emotion_map.html" aria-current="page">未来感情</a>
-        <a href="./country_llm_demo.html">世界国家</a>
       </nav>
       <section class="top-metrics" aria-label="summary metrics">
         <div class="metric">
@@ -1119,18 +1127,8 @@
     </header>
 
     <section class="controls" aria-label="simulation controls">
-      <div class="segmented" id="scenarioTabs">
-        <button type="button" data-scenario="baseline" aria-pressed="true">介入なし</button>
-        <button type="button" data-scenario="sustain" aria-pressed="false">構造持続介入</button>
-      </div>
-      <div class="segmented" id="agentFilterTabs">
-        <button type="button" data-agent-filter="llm" aria-pressed="true">LLM対象のみ</button>
-        <button type="button" data-agent-filter="all" aria-pressed="false">全体</button>
-        <button type="button" data-agent-filter="youth" aria-pressed="false">若者</button>
-        <button type="button" data-agent-filter="family" aria-pressed="false">家族形成</button>
-        <button type="button" data-agent-filter="generation" aria-pressed="false">次世代</button>
-        <button type="button" data-agent-filter="auxiliary" aria-pressed="false">補助観測</button>
-      </div>
+      <div class="data-badge" aria-label="シナリオ">構造持続介入run</div>
+      <div class="data-badge" aria-label="表示対象">LLM観測rowのみ</div>
     </section>
 
     <section class="content">
@@ -1211,7 +1209,6 @@
             <div class="signal-label">世界圧力</div>
             <div class="world-pressure-head">
               <div class="world-pressure-value" id="worldPressureValue">読み込み中</div>
-              <a class="world-pressure-link" href="./country_llm_demo.html">詳細</a>
             </div>
             <div class="world-pressure-chips" id="worldPressureChips"></div>
           </div>
@@ -1251,11 +1248,11 @@
       <aside class="side">
         <section class="panel detail-panel">
           <header class="panel-header">
-            <h2 class="panel-title">選択エージェント</h2>
+            <h2 class="panel-title">選択エージェント<span class="panel-title-sub" id="agentCountBadge"></span></h2>
           </header>
           <div class="detail-body">
             <div class="agent-search">
-              <input id="agentSearchInput" type="search" placeholder="ID・氏名で検索">
+              <input id="agentSearchInput" type="search" placeholder="ID・氏名で検索（表示中のLLM対象）">
               <div class="agent-search-results" id="agentSearchResults"></div>
             </div>
             <div class="selected-emotion-card" id="selectedEmotionCard">
@@ -1316,25 +1313,15 @@
     const workingTsvPath = "../domain_packs/agi_youth_japan/data/working_agents.tsv";
     const timeScheduleTsvPath = "../domain_packs/agi_youth_japan/data/time_schedule.tsv";
     const llmTurnsTsvPaths = [
-      "../data/runs/structure_intervention_100years_panel48_midprompt/agent_turns.tsv",
-      "../data/runs/structure_intervention_71steps_panel48_midprompt_20260505_031850/agent_turns.tsv",
-      "../data/runs/closed_loop_40panel_step1_smoke/agent_turns.tsv"
+      "../data/runs/structure_intervention_100years_panel48_midprompt/agent_turns.tsv"
     ];
     const llmTurnsOverlayPaths = [
     ];
     const countryTurnsTsvPaths = [
-      "../data/runs/structure_intervention_100years_panel48_midprompt/country_turns.tsv",
-      "../data/runs/structure_intervention_71steps_panel48_midprompt_20260505_031850/country_turns.tsv",
-      "../data/runs/closed_loop_40panel_step1_smoke/country_turns.tsv",
-      "../data/runs/closed_loop_llm_24steps_light/country_turns.tsv",
-      "../data/runs/country_llm_smoke/turns.tsv"
+      "../data/runs/structure_intervention_100years_panel48_midprompt/country_turns.tsv"
     ];
     const autoEventTsvPaths = [
-      "../data/runs/structure_intervention_100years_panel48_midprompt/auto_events_with_feedback.tsv",
-      "../data/runs/structure_intervention_71steps_panel48_midprompt_20260505_031850/auto_events_with_feedback.tsv",
-      "../data/runs/closed_loop_40panel_step1_smoke/auto_events_with_organization.tsv",
-      "../data/runs/closed_loop_40panel_step1_smoke/auto_events_with_feedback.tsv",
-      "../data/runs/closed_loop_llm_24steps_light/auto_events_with_feedback.tsv"
+      "../data/runs/structure_intervention_100years_panel48_midprompt/auto_events_with_feedback.tsv"
     ];
     const rooms = {
       caution: { xMin: 72, xMax: 483, yMin: 144, yMax: 326 },
@@ -1382,7 +1369,7 @@
     ];
 
     const state = {
-      scenario: "baseline",
+      scenario: "sustain",
       turn: 0,
       agentFilter: "llm",
       selectedId: "Y01",
@@ -1459,10 +1446,8 @@
         }
         try {
           const autoEventRows = await loadFirstAvailableTsv(autoEventTsvPaths);
-          eventSchedule = [
-            ...eventSchedule,
-            ...buildAutoEventSchedule(autoEventRows)
-          ];
+          const autoEventSchedule = buildAutoEventSchedule(autoEventRows);
+          if (autoEventSchedule.length) eventSchedule = autoEventSchedule;
         } catch (autoEventError) {
           console.warn("Auto events were not loaded; using static event schedule.", autoEventError);
         }
@@ -1538,6 +1523,7 @@
     function buildAutoEventSchedule(rows) {
       return rows
         .filter((row) => row.step && row["イベント名"])
+        .filter((row) => row["発生源"] !== "国家LLMリスク段階")
         .map((row) => {
           const category = row["区分"] || "";
           const name = row["イベント名"] || "";
@@ -2374,9 +2360,7 @@
             ? "補助観測の支配状態"
             : state.agentFilter === "youth"
               ? "若者の支配状態"
-              : state.agentFilter === "all"
-                ? "全体の支配状態"
-                : "LLM対象の支配状態";
+              : "LLM対象の支配状態";
       document.getElementById("dominantSignalLabel").textContent = signalLabel;
       document.getElementById("youthSignal").textContent = `${categoryByKey[signalTop].label}が中心`;
 
@@ -2584,6 +2568,8 @@
 
     function renderAgentSearch(rows) {
       if (!agentSearchResults) return;
+      const countBadge = document.getElementById("agentCountBadge");
+      if (countBadge) countBadge.textContent = `表示中 ${rows.length}体`;
 
       const query = (agentSearchInput?.value || "").trim().toLowerCase();
       const orderedRows = [...rows].sort((a, b) => {
@@ -2598,7 +2584,7 @@
           const haystack = `${row.id} ${row.name || ""} ${row.persona || ""} ${row.label || ""}`.toLowerCase();
           return !query || haystack.includes(query);
         })
-        .slice(0, query ? 14 : 8);
+        .slice(0, query ? 40 : 32);
 
       if (!matchedRows.length) {
         agentSearchResults.innerHTML = `<span class="agent-summary">該当なし</span>`;
@@ -2684,13 +2670,13 @@
       }
     }
 
-    document.getElementById("scenarioTabs").addEventListener("click", (event) => {
+    document.getElementById("scenarioTabs")?.addEventListener("click", (event) => {
       const button = event.target.closest("button[data-scenario]");
       if (!button) return;
       setScenario(button.dataset.scenario);
     });
 
-    document.getElementById("agentFilterTabs").addEventListener("click", (event) => {
+    document.getElementById("agentFilterTabs")?.addEventListener("click", (event) => {
       const button = event.target.closest("button[data-agent-filter]");
       if (!button) return;
       setAgentFilter(button.dataset.agentFilter);
