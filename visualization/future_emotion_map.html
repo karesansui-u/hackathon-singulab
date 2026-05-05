@@ -2587,14 +2587,10 @@
       },
       birthOnly: {
         label: "出産支援のみ",
-        agentTurnsPaths: ["../outputs/runs/no_intervention_71steps_panel48/agent_turns.tsv"],
-        countryTurnsPaths: ["../outputs/runs/no_intervention_71steps_panel48/country_turns.tsv"],
-        autoEventPaths: ["../outputs/runs/no_intervention_71steps_panel48/auto_events_with_feedback.tsv"],
-        scheduledEventPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/scheduled_events_used.tsv"],
-        scheduledEventFilter: (row) => {
-          const eventId = row.event_id || "";
-          return eventId === "P04" || eventId.startsWith("BP");
-        }
+        agentTurnsPaths: ["../outputs/runs/birth_grant_only_83steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../outputs/runs/birth_grant_only_83steps_panel48/country_turns.tsv"],
+        autoEventPaths: ["../outputs/runs/birth_grant_only_83steps_panel48/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../outputs/runs/birth_grant_only_83steps_panel48/scheduled_events_used.tsv"]
       },
       policyNoSustain: {
         label: "LLM政策探索（持続なし）",
@@ -3118,7 +3114,6 @@
     let runDataByScenario = new Map();
     let llmTurnsByKey = new Map();
     let llmAgentIds = new Set();
-    let fallbackPanelAgentIds = new Set();
     let renderedRowsById = new Map();
     let timeScheduleByStep = new Map();
     let timeScheduleMaxStep = 0;
@@ -3168,9 +3163,12 @@
         }
         const loadedRuns = await loadRunDataByScenario(worldTimelineEvents);
         runDataByScenario = loadedRuns.runDataByScenario;
-        fallbackPanelAgentIds = new Set(loadedRuns.allLlmRows.map((row) => row.agent_id).filter(Boolean));
         agents = mergeLlmOnlyAgents(agents, loadedRuns.allLlmRows);
-        if (!runConfigs[state.scenario]) state.scenario = "sustain";
+        if (!runDataByScenario.has(state.scenario)) {
+          state.scenario = runDataByScenario.has("sustain")
+            ? "sustain"
+            : runDataByScenario.keys().next().value || state.scenario;
+        }
         applyRunDataForScenario(state.scenario);
         const defaultAgent = state.agentFilter === "llm"
           ? agents.find((agent) => llmAgentIds.has(agent.id))
@@ -3238,11 +3236,11 @@
       const runData = runDataByScenario.get(scenario);
       if (!runData) {
         llmTurnsByKey = new Map();
-        llmAgentIds = new Set(fallbackPanelAgentIds);
+        llmAgentIds = new Set();
         countryTurnsByStep = new Map();
         countryMaxStep = 0;
         eventSchedule = fallbackScheduleForScenario(scenario);
-        state.agentFilter = llmAgentIds.size ? "llm" : "all";
+        state.agentFilter = "all";
         minTurn = timeScheduleMaxStep ? 1 : 0;
         maxTurn = Math.min(timeScheduleMaxStep || demoMaxTurn, demoMaxTurn);
         state.turn = clamp(state.turn || minTurn, minTurn, maxTurn);
@@ -5477,10 +5475,11 @@
     }
 
     function setScenario(scenario) {
-      if (!runConfigs[scenario]) {
+      if (!scenarioIsSelectable(scenario)) {
         syncScenarioSelect();
         return;
       }
+      stopPlayback();
       state.scenario = scenario;
       applyRunDataForScenario(scenario);
       syncAgentFilterTabs();
@@ -5488,14 +5487,18 @@
       render();
     }
 
+    function scenarioIsSelectable(scenario) {
+      return Boolean(runConfigs[scenario] && runDataByScenario.has(scenario));
+    }
+
     function syncScenarioSelect() {
       const select = document.getElementById("scenarioSelect");
       if (select) {
         Array.from(select.options).forEach((option) => {
-          option.disabled = !runConfigs[option.value];
+          option.disabled = !scenarioIsSelectable(option.value);
         });
         select.value = state.scenario;
-        select.disabled = false;
+        select.disabled = !runDataByScenario.size;
       }
       renderScenarioBrief();
     }
@@ -5628,6 +5631,14 @@
         window.clearInterval(state.timer);
         state.timer = null;
       }
+    }
+
+    function stopPlayback() {
+      if (!state.playing && !state.timer) return;
+      state.playing = false;
+      window.clearInterval(state.timer);
+      state.timer = null;
+      if (playButton) playButton.textContent = "▶";
     }
 
     function handleScenarioSelection(event) {
