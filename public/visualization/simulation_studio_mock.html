@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>制度変更シミュレーション設計 モック</title>
+  <title>制度変更シミュレーション設計</title>
   <style>
     :root {
       color-scheme: light;
@@ -552,6 +552,85 @@
       font-weight: 750;
     }
 
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .result-table th,
+    .result-table td {
+      border-bottom: 1px solid var(--line);
+      padding: 7px 6px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .result-table th {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+      white-space: nowrap;
+      background: #f8fafc;
+    }
+
+    .result-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .score-pill {
+      display: inline-flex;
+      min-width: 34px;
+      min-height: 22px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 2px 7px;
+      font-size: 10px;
+      font-weight: 900;
+      background: #eef2f7;
+      color: var(--ink);
+    }
+
+    .score-pill.good {
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .score-pill.caution {
+      background: var(--amber-soft);
+      color: var(--amber);
+    }
+
+    .score-pill.danger {
+      background: var(--rose-soft);
+      color: var(--rose);
+    }
+
+    .insight-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .insight-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 10px;
+      background: #fbfdff;
+      font-size: 11px;
+      line-height: 1.45;
+      font-weight: 750;
+    }
+
+    .insight-item strong {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
     @media (max-width: 1220px) {
       .workspace {
         grid-template-columns: minmax(320px, 0.92fr) minmax(420px, 1.08fr);
@@ -599,37 +678,37 @@
   <main class="app">
     <header class="topbar">
       <div class="brand">
-        <h1>制度変更シミュレーション設計</h1>
+        <h1>制度変更シミュレーション作成スタジオ</h1>
         <span class="brand-meta">Demo 2</span>
       </div>
       <div class="top-actions">
-        <span class="status-pill">API未接続</span>
+        <span class="status-pill" id="statusPill">ブラウザ内生成</span>
         <a class="nav-link" href="future_emotion_map.html">ビューア</a>
-        <button class="button" type="button">保存</button>
-        <button class="button primary" type="button" disabled>生成</button>
+        <button class="button" type="button" id="saveButton">JSON保存</button>
+        <button class="button primary" type="button" id="generateButton">生成</button>
       </div>
     </header>
 
     <section class="metrics" aria-label="draft metrics">
       <article class="metric">
         <div class="metric-label">対象ドメイン</div>
-        <div class="metric-value">AGI若者</div>
+        <div class="metric-value">企業HR</div>
       </article>
       <article class="metric">
         <div class="metric-label">観測step</div>
-        <div class="metric-value">12</div>
+        <div class="metric-value" id="metricSteps">20</div>
       </article>
       <article class="metric">
-        <div class="metric-label">施策数</div>
-        <div class="metric-value">3</div>
+        <div class="metric-label">不満リスク</div>
+        <div class="metric-value" id="metricDissatisfaction">0</div>
       </article>
       <article class="metric">
-        <div class="metric-label">検証状態</div>
-        <div class="metric-value">OK</div>
+        <div class="metric-label">退職意向</div>
+        <div class="metric-value" id="metricResignation">0</div>
       </article>
       <article class="metric">
-        <div class="metric-label">比較run</div>
-        <div class="metric-value">5</div>
+        <div class="metric-label">モチベーション</div>
+        <div class="metric-value" id="metricMotivation">0</div>
       </article>
     </section>
 
@@ -637,64 +716,75 @@
       <section class="panel">
         <div class="panel-head">
           <div>
-            <h2 class="panel-title">問いと条件</h2>
-            <div class="panel-sub">draft_20260505_001</div>
+            <h2 class="panel-title">検証設計</h2>
+            <div class="panel-sub">同じ設定は同じrun_requestで再現</div>
           </div>
         </div>
         <div class="panel-body">
           <div class="field">
-            <label for="domainPack">ドメインパック</label>
+            <label for="domainPack">検証テンプレート</label>
             <select id="domainPack">
-              <option>agi_youth_japan</option>
-              <option disabled>company_policy_demo</option>
-              <option disabled>local_infra_demo</option>
+              <option value="enterprise_hr_policy_change">企業の人事制度変更</option>
+              <option value="agi_youth_japan" disabled>若者AGI・家族形成</option>
+              <option value="local_policy_change" disabled>自治体の制度変更</option>
             </select>
           </div>
           <div class="field">
-            <label for="scenarioTitle">シナリオ名</label>
-            <input id="scenarioTitle" type="text" value="若者希望+出産支援パッケージ">
+            <label for="policyType">制度タイプ</label>
+            <select id="policyType">
+              <option value="ai_evaluation">AI評価制度</option>
+              <option value="compensation">報酬・等級制度</option>
+              <option value="work_style">出社/リモート方針</option>
+              <option value="genai_rollout">生成AI導入</option>
+              <option value="manager_system">管理職制度</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="scenarioTitle">検証名</label>
+            <input id="scenarioTitle" type="text" value="AI評価制度 段階導入">
           </div>
           <div class="field">
             <label for="question">検証したい問い</label>
-            <textarea id="question">若者が将来に希望を持ち、子どもを持つ選択肢を失わない政策を試したい。希望、制度信頼、子ども意向、撤退圧の変化を見る。</textarea>
+            <textarea id="question">AI評価制度を導入したい。社員が監視や不公平と受け取らず、退職者を増やさず、採用にもプラスになる説明順序とガードレールを見たい。</textarea>
           </div>
           <div class="field">
-            <label>実行レンジ</label>
-            <div class="segmented" aria-label="run length">
-              <button type="button" aria-pressed="true">12 step</button>
-              <button type="button" aria-pressed="false">24 step</button>
-              <button type="button" aria-pressed="false">83 step</button>
-            </div>
+            <label for="stepCount">観測ステップ（1-100）</label>
+            <input id="stepCount" type="number" min="1" max="100" value="20">
           </div>
           <div class="field">
-            <label for="target">対象セグメント</label>
+            <label for="reproSeed">再現性ID</label>
+            <input id="reproSeed" type="text" value="hr-ai-eval-v1">
+          </div>
+          <div class="field">
+            <label for="target">重点的に見る社員層</label>
             <select id="target">
-              <option>15-22歳・23-40歳・次世代コホート</option>
-              <option>若者のみ</option>
-              <option>家族形成世代のみ</option>
+              <option value="all">全社員代表セグメント</option>
+              <option value="early">若手中心</option>
+              <option value="manager">管理職中心</option>
+              <option value="working_parent">育児・ケア責任層中心</option>
             </select>
           </div>
           <div class="impact-map">
             <div class="control-label">観測指標</div>
             <div class="impact-row">
-              <span>希望</span>
-              <div class="bar"><span style="--value: 72%"></span></div>
-              <span>72</span>
+              <span>不満</span>
+              <div class="bar"><span id="barDissatisfaction" style="--value: 38%; background: var(--amber)"></span></div>
+              <span id="valueDissatisfaction">38</span>
             </div>
             <div class="impact-row">
-              <span>制度信頼</span>
-              <div class="bar"><span style="--value: 64%; background: var(--blue)"></span></div>
-              <span>64</span>
+              <span>退職意向</span>
+              <div class="bar"><span id="barResignation" style="--value: 24%; background: var(--rose)"></span></div>
+              <span id="valueResignation">24</span>
             </div>
             <div class="impact-row">
-              <span>子ども意向</span>
-              <div class="bar"><span style="--value: 58%; background: var(--green)"></span></div>
-              <span>58</span>
+              <span>モチベ</span>
+              <div class="bar"><span id="barMotivation" style="--value: 66%; background: var(--green)"></span></div>
+              <span id="valueMotivation">66</span>
             </div>
             <div class="impact-row">
-              <span>撤退圧</span>
-              <div class="bar"><span style="--value: 31%; background: var(--rose)"></span></div>
-              <span>31</span>
+              <span>公正感</span>
+              <div class="bar"><span id="barFairness" style="--value: 62%; background: var(--blue)"></span></div>
+              <span id="valueFairness">62</span>
             </div>
           </div>
         </div>
@@ -703,94 +793,94 @@
       <section class="panel">
         <div class="panel-head">
           <div>
-            <h2 class="panel-title">施策パッケージ</h2>
-            <div class="panel-sub">scenario_extension</div>
+            <h2 class="panel-title">設計パラメータ</h2>
+            <div class="panel-sub">制度変更の届き方を調整</div>
           </div>
-          <button class="button" type="button">追加</button>
+          <button class="button" type="button" id="resetButton">初期値</button>
         </div>
         <div class="panel-body">
           <div class="policy-list">
             <article class="policy-item">
               <div class="policy-top">
                 <div>
-                  <div class="policy-name">住居・休息・代替ケア支援</div>
-                  <div class="policy-meta">若者・家族形成世代 / step 61-83</div>
+                  <div class="policy-name">制度変更の影響度</div>
+                  <div class="policy-meta">低: 限定試行 / 高: 評価・処遇に強く反映</div>
                 </div>
-                <span class="policy-chip">制度支援</span>
+                <span class="policy-chip">変更幅</span>
               </div>
               <div class="policy-grid">
                 <div class="mini-stat">
-                  <div class="mini-label">開始</div>
-                  <div class="mini-value">61</div>
+                  <div class="mini-label">導入</div>
+                  <div class="mini-value">3</div>
                 </div>
                 <div class="mini-stat">
-                  <div class="mini-label">終了</div>
-                  <div class="mini-value">83</div>
+                  <div class="mini-label">観測</div>
+                  <div class="mini-value" id="policyEndStep">20</div>
                 </div>
                 <div class="mini-stat">
-                  <div class="mini-label">強度</div>
-                  <div class="mini-value">0.72</div>
+                  <div class="mini-label">影響度</div>
+                  <div class="mini-value" id="evalIntensityValue">0.65</div>
                 </div>
               </div>
               <div class="range-row">
-                <input type="range" min="0" max="100" value="72" aria-label="intensity">
-                <strong>72%</strong>
+                <input type="range" min="0" max="100" value="65" aria-label="AI評価制度の強度" id="evalIntensity">
+                <strong id="evalIntensityPercent">65%</strong>
               </div>
             </article>
 
             <article class="policy-item">
               <div class="policy-top">
                 <div>
-                  <div class="policy-name">初職リカバリー保証</div>
-                  <div class="policy-meta">15-22歳 / step 12-83</div>
+                  <div class="policy-name">事前説明・共同設計</div>
+                  <div class="policy-meta">管理職研修、社員代表レビュー、説明会の厚さ</div>
                 </div>
-                <span class="policy-chip" style="background: var(--teal-soft); color: var(--teal)">役割経路</span>
+                <span class="policy-chip" style="background: var(--teal-soft); color: var(--teal)">納得形成</span>
               </div>
               <div class="policy-grid">
                 <div class="mini-stat">
                   <div class="mini-label">開始</div>
-                  <div class="mini-value">12</div>
+                  <div class="mini-value">1</div>
                 </div>
                 <div class="mini-stat">
-                  <div class="mini-label">終了</div>
-                  <div class="mini-value">83</div>
+                  <div class="mini-label">全社説明</div>
+                  <div class="mini-value">3</div>
                 </div>
                 <div class="mini-stat">
-                  <div class="mini-label">強度</div>
-                  <div class="mini-value">0.66</div>
+                  <div class="mini-label">説明度</div>
+                  <div class="mini-value" id="communicationValue">0.76</div>
                 </div>
               </div>
               <div class="range-row">
-                <input type="range" min="0" max="100" value="66" aria-label="intensity">
-                <strong>66%</strong>
+                <input type="range" min="0" max="100" value="76" aria-label="説明と共同設計の強度" id="communicationIntensity">
+                <strong id="communicationPercent">76%</strong>
               </div>
             </article>
 
             <article class="policy-item">
               <div class="policy-top">
                 <div>
-                  <div class="policy-name">出生非強制監査</div>
-                  <div class="policy-meta">全セグメント / step 61-83</div>
+                  <div class="policy-name">安全策・異議申立て</div>
+                  <div class="policy-meta">人間最終判断、ログ利用範囲、異議申立て</div>
                 </div>
-                <span class="policy-chip" style="background: var(--rose-soft); color: var(--rose)">副作用監査</span>
+                <span class="policy-chip" style="background: var(--rose-soft); color: var(--rose)">ガードレール</span>
               </div>
               <div class="policy-grid">
                 <div class="mini-stat">
                   <div class="mini-label">開始</div>
-                  <div class="mini-value">61</div>
+                  <div class="mini-value">2</div>
                 </div>
                 <div class="mini-stat">
-                  <div class="mini-label">終了</div>
-                  <div class="mini-value">83</div>
+                  <div class="mini-label">観測</div>
+                  <div class="mini-value" id="guardrailEndStep">20</div>
                 </div>
                 <div class="mini-stat">
-                  <div class="mini-label">強度</div>
-                  <div class="mini-value">0.48</div>
+                  <div class="mini-label">安全度</div>
+                  <div class="mini-value" id="guardrailValue">0.82</div>
                 </div>
               </div>
               <div class="range-row">
-                <input type="range" min="0" max="100" value="48" aria-label="intensity">
-                <strong>48%</strong>
+                <input type="range" min="0" max="100" value="82" aria-label="ガードレールの強度" id="guardrailIntensity">
+                <strong id="guardrailPercent">82%</strong>
               </div>
             </article>
           </div>
@@ -801,10 +891,10 @@
         <section class="panel">
           <div class="panel-head">
             <div>
-              <h2 class="panel-title">APIプレビュー</h2>
+              <h2 class="panel-title">再現用リクエスト</h2>
               <div class="panel-sub">run_request.json</div>
             </div>
-            <button class="button" type="button">検証</button>
+            <button class="button" type="button" id="validateButton">検証</button>
           </div>
           <div class="panel-body run-preview">
             <div class="pipeline" aria-label="pipeline">
@@ -829,7 +919,7 @@
                 <div class="pipe-status">pending</div>
               </div>
             </div>
-            <pre class="preview-box">{
+            <pre class="preview-box" id="apiPreview">{
   "schema_version": "simulation_run_request_v1",
   "run_id": "custom_hope_family_20260505_001",
   "domain_pack_id": "agi_youth_japan",
@@ -849,55 +939,638 @@
         <section class="panel" style="margin-top: 14px;">
           <div class="panel-head">
             <div>
-              <h2 class="panel-title">比較run</h2>
-              <div class="panel-sub">viewer manifest</div>
+              <h2 class="panel-title">比較シナリオ</h2>
+              <div class="panel-sub">同じ社員代表で比較</div>
             </div>
           </div>
           <div class="panel-body">
             <div class="compare-grid">
-              <article class="run-card is-active">
+              <article class="run-card is-active" id="runBaseline">
                 <div class="run-status">再生可能</div>
-                <div class="run-title">介入なし</div>
+                <div class="run-title">現行制度</div>
               </article>
-              <article class="run-card">
+              <article class="run-card" id="runDirect">
                 <div class="run-status">再生可能</div>
-                <div class="run-title">構造持続介入</div>
+                <div class="run-title">一斉導入</div>
               </article>
-              <article class="run-card">
+              <article class="run-card" id="runPhased">
                 <div class="run-status">再生可能</div>
-                <div class="run-title">希望+家族形成</div>
+                <div class="run-title">段階導入</div>
               </article>
-              <article class="run-card">
+              <article class="run-card" id="runCustom">
                 <div class="run-status waiting">未生成</div>
-                <div class="run-title">カスタム施策案</div>
+                <div class="run-title">カスタム案</div>
               </article>
             </div>
             <div class="map-preview" aria-label="viewer preview">
-              <svg viewBox="0 0 520 280" role="img" aria-label="emotion map preview">
+              <svg viewBox="0 0 520 280" role="img" aria-label="emotion map preview" id="resultMap">
                 <rect class="room good" x="16" y="16" width="236" height="116" rx="8"></rect>
                 <rect class="room neutral" x="268" y="16" width="236" height="116" rx="8"></rect>
                 <rect class="room caution" x="16" y="148" width="236" height="116" rx="8"></rect>
                 <rect class="room danger" x="268" y="148" width="236" height="116" rx="8"></rect>
-                <text x="30" y="42" fill="#15803d" font-size="14" font-weight="800">良好</text>
-                <text x="282" y="42" fill="#647184" font-size="14" font-weight="800">中立</text>
-                <text x="30" y="174" fill="#b45309" font-size="14" font-weight="800">注意</text>
-                <text x="282" y="174" fill="#be123c" font-size="14" font-weight="800">危険</text>
-                <circle class="agent-dot" cx="84" cy="82" r="12" fill="#16a34a"></circle>
-                <circle class="agent-dot" cx="132" cy="92" r="12" fill="#22c55e"></circle>
-                <circle class="agent-dot" cx="184" cy="74" r="12" fill="#0f766e"></circle>
-                <circle class="agent-dot" cx="334" cy="86" r="12" fill="#94a3b8"></circle>
-                <circle class="agent-dot" cx="386" cy="74" r="12" fill="#64748b"></circle>
-                <circle class="agent-dot" cx="102" cy="214" r="12" fill="#f59e0b"></circle>
-                <circle class="agent-dot" cx="160" cy="224" r="12" fill="#d97706"></circle>
-                <circle class="agent-dot" cx="334" cy="218" r="12" fill="#e11d48"></circle>
-                <circle class="agent-dot" cx="396" cy="210" r="12" fill="#be123c"></circle>
+                <text x="30" y="42" fill="#15803d" font-size="14" font-weight="800">良好: 納得・意欲</text>
+                <text x="282" y="42" fill="#647184" font-size="14" font-weight="800">中立: 静観</text>
+                <text x="30" y="174" fill="#b45309" font-size="14" font-weight="800">注意: 不安・説明要求</text>
+                <text x="282" y="174" fill="#be123c" font-size="14" font-weight="800">危険: 不信・退職準備</text>
+                <g id="agentLayer"></g>
               </svg>
             </div>
-            <div class="footnote">この画面は静的モック。生成ボタンはAPI実装後にジョブ作成へ接続する。</div>
+            <div class="insight-list" id="insightList"></div>
+            <table class="result-table" aria-label="employee simulation rows">
+              <thead>
+                <tr>
+                  <th>代表社員</th>
+                  <th>評価</th>
+                  <th>不満</th>
+                  <th>退職</th>
+                  <th>行動</th>
+                </tr>
+              </thead>
+              <tbody id="resultRows"></tbody>
+            </table>
+            <div class="footnote">このMVPはブラウザ内のrule-based生成。API接続時は同じrun_requestをバックエンドへ送り、LLM観測rowへ差し替える。</div>
           </div>
         </section>
       </section>
     </section>
   </main>
+  <script>
+    const employees = [
+      {
+        id: "E01",
+        name: "若手高成果エンジニア",
+        segment: "young_high_performer",
+        group: "若手",
+        base: { dissatisfaction: 22, resignation: 26, motivation: 74, fairness: 58, trust: 56, load: 54 },
+        sensitivity: { ai: 62, fairness: 68, market: 78, growth: 82, voice: 1.25 }
+      },
+      {
+        id: "E02",
+        name: "若手不安層",
+        segment: "early_career_anxious",
+        group: "若手",
+        base: { dissatisfaction: 36, resignation: 32, motivation: 58, fairness: 50, trust: 48, load: 62 },
+        sensitivity: { ai: 82, fairness: 76, market: 55, growth: 48, voice: 0.95 }
+      },
+      {
+        id: "E03",
+        name: "中堅専門職",
+        segment: "mid_career_specialist",
+        group: "中堅",
+        base: { dissatisfaction: 31, resignation: 28, motivation: 66, fairness: 54, trust: 51, load: 66 },
+        sensitivity: { ai: 70, fairness: 82, market: 72, growth: 58, voice: 1.15 }
+      },
+      {
+        id: "E04",
+        name: "現場管理職",
+        segment: "manager",
+        group: "管理職",
+        base: { dissatisfaction: 34, resignation: 24, motivation: 61, fairness: 52, trust: 55, load: 76 },
+        sensitivity: { ai: 60, fairness: 72, market: 45, growth: 46, voice: 1.35 }
+      },
+      {
+        id: "E05",
+        name: "育児中社員",
+        segment: "working_parent",
+        group: "制約あり",
+        base: { dissatisfaction: 38, resignation: 30, motivation: 60, fairness: 48, trust: 50, load: 78 },
+        sensitivity: { ai: 76, fairness: 86, market: 50, growth: 42, voice: 1.05 }
+      },
+      {
+        id: "E06",
+        name: "ベテラン社員",
+        segment: "veteran_employee",
+        group: "ベテラン",
+        base: { dissatisfaction: 42, resignation: 18, motivation: 55, fairness: 46, trust: 47, load: 60 },
+        sensitivity: { ai: 68, fairness: 78, market: 22, growth: 35, voice: 1.10 }
+      },
+      {
+        id: "E07",
+        name: "採用候補者視点",
+        segment: "candidate_market",
+        group: "外部",
+        base: { dissatisfaction: 28, resignation: 0, motivation: 62, fairness: 52, trust: 50, load: 0 },
+        sensitivity: { ai: 64, fairness: 76, market: 0, growth: 62, voice: 1.20 }
+      },
+      {
+        id: "E08",
+        name: "人事担当",
+        segment: "hr_operator",
+        group: "運用",
+        base: { dissatisfaction: 30, resignation: 20, motivation: 64, fairness: 55, trust: 58, load: 82 },
+        sensitivity: { ai: 52, fairness: 80, market: 40, growth: 50, voice: 1.30 }
+      },
+      {
+        id: "E09",
+        name: "リモート中心社員",
+        segment: "remote_employee",
+        group: "制約あり",
+        base: { dissatisfaction: 35, resignation: 29, motivation: 63, fairness: 49, trust: 51, load: 58 },
+        sensitivity: { ai: 74, fairness: 84, market: 66, growth: 52, voice: 1.00 }
+      },
+      {
+        id: "E10",
+        name: "新任管理職",
+        segment: "new_manager",
+        group: "管理職",
+        base: { dissatisfaction: 39, resignation: 27, motivation: 57, fairness: 47, trust: 49, load: 86 },
+        sensitivity: { ai: 66, fairness: 80, market: 48, growth: 45, voice: 1.05 }
+      }
+    ];
+
+    const dom = {
+      statusPill: document.getElementById("statusPill"),
+      saveButton: document.getElementById("saveButton"),
+      generateButton: document.getElementById("generateButton"),
+      validateButton: document.getElementById("validateButton"),
+      resetButton: document.getElementById("resetButton"),
+      scenarioTitle: document.getElementById("scenarioTitle"),
+      question: document.getElementById("question"),
+      target: document.getElementById("target"),
+      policyType: document.getElementById("policyType"),
+      stepCount: document.getElementById("stepCount"),
+      reproSeed: document.getElementById("reproSeed"),
+      evalIntensity: document.getElementById("evalIntensity"),
+      communicationIntensity: document.getElementById("communicationIntensity"),
+      guardrailIntensity: document.getElementById("guardrailIntensity"),
+      policyEndStep: document.getElementById("policyEndStep"),
+      guardrailEndStep: document.getElementById("guardrailEndStep"),
+      evalIntensityValue: document.getElementById("evalIntensityValue"),
+      communicationValue: document.getElementById("communicationValue"),
+      guardrailValue: document.getElementById("guardrailValue"),
+      evalIntensityPercent: document.getElementById("evalIntensityPercent"),
+      communicationPercent: document.getElementById("communicationPercent"),
+      guardrailPercent: document.getElementById("guardrailPercent"),
+      apiPreview: document.getElementById("apiPreview"),
+      resultRows: document.getElementById("resultRows"),
+      agentLayer: document.getElementById("agentLayer"),
+      insightList: document.getElementById("insightList")
+    };
+
+    let currentResult = null;
+
+    function clamp(value, min = 0, max = 100) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function scoreClass(value, inverse = false) {
+      const normalized = inverse ? 100 - value : value;
+      if (normalized >= 66) return "good";
+      if (normalized >= 42) return "caution";
+      return "danger";
+    }
+
+    function seeded(id, scenario, seed = "") {
+      const text = `${id}:${scenario}:${seed}`;
+      let hash = 0;
+      for (let i = 0; i < text.length; i += 1) {
+        hash = (hash * 31 + text.charCodeAt(i)) % 9973;
+      }
+      const value = Math.sin(hash * 999.91) * 10000;
+      return value - Math.floor(value);
+    }
+
+    function collectInput() {
+      const steps = clamp(Number(dom.stepCount.value) || 20, 1, 100);
+      return {
+        title: dom.scenarioTitle.value.trim() || "AI評価制度 段階導入",
+        question: dom.question.value.trim(),
+        target: dom.target.value,
+        policyType: dom.policyType.value,
+        reproducibilitySeed: dom.reproSeed.value.trim() || "hr-ai-eval-v1",
+        evalIntensity: Number(dom.evalIntensity.value) / 100,
+        communication: Number(dom.communicationIntensity.value) / 100,
+        guardrail: Number(dom.guardrailIntensity.value) / 100,
+        steps
+      };
+    }
+
+    function scenarioParams(kind, input) {
+      if (kind === "baseline") {
+        return { policy: 0.08, communication: 0.42, guardrail: 0.45, rollout: "baseline" };
+      }
+      if (kind === "direct") {
+        return { policy: 0.78, communication: 0.30, guardrail: 0.28, rollout: "direct" };
+      }
+      if (kind === "phased") {
+        return { policy: Math.max(input.evalIntensity, 0.58), communication: Math.max(input.communication, 0.72), guardrail: Math.max(input.guardrail, 0.72), rollout: "phased" };
+      }
+      return { policy: input.evalIntensity, communication: input.communication, guardrail: input.guardrail, rollout: "custom" };
+    }
+
+    function policyProfile(policyType) {
+      const profiles = {
+        ai_evaluation: { id: "P_AI_EVAL_001", name: "AI評価制度", ai: 1.00, fairness: 1.00, manager: 1.00, brand: 0.92, growth: 0.85 },
+        compensation: { id: "P_COMP_001", name: "報酬・等級制度", ai: 0.45, fairness: 1.30, manager: 0.85, brand: 0.75, growth: 0.95 },
+        work_style: { id: "P_WORK_STYLE_001", name: "出社/リモート方針", ai: 0.30, fairness: 1.10, manager: 0.75, brand: 1.20, growth: 0.60 },
+        genai_rollout: { id: "P_GENAI_001", name: "生成AI導入", ai: 0.82, fairness: 0.78, manager: 0.70, brand: 0.82, growth: 1.20 },
+        manager_system: { id: "P_MANAGER_001", name: "管理職制度", ai: 0.35, fairness: 1.05, manager: 1.35, brand: 0.70, growth: 0.90 }
+      };
+      return profiles[policyType] || profiles.ai_evaluation;
+    }
+
+    function targetMultiplier(employee, target) {
+      if (target === "early") return employee.group === "若手" ? 1.18 : 0.92;
+      if (target === "manager") return employee.group === "管理職" ? 1.20 : 0.90;
+      if (target === "working_parent") return employee.group === "制約あり" ? 1.20 : 0.92;
+      return 1;
+    }
+
+    function simulate(kind = "custom") {
+      const input = collectInput();
+      const params = scenarioParams(kind, input);
+      const profile = policyProfile(input.policyType);
+      const questionRisk = /監視|不公平|退職|不満|ブラックボックス|ログ/.test(input.question) ? 6 : 0;
+      const rows = employees.map((employee) => {
+        const wobble = (seeded(employee.id, kind, input.reproducibilitySeed) - 0.5) * 6;
+        const target = targetMultiplier(employee, input.target);
+        const policyRisk = params.policy * target;
+        const communicationRelief = params.communication;
+        const guardrailRelief = params.guardrail;
+        const managerPenalty = employee.group === "管理職" ? policyRisk * 20 * profile.manager - communicationRelief * 8 : 0;
+        const externalBrandPenalty = employee.segment === "candidate_market" ? policyRisk * 24 * profile.brand - communicationRelief * 18 - guardrailRelief * 14 : 0;
+
+        const dissatisfaction = clamp(
+          employee.base.dissatisfaction +
+            policyRisk * (employee.sensitivity.ai * 0.34 * profile.ai + employee.sensitivity.fairness * 0.30 * profile.fairness) +
+            managerPenalty +
+            questionRisk -
+            communicationRelief * 28 -
+            guardrailRelief * 26 +
+            wobble
+        );
+        const fairness = clamp(
+          employee.base.fairness +
+            communicationRelief * 30 +
+            guardrailRelief * 24 -
+            policyRisk * (employee.sensitivity.fairness * 0.24 * profile.fairness) -
+            managerPenalty * 0.18 -
+            questionRisk * 0.6 -
+            wobble * 0.35
+        );
+        const motivation = clamp(
+          employee.base.motivation +
+            policyRisk * (employee.sensitivity.growth * 0.18 * profile.growth - employee.sensitivity.ai * 0.10 * profile.ai) +
+            communicationRelief * 13 +
+            guardrailRelief * 10 -
+            dissatisfaction * 0.24 -
+            Math.max(0, managerPenalty) * 0.10 +
+            15 +
+            wobble * 0.4
+        );
+        const resignation = employee.segment === "candidate_market"
+          ? clamp(0)
+          : clamp(
+              employee.base.resignation +
+                dissatisfaction * 0.38 +
+                employee.sensitivity.market * 0.16 -
+                motivation * 0.17 -
+                fairness * 0.08 -
+                guardrailRelief * 10 +
+                wobble * 0.3
+            );
+        const managerLoad = employee.group === "管理職" || employee.segment === "hr_operator"
+          ? clamp(employee.base.load + params.policy * 38 * profile.manager - communicationRelief * 12 - guardrailRelief * 8 + wobble)
+          : 0;
+        const employerBrand = clamp(66 - externalBrandPenalty - dissatisfaction * 0.18 + fairness * 0.18 + motivation * 0.12);
+
+        let evaluation = "中立";
+        if (resignation > 62 || dissatisfaction > 72 || fairness < 34) evaluation = "危険";
+        else if (dissatisfaction > 46 || fairness < 52 || managerLoad > 78) evaluation = "注意";
+        else if (motivation > 68 && fairness > 62 && dissatisfaction < 36) evaluation = "良好";
+
+        const emotion = evaluation === "良好"
+          ? (params.policy > 0.25 ? "納得" : "平静")
+          : evaluation === "注意"
+            ? (fairness < 45 ? "不公平感" : "不安")
+            : evaluation === "危険"
+              ? (resignation > 62 ? "離職警戒" : "不信")
+              : "静観";
+        const action = actionFor({ evaluation, resignation, dissatisfaction, fairness, managerLoad, employee });
+
+        return {
+          step: input.steps,
+          employee_id: employee.id,
+          segment_id: employee.segment,
+          display_name: employee.name,
+          evaluation,
+          emotion,
+          dissatisfaction_0to100: Math.round(dissatisfaction),
+          resignation_intent_0to100: Math.round(resignation),
+          motivation_0to100: Math.round(motivation),
+          perceived_fairness_0to100: Math.round(fairness),
+          manager_load_0to100: Math.round(managerLoad),
+          employer_brand_0to100: Math.round(employerBrand),
+          action_category: action.category,
+          action_detail: action.detail,
+          private_thought: thoughtFor(employee, evaluation, params, profile),
+          peer_talk: peerTalkFor(employee, evaluation),
+          open_feedback: feedbackFor(employee, evaluation, fairness),
+          needed_guardrail: guardrailFor(employee, evaluation, fairness, managerLoad),
+          reasoning_basis: `policy=${params.policy.toFixed(2)}, communication=${params.communication.toFixed(2)}, guardrail=${params.guardrail.toFixed(2)}`
+        };
+      });
+
+      currentResult = {
+        generated_at: new Date().toISOString(),
+        scenario_kind: kind,
+        run_request: buildRunRequest(kind, input),
+        rows,
+        summary: summarize(rows)
+      };
+      renderResult(currentResult);
+    }
+
+    function actionFor(values) {
+      if (values.resignation > 62) return { category: "転職情報収集", detail: "求人と評価制度の口コミを確認し、外部選択肢を持とうとする" };
+      if (values.evaluation === "危険") return { category: "改善要求", detail: "AI利用範囲と異議申立て経路の明文化を求める" };
+      if (values.managerLoad > 78) return { category: "運用負荷の申告", detail: "管理職向け研修と説明資料の追加を人事へ求める" };
+      if (values.dissatisfaction > 48 || values.fairness < 52) return { category: "上司相談", detail: "制度の評価基準とログ利用範囲を確認する" };
+      if (values.evaluation === "良好") return { category: "制度利用", detail: "フィードバック頻度向上を成長機会として使う" };
+      return { category: "静観", detail: "次の説明会と限定試行の結果を待つ" };
+    }
+
+    function thoughtFor(employee, evaluation, params, profile) {
+      if (evaluation === "良好") return `${employee.name}は、透明性と異議申立てがあるなら${profile.name}を前向きに受け取れる。`;
+      if (evaluation === "危険") return `${employee.name}は、${profile.name}が実質的に不利な判定へ使われるのではないかと警戒している。`;
+      if (evaluation === "注意") return `${employee.name}は、制度の目的よりも運用のばらつきと説明不足を気にしている。`;
+      return `${employee.name}は、まだ判断材料が足りず、次の説明と試行結果を見ている。`;
+    }
+
+    function peerTalkFor(employee, evaluation) {
+      if (evaluation === "危険") return "これ、結局ログで見られて評価されるってことじゃないの？";
+      if (evaluation === "注意") return "説明は分かるけど、現場でどう使われるか次第だよね。";
+      if (evaluation === "良好") return "ちゃんと人間判断と異議申立てがあるなら、フィードバックは早くなりそう。";
+      return "まだ様子見かな。限定試行の結果を見たい。";
+    }
+
+    function feedbackFor(employee, evaluation, fairness) {
+      if (fairness < 45) return "評価への利用範囲、異議申立て、ログ非利用領域を明文化してほしい。";
+      if (evaluation === "良好") return "試行結果と評価者の説明責任が見えるなら前向きに参加できる。";
+      return "制度目的、評価者の裁量、本人への説明方法をもう少し具体化してほしい。";
+    }
+
+    function guardrailFor(employee, evaluation, fairness, managerLoad) {
+      if (managerLoad > 78) return "管理職研修、説明テンプレート、相談窓口の増強";
+      if (fairness < 48) return "人間最終判断、説明請求、異議申立て、ログ利用範囲の明文化";
+      if (employee.segment === "candidate_market") return "採用選考への流用禁止と外部向け透明性説明";
+      return "限定試行、結果監査、社員代表レビュー";
+    }
+
+    function summarize(rows) {
+      const n = rows.length || 1;
+      const avg = (field) => Math.round(rows.reduce((sum, row) => sum + Number(row[field] || 0), 0) / n);
+      const counts = rows.reduce((acc, row) => {
+        acc[row.evaluation] = (acc[row.evaluation] || 0) + 1;
+        return acc;
+      }, {});
+      return {
+        dissatisfaction: avg("dissatisfaction_0to100"),
+        resignation: avg("resignation_intent_0to100"),
+        motivation: avg("motivation_0to100"),
+        fairness: avg("perceived_fairness_0to100"),
+        managerLoad: avg("manager_load_0to100"),
+        employerBrand: avg("employer_brand_0to100"),
+        counts
+      };
+    }
+
+    function buildRunRequest(kind, input) {
+      const profile = policyProfile(input.policyType);
+      const safeSeed = input.reproducibilitySeed.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 32) || "seed";
+      const runId = `hr_policy_${input.policyType}_${kind}_${safeSeed}`;
+      return {
+        schema_version: "hr_policy_run_request_v1",
+        run_id: runId,
+        domain_pack_id: "enterprise_hr_policy_change",
+        draft_id: "draft_hr_browser_mvp",
+        scenario_id: kind,
+        title: input.title,
+        question: input.question,
+        policy_type: input.policyType,
+        reproducibility_seed: input.reproducibilitySeed,
+        steps: input.steps,
+        policy_changes: [
+          {
+            policy_id: profile.id,
+            name: profile.name,
+            intensity_0to1: Number(input.evalIntensity.toFixed(2)),
+            affected_processes: affectedProcessesFor(input.policyType),
+            guardrails: ["human_final_decision", "appeal_process", "no_sensitive_data"]
+          }
+        ],
+        communication_plan: [
+          { step: 1, target: "managers", transparency_0to1: Number(input.communication.toFixed(2)) },
+          { step: 2, target: "employee_representatives", participation_0to1: Number(input.communication.toFixed(2)) },
+          { step: 3, target: "all_employees", guardrail_0to1: Number(input.guardrail.toFixed(2)) }
+        ],
+        model: { backend: "browser_rule_based", name: "studio-mvp-v0" },
+        privacy_mode: "synthetic_segments_only",
+        output_dir: `outputs/runs/${runId}`
+      };
+    }
+
+    function affectedProcessesFor(policyType) {
+      const mapping = {
+        ai_evaluation: ["performance_review", "promotion", "feedback"],
+        compensation: ["compensation", "grade", "promotion"],
+        work_style: ["attendance", "team_operations", "hiring_brand"],
+        genai_rollout: ["daily_work", "training", "productivity"],
+        manager_system: ["management_load", "promotion", "team_feedback"]
+      };
+      return mapping[policyType] || mapping.ai_evaluation;
+    }
+
+    function renderResult(result) {
+      const { summary, rows } = result;
+      setText("metricSteps", result.run_request.steps);
+      setText("metricDissatisfaction", summary.dissatisfaction);
+      setText("metricResignation", summary.resignation);
+      setText("metricMotivation", summary.motivation);
+      updateBar("Dissatisfaction", summary.dissatisfaction);
+      updateBar("Resignation", summary.resignation);
+      updateBar("Motivation", summary.motivation);
+      updateBar("Fairness", summary.fairness);
+      dom.apiPreview.textContent = JSON.stringify(result.run_request, null, 2);
+      renderRows(rows);
+      renderMap(rows);
+      renderInsights(result);
+      renderRunCards(result.scenario_kind);
+      dom.statusPill.textContent = "生成済み";
+      dom.statusPill.style.background = "var(--green-soft)";
+      dom.statusPill.style.borderColor = "#86efac";
+      dom.statusPill.style.color = "var(--green)";
+    }
+
+    function setText(id, value) {
+      const node = document.getElementById(id);
+      if (node) node.textContent = String(value);
+    }
+
+    function updateBar(name, value) {
+      const bar = document.getElementById(`bar${name}`);
+      const label = document.getElementById(`value${name}`);
+      if (bar) bar.style.setProperty("--value", `${clamp(value)}%`);
+      if (label) label.textContent = String(value);
+    }
+
+    function renderRows(rows) {
+      dom.resultRows.innerHTML = rows
+        .slice()
+        .sort((a, b) => b.resignation_intent_0to100 - a.resignation_intent_0to100)
+        .map((row) => {
+          const cls = row.evaluation === "良好" ? "good" : row.evaluation === "危険" ? "danger" : row.evaluation === "注意" ? "caution" : "";
+          return `
+            <tr>
+              <td><strong>${escapeHtml(row.display_name)}</strong><br>${escapeHtml(row.segment_id)}</td>
+              <td><span class="score-pill ${cls}">${escapeHtml(row.evaluation)}</span><br>${escapeHtml(row.emotion)}</td>
+              <td><span class="score-pill ${scoreClass(row.dissatisfaction_0to100, true)}">${row.dissatisfaction_0to100}</span></td>
+              <td><span class="score-pill ${scoreClass(row.resignation_intent_0to100, true)}">${row.resignation_intent_0to100}</span></td>
+              <td>${escapeHtml(row.action_category)}<br><span style="color: var(--muted);">${escapeHtml(row.needed_guardrail)}</span></td>
+            </tr>
+          `;
+        }).join("");
+    }
+
+    function renderMap(rows) {
+      const rooms = {
+        "良好": { x: 40, y: 58, w: 190, h: 54, color: "#16a34a" },
+        "中立": { x: 292, y: 58, w: 190, h: 54, color: "#64748b" },
+        "注意": { x: 40, y: 190, w: 190, h: 54, color: "#f59e0b" },
+        "危険": { x: 292, y: 190, w: 190, h: 54, color: "#e11d48" }
+      };
+      const grouped = rows.reduce((acc, row) => {
+        (acc[row.evaluation] ||= []).push(row);
+        return acc;
+      }, {});
+      const circles = [];
+      Object.entries(grouped).forEach(([evaluation, items]) => {
+        const room = rooms[evaluation] || rooms["中立"];
+        items.forEach((row, index) => {
+          const cols = 5;
+          const x = room.x + (index % cols) * 34 + 14;
+          const y = room.y + Math.floor(index / cols) * 30;
+          const r = 8 + Math.min(6, row.resignation_intent_0to100 / 18);
+          circles.push(`<circle class="agent-dot" cx="${x}" cy="${y}" r="${r.toFixed(1)}" fill="${room.color}"><title>${escapeHtml(row.display_name)} / 不満${row.dissatisfaction_0to100} / 退職${row.resignation_intent_0to100}</title></circle>`);
+        });
+      });
+      dom.agentLayer.innerHTML = circles.join("");
+    }
+
+    function renderInsights(result) {
+      const rows = result.rows;
+      const highRisk = rows.filter((row) => row.resignation_intent_0to100 >= 55 || row.dissatisfaction_0to100 >= 68);
+      const managerRisk = rows.filter((row) => row.manager_load_0to100 >= 78);
+      const fairnessRisk = rows.filter((row) => row.perceived_fairness_0to100 < 48);
+      const bestGuardrails = Array.from(new Set(rows
+        .filter((row) => row.evaluation !== "良好")
+        .map((row) => row.needed_guardrail)
+        .slice(0, 4)));
+      dom.insightList.innerHTML = [
+        {
+          title: "創発サマリー",
+          text: highRisk.length
+            ? `${highRisk.map((row) => row.display_name).join("、")}で不満/退職意向が高まりやすい。`
+            : "高リスク退職意向は抑えられており、制度説明とガードレールが効いている。"
+        },
+        {
+          title: "導入順序",
+          text: managerRisk.length
+            ? "管理職負荷が高い。全社説明より先に管理職研修と説明テンプレートを厚くする。"
+            : "管理職説明、代表社員レビュー、全社説明の順で進めると反発が抑えやすい。"
+        },
+        {
+          title: "必要ガードレール",
+          text: fairnessRisk.length
+            ? bestGuardrails.join(" / ")
+            : "人間最終判断、異議申立て、ログ利用範囲の明文化は維持する。"
+        }
+      ].map((item) => `<div class="insight-item"><strong>${escapeHtml(item.title)}</strong>${escapeHtml(item.text)}</div>`).join("");
+    }
+
+    function renderRunCards(active) {
+      const mapping = {
+        baseline: "runBaseline",
+        direct: "runDirect",
+        phased: "runPhased",
+        custom: "runCustom"
+      };
+      Object.values(mapping).forEach((id) => document.getElementById(id)?.classList.remove("is-active"));
+      document.getElementById(mapping[active] || "runCustom")?.classList.add("is-active");
+      document.querySelector("#runCustom .run-status").textContent = active === "custom" ? "生成済み" : "生成可能";
+      document.querySelector("#runCustom .run-status").classList.toggle("waiting", active !== "custom");
+    }
+
+    function updatePreviewOnly() {
+      const input = collectInput();
+      setText("metricSteps", input.steps);
+      if (dom.policyEndStep) dom.policyEndStep.textContent = String(input.steps);
+      if (dom.guardrailEndStep) dom.guardrailEndStep.textContent = String(input.steps);
+      dom.evalIntensityValue.textContent = (input.evalIntensity).toFixed(2);
+      dom.communicationValue.textContent = (input.communication).toFixed(2);
+      dom.guardrailValue.textContent = (input.guardrail).toFixed(2);
+      dom.evalIntensityPercent.textContent = `${Math.round(input.evalIntensity * 100)}%`;
+      dom.communicationPercent.textContent = `${Math.round(input.communication * 100)}%`;
+      dom.guardrailPercent.textContent = `${Math.round(input.guardrail * 100)}%`;
+      dom.apiPreview.textContent = JSON.stringify(buildRunRequest("custom", input), null, 2);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function downloadJson() {
+      const payload = currentResult || { run_request: buildRunRequest("custom", collectInput()), rows: [] };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${payload.run_request?.run_id || "hr_policy_simulation"}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function resetInputs() {
+      dom.scenarioTitle.value = "AI評価制度 段階導入";
+      dom.question.value = "AI評価制度を導入したい。社員が監視や不公平と受け取らず、退職者を増やさず、採用にもプラスになる説明順序とガードレールを見たい。";
+      dom.target.value = "all";
+      dom.policyType.value = "ai_evaluation";
+      dom.stepCount.value = 20;
+      dom.reproSeed.value = "hr-ai-eval-v1";
+      dom.evalIntensity.value = 65;
+      dom.communicationIntensity.value = 76;
+      dom.guardrailIntensity.value = 82;
+      updatePreviewOnly();
+      simulate("phased");
+    }
+
+    ["input", "change"].forEach((eventName) => {
+      [dom.evalIntensity, dom.communicationIntensity, dom.guardrailIntensity, dom.scenarioTitle, dom.question, dom.target, dom.policyType, dom.stepCount, dom.reproSeed].forEach((node) => {
+        node?.addEventListener(eventName, updatePreviewOnly);
+      });
+    });
+    dom.generateButton?.addEventListener("click", () => simulate("custom"));
+    dom.validateButton?.addEventListener("click", () => {
+      updatePreviewOnly();
+      dom.statusPill.textContent = "検証OK";
+      dom.statusPill.style.background = "var(--blue-soft)";
+      dom.statusPill.style.borderColor = "#bfdbfe";
+      dom.statusPill.style.color = "var(--blue)";
+    });
+    dom.saveButton?.addEventListener("click", downloadJson);
+    dom.resetButton?.addEventListener("click", resetInputs);
+    document.getElementById("runBaseline")?.addEventListener("click", () => simulate("baseline"));
+    document.getElementById("runDirect")?.addEventListener("click", () => simulate("direct"));
+    document.getElementById("runPhased")?.addEventListener("click", () => simulate("phased"));
+    document.getElementById("runCustom")?.addEventListener("click", () => simulate("custom"));
+
+    updatePreviewOnly();
+    simulate("phased");
+  </script>
 </body>
 </html>

@@ -250,125 +250,6 @@
       white-space: nowrap;
     }
 
-    .simulation-studio {
-      flex: 1 1 760px;
-      display: grid;
-      grid-template-columns: minmax(260px, 0.72fr) minmax(420px, 1.28fr);
-      gap: 10px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 9px 10px;
-      background: #f8fafc;
-    }
-
-    .studio-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      min-width: 0;
-      grid-column: 1;
-    }
-
-    .studio-title {
-      font-size: 13px;
-      font-weight: 900;
-    }
-
-    .studio-sub {
-      margin-top: 2px;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .studio-run-button {
-      min-height: 32px;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 0 10px;
-      background: #ffffff;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 900;
-      white-space: nowrap;
-    }
-
-    .studio-flow {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 7px;
-      grid-column: 1;
-    }
-
-    .studio-step {
-      min-height: 34px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 6px 8px;
-      background: #ffffff;
-      color: var(--ink);
-      font-size: 11px;
-      font-weight: 900;
-      text-align: center;
-    }
-
-    .policy-plan {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 8px;
-      grid-column: 2;
-      grid-row: 1 / span 2;
-    }
-
-    .policy-card {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 8px 9px;
-      background: #ffffff;
-      min-width: 0;
-    }
-
-    .policy-name {
-      font-size: 12px;
-      line-height: 1.25;
-      font-weight: 900;
-    }
-
-    .policy-detail {
-      margin-top: 5px;
-      color: var(--muted);
-      font-size: 10px;
-      line-height: 1.35;
-      font-weight: 700;
-    }
-
-    .policy-status {
-      display: inline-flex;
-      align-items: center;
-      min-height: 20px;
-      border-radius: 999px;
-      padding: 2px 7px;
-      margin-bottom: 6px;
-      background: #e0f2fe;
-      color: #075985;
-      font-size: 10px;
-      font-weight: 900;
-    }
-
-    .policy-card.is-next .policy-status {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .policy-card.is-future .policy-status {
-      background: #ede9fe;
-      color: #6d28d9;
-    }
-
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -1542,21 +1423,6 @@
         grid-template-columns: 1fr;
       }
 
-      .simulation-studio {
-        grid-template-columns: 1fr;
-      }
-
-      .studio-head,
-      .studio-flow,
-      .policy-plan {
-        grid-column: auto;
-        grid-row: auto;
-      }
-
-      .policy-plan {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
       .side {
         grid-template-columns: 1fr;
         grid-template-rows: auto;
@@ -1583,8 +1449,9 @@
         align-items: stretch;
       }
 
-      .segmented {
+      .scenario-picker {
         width: 100%;
+        flex-basis: 100%;
       }
 
       .scenario-brief {
@@ -1601,8 +1468,6 @@
       }
 
       .top-metrics,
-      .studio-flow,
-      .policy-plan,
       .report-summary-grid,
       .map-footer,
       .left-summary-grid,
@@ -1631,41 +1496,40 @@
         <a href="./future_emotion_map.html" aria-current="page">未来感情</a>
         <a href="./simulation_studio_mock.html">作成スタジオ</a>
       </nav>
-      <section class="top-metrics" aria-label="summary metrics">
+      <section class="top-metrics" aria-label="SUMMARY">
         <div class="metric">
-          <div class="metric-label">良好</div>
-          <div class="metric-value" id="metric-good">0%</div>
+          <div class="metric-label">希望</div>
+          <div class="metric-value" id="metric-good">0人</div>
         </div>
         <div class="metric">
           <div class="metric-label">中立</div>
-          <div class="metric-value" id="metric-neutral">0%</div>
+          <div class="metric-value" id="metric-neutral">0人</div>
         </div>
         <div class="metric">
           <div class="metric-label">注意</div>
-          <div class="metric-value" id="metric-caution">0%</div>
+          <div class="metric-value" id="metric-caution">0人</div>
         </div>
         <div class="metric">
           <div class="metric-label">危険</div>
-          <div class="metric-value" id="metric-danger">0%</div>
+          <div class="metric-value" id="metric-danger">0人</div>
         </div>
         <div class="metric">
-          <div class="metric-label">子ども意向</div>
+          <div class="metric-label">子ども希望指数</div>
           <div class="metric-value" id="metric-child">0%</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">希望人数</div>
-          <div class="metric-value" id="metric-hope">0/3</div>
         </div>
       </section>
     </header>
 
     <section class="controls" aria-label="simulation controls">
-      <div class="segmented" id="scenarioTabs">
-        <button type="button" data-scenario="baseline" aria-pressed="false">介入なし</button>
-        <button type="button" data-scenario="sustain" aria-pressed="true">構造持続通貨 介入</button>
-        <button type="button" data-scenario="birthGrant" aria-pressed="false">構造持続+出産 介入</button>
-        <button type="button" data-scenario="hopeFamily" aria-pressed="false">構造持続+希望 介入</button>
-      </div>
+      <label class="scenario-picker" for="scenarioSelect">
+        <span class="scenario-select-label">シミュレーション</span>
+        <select class="scenario-select" id="scenarioSelect">
+          <option value="baseline">介入なし</option>
+          <option value="sustain" selected>構造持続通貨 介入</option>
+          <option value="birthGrant">構造持続+出産 介入</option>
+          <option value="hopeFamily">構造持続+希望 介入</option>
+        </select>
+      </label>
       <section class="scenario-brief" aria-label="選択中のシミュレーション概要">
         <div class="scenario-brief-main">
           <div class="scenario-brief-kicker">選択中のシミュレーション</div>
@@ -1675,45 +1539,6 @@
         <div class="scenario-brief-actions">
           <button type="button" class="scenario-detail-button" id="scenarioDetailButton">設計の詳細</button>
           <button type="button" class="scenario-detail-button" id="scenarioReportButton">分析レポート</button>
-        </div>
-      </section>
-      <div class="data-badge" aria-label="表示対象">LLM観測rowのみ / 画面は40年目まで / 100年視点は口頭補足</div>
-      <section class="simulation-studio" aria-label="シミュレーション生成予定">
-        <div class="studio-head">
-          <div>
-            <div class="studio-title">想定設計：施策パッケージ生成</div>
-            <div class="studio-sub">ユーザーがUI上から施策パッケージを生成し、シミュレーションをどんどん追加できる設計想定</div>
-          </div>
-          <button type="button" class="studio-run-button" disabled>追加生成は予定</button>
-        </div>
-        <div class="studio-flow" aria-label="生成フロー">
-          <div class="studio-step">問い</div>
-          <div class="studio-step">施策パッケージ</div>
-          <div class="studio-step">LLM生成</div>
-          <div class="studio-step">row保存</div>
-          <div class="studio-step">再生</div>
-        </div>
-        <div class="policy-plan" aria-label="希望を持てる施策・設計リスト">
-          <article class="policy-card">
-            <div class="policy-status">再生中</div>
-            <div class="policy-name">介入なし</div>
-            <div class="policy-detail">現状延長の不安・生活防衛・制度不信を観測</div>
-          </article>
-          <article class="policy-card">
-            <div class="policy-status">再生中</div>
-            <div class="policy-name">構造持続通貨 介入</div>
-            <div class="policy-detail">住居・学び直し・ケア・社会持続活動報酬</div>
-          </article>
-          <article class="policy-card is-next">
-            <div class="policy-status" id="birthGrantPolicyStatus">生成待ち</div>
-            <div class="policy-name">構造持続+出産 介入</div>
-            <div class="policy-detail">一時金を住居・休息・代替ケア・教育費緩衝へ接続</div>
-          </article>
-          <article class="policy-card is-future">
-            <div class="policy-status" id="hopeFamilyPolicyStatus">生成待ち</div>
-            <div class="policy-name">構造持続+希望 介入</div>
-            <div class="policy-detail">nat着金・希望ケース拡張・若者メンター・家族形成利用で希望3体以上を検証</div>
-          </article>
         </div>
       </section>
     </section>
@@ -1777,7 +1602,7 @@
               <text x="110" y="124" class="room-label-subtitle">不安・怒り</text>
 
               <rect x="531" y="78" width="238" height="58" rx="8" class="room-label-bg"></rect>
-              <text x="555" y="104" class="room-label-title">良好</text>
+              <text x="555" y="104" class="room-label-title">希望</text>
               <text x="555" y="124" class="room-label-subtitle">安心・希望・連帯感</text>
 
               <rect x="86" y="370" width="300" height="58" rx="8" class="room-label-bg"></rect>
@@ -1909,7 +1734,7 @@
                 <div class="kv-value" id="kvIntensity">0.00</div>
               </div>
               <div class="kv">
-                <div class="kv-label">子ども意向</div>
+                <div class="kv-label">子ども希望指数</div>
                 <div class="kv-value" id="kvChildIntent">0%</div>
               </div>
             </div>
@@ -1921,7 +1746,7 @@
 
   <script>
     const categories = [
-      { key: "good", label: "良好", emotions: "安心・希望・連帯感", color: "#16a34a", soft: "#dcfce7" },
+      { key: "good", label: "希望", emotions: "安心・希望・連帯感", color: "#16a34a", soft: "#dcfce7" },
       { key: "neutral", label: "中立", emotions: "平静", color: "#94a3b8", soft: "#eef2f7" },
       { key: "caution", label: "注意", emotions: "不安・怒り", color: "#f59e0b", soft: "#fef3c7" },
       { key: "danger", label: "危険", emotions: "裏切られ感・喪失感・絶望・諦念", color: "#e11d48", soft: "#ffe4e6" }
@@ -1930,6 +1755,7 @@
     const categoryByKey = Object.fromEntries(categories.map((category) => [category.key, category]));
     const evaluationKeyByLabel = {
       良好: "good",
+      希望: "good",
       中立: "neutral",
       注意: "caution",
       危険: "danger"
@@ -1972,7 +1798,7 @@
       baseline: {
         title: "介入なし",
         summary: "AGI/AIロボ普及、生活コスト、地政学不安、SNS悲観が進む一方で、制度側の新しい支援を入れない比較基準です。若者・家族形成世代・次世代が、不安、生活防衛、制度不信、社会からの撤退へどう動くかを観測します。",
-        lead: "このrunは「何もしなかったらこうなる」を見せる基準線です。LLMには悲観するよう命令せず、社会圧力、属性、年齢、雇用・住居・ケア制約、前ステップの記憶だけを渡して、各エージェントが自然にどう受け取るかをrowデータとして保存しています。",
+        lead: "このシミュレーションは「何もしなかったらこうなる」を見せる基準線です。LLMには悲観するよう命令せず、社会圧力、属性、年齢、雇用・住居・ケア制約、前ステップの記憶だけを渡して、各エージェントが自然にどう受け取るかを観測データとして保存しています。",
         sections: [
           {
             title: "検証している問い",
@@ -1994,7 +1820,7 @@
       },
       sustain: {
         title: "構造持続通貨 介入",
-        summary: "住居、学び直し、ケア、地域更新、社会持続活動への報酬を入れたrunです。経済成長だけでなく、社会を維持・修復する行動が役割と所得になると、人の未来感情と行動がどう変わるかを見ます。",
+        summary: "住居、学び直し、ケア、地域更新、社会持続活動への報酬を入れたシミュレーションです。経済成長だけでなく、社会を維持・修復する行動が役割と所得になると、人の未来感情と行動がどう変わるかを見ます。",
         lead: "構造持続理論を社会制度に落とす最初の介入です。資源や給付額だけでなく、本人が『直す・変える・続ける経路』を持てるか、社会を維持する活動が飯の種になるかを観測します。",
         sections: [
           {
@@ -2002,7 +1828,7 @@
             items: [
               "AIで従来の仕事が揺らぐ時、人間の役割を経済活動だけでなく社会持続活動へ拡張できるか。",
               "若者に、学び直し、地域更新、ケア補助、制度改善のような新しい希望経路が見えるか。",
-              "危険・注意レイヤーにいる人が、支援と役割経路によって良好・中立へ戻れるか。"
+              "危険・注意レイヤーにいる人が、支援と役割経路によって希望・中立へ戻れるか。"
             ]
           },
           {
@@ -2017,8 +1843,8 @@
       },
       birthGrant: {
         title: "構造持続+出産 介入",
-        summary: "出産一時金を単体給付にせず、住居、産後休息、代替ケア、教育費、復帰キャリア、財政監査へ接続したrunです。『お金を増やせば子ども意向が戻るのか』ではなく、条件の束として効くかを検証します。",
-        lead: "このrunは、子どもを産ませる制度ではありません。望む人が子どもを迎えられる条件に支払うと、家族形成世代や若者の認識がどう変わるか、また給付があっても希望に変換されない詰まりがどこにあるかを観測します。",
+        summary: "出産一時金を単体給付にせず、住居、産後休息、代替ケア、教育費、復帰キャリア、財政監査へ接続したシミュレーションです。『お金を増やせば子ども希望指数が戻るのか』ではなく、条件の束として効くかを検証します。",
+        lead: "このシミュレーションは、子どもを産ませる制度ではありません。望む人が子どもを迎えられる条件に支払うと、家族形成世代や若者の認識がどう変わるか、また給付があっても希望に変換されない詰まりがどこにあるかを観測します。",
         sections: [
           {
             title: "検証している問い",
@@ -2040,8 +1866,8 @@
       },
       hopeFamily: {
         title: "構造持続+希望 介入",
-        summary: "給付や制度名だけでなく、個別資格通知、即時予約、nat着金、若者メンター、地域の成功ケース、家族形成面談を追加したrunです。不安が高い社会でも、具体的な次の一手が届くと希望が立ち上がるかを検証します。",
-        lead: "このrunは、希望を直接命令していません。『本人に届く通知』『予約できる枠』『初回着金』『伴走者』『監査の継続性』という社会的事実を追加し、エージェントがそれを信じる、疑う、使う、相談する、まだ不安に留まるなどの分岐を観測しています。",
+        summary: "給付や制度名だけでなく、個別資格通知、即時予約、nat着金、若者メンター、地域の成功ケース、家族形成面談を追加したシミュレーションです。不安が高い社会でも、具体的な次の一手が届くと希望が立ち上がるかを検証します。",
+        lead: "このシミュレーションは、希望を直接命令していません。『本人に届く通知』『予約できる枠』『初回着金』『伴走者』『監査の継続性』という社会的事実を追加し、エージェントがそれを信じる、疑う、使う、相談する、まだ不安に留まるなどの分岐を観測しています。",
         sections: [
           {
             title: "検証している問い",
@@ -2056,7 +1882,7 @@
             items: [
               "シナリオ補足は『命令』ではなく『本人が知覚しやすい社会状況』として渡しています。",
               "LLM出力は毎step保存され、内心、会話、SNS、行動、因果、記憶が残るため、なぜ希望が増えたかを後から説明できます。",
-              "デモ表示範囲の40年目では希望5人、良好19人まで確認できます。不安がゼロになったのではなく『不安を抱えたまま動ける』状態として出ています。"
+              "デモ表示範囲の40年目では希望状態が19人まで確認できます。不安がゼロになったのではなく『不安を抱えたまま動ける』状態として出ています。"
             ]
           }
         ]
@@ -2077,7 +1903,7 @@
           "問い: 未来を当てるのではなく、施策を入れた時の感情・行動・副作用・波及を事前観測する設計にしています。",
           "エージェント: 年齢、所得、雇用、住居、奨学金、ケア責任、SNS感受性、制度信頼、自己効力感、人口重みを持つ代表エージェントにしています。",
           "イベント: 世界圧力、政策介入、社会反応、組織判断、長期評価を分け、何が効いたかを後から読めるようにしています。",
-          "観測: 感情だけでなく、行動、内心、友達との会話、SNS発信、因果、持ち越し記憶を固定rowデータで保存しています。",
+          "観測: 感情だけでなく、行動、内心、友達との会話、SNS発信、因果、持ち越し記憶を固定スキーマの観測データとして保存しています。",
           "創発: LLMには結論を命令せず、状態と文脈を情報として渡し、エージェントが信じる、疑う、使う、怒る、動かない分岐を残します。",
           "検証: 介入なし、構造持続通貨、構造持続+出産、構造持続+希望を同じ時点で比較し、効いた施策と効かなかった施策を両方説明できます。"
         ]
@@ -2088,7 +1914,7 @@
           "平均値の予測ではなく、どの層がどの制約で動けなくなるかを見るため、制度設計の修正点に変換しやすいです。",
           "希望、安心、不安、諦念のような心理状態を、制度利用、生活防衛、相談、参加・連帯などの行動に接続しています。",
           "支援が効いた時だけでなく、制度利用が増えても希望に変換されないケースを出せるため、政策宣伝ではなく事前検証になります。",
-          "rowデータとして保存するため、発表では安定再生しつつ、裏側ではLLMエージェントの創発過程を監査できます。"
+          "観測データとして保存するため、発表では安定再生しつつ、裏側ではLLMエージェントの創発過程を監査できます。"
         ]
       }
     ];
@@ -2131,7 +1957,7 @@
           {
             title: "大きく効いたイベント",
             items: [
-              "生活コスト上昇は、子ども意向や住居選択だけでなく、進学・転職・転居の自由度を削る。",
+              "生活コスト上昇は、子ども希望指数や住居選択だけでなく、進学・転職・転居の自由度を削る。",
               "医療・介護ショックは、若者にも家族責任や将来負担として届き、自由時間と自己効力感を削る。",
               "SNS悲観は、個人の不安を『みんな詰んでいる』という集団認識へ増幅する。"
             ]
@@ -2140,7 +1966,7 @@
       },
       sustain: {
         title: "構造持続通貨 介入 レポート",
-        lead: "住居、学び直し、ケア、地域更新、社会持続活動へのnat報酬を入れたrunです。資本主義の外側に逃げるのではなく、社会を維持・修復する活動を役割と所得に変えた時、危険域から戻れるかを見ます。",
+        lead: "住居、学び直し、ケア、地域更新、社会持続活動へのnat報酬を入れたシミュレーションです。資本主義の外側に逃げるのではなく、社会を維持・修復する活動を役割と所得に変えた時、危険域から戻れるかを見ます。",
         summaryCards: [
           { label: "40年後の主状態", value: "注意22 / 中立6" },
           { label: "希望人数", value: "全期間0" },
@@ -2185,7 +2011,7 @@
       },
       birthGrant: {
         title: "構造持続+出産 介入 レポート",
-        lead: "出産一時金を単独給付にせず、住居、休息、代替ケア、教育費、復帰キャリア、財政監査へ接続したrunです。結論として、制度利用は増えるが希望は0のままで、支援が『届く実感』へ変換されない詰まりが見えます。",
+        lead: "出産一時金を単独給付にせず、住居、休息、代替ケア、教育費、復帰キャリア、財政監査へ接続したシミュレーションです。結論として、制度利用は増えるが希望は0のままで、支援が『届く実感』へ変換されない詰まりが見えます。",
         summaryCards: [
           { label: "40年後の主状態", value: "注意28 / 希望0" },
           { label: "10年後の行動", value: "制度利用13" },
@@ -2230,11 +2056,11 @@
       },
       hopeFamily: {
         title: "構造持続+希望 介入 レポート",
-        lead: "構造持続通貨と家族形成支援に加え、個別資格通知、即時予約、nat初回着金、若者メンター、地域の成功ケース、家族形成面談を入れたrunです。不安を消すのではなく、不安を抱えたまま動ける条件を作れるかを見ます。",
+        lead: "構造持続通貨と家族形成支援に加え、個別資格通知、即時予約、nat初回着金、若者メンター、地域の成功ケース、家族形成面談を入れたシミュレーションです。不安を消すのではなく、不安を抱えたまま動ける条件を作れるかを見ます。",
         summaryCards: [
-          { label: "5年後", value: "良好12 / 希望4" },
-          { label: "10年後", value: "良好25 / 希望7" },
-          { label: "40年後", value: "良好19 / 希望5" }
+          { label: "5年後", value: "希望12 / 希望感情4" },
+          { label: "10年後", value: "希望25 / 希望感情7" },
+          { label: "40年後", value: "希望19 / 希望感情5" }
         ],
         milestones: [
           {
@@ -2245,19 +2071,19 @@
           },
           {
             time: "5年後",
-            summary: "良好12、中立10、希望4。制度利用18、相談5。",
+            summary: "希望12、中立10、希望感情4。制度利用18、相談5。",
             event: "nat着金、実体験共有、個別通知、予約、成功ケースが重なる。",
             analysis: "ここで明確に差が出る。希望は抽象的な楽観ではなく、『通知が来た』『予約できる』『着金した』という実在感から立ち上がる。"
           },
           {
             time: "10年後",
-            summary: "良好25、中立1、希望7。安心18が最多。",
+            summary: "希望25、中立1、希望感情7。安心18が最多。",
             event: "制度が一時的なキャンペーンではなく、運用として見え始める。",
             analysis: "希望だけでなく安心が厚くなる。これは不安が消えたのではなく、条件と段取りが見えることで生活防衛から制度利用へ移った状態。"
           },
           {
             time: "40年後",
-            summary: "良好19、中立9、希望5、連帯感1。制度利用20、参加・連帯2。",
+            summary: "希望19、中立9、希望感情5、連帯感1。制度利用20、参加・連帯2。",
             event: "今の子ども世代が大人になり、制度記憶と実利用経験を受け取る。",
             analysis: "40年後も希望は残るが、万能ではない。条件変更や財政不安があるため、継続監査と異議申立、地域の受け皿を残すことが重要。"
           }
@@ -2308,7 +2134,7 @@
     };
     const fallbackEventSchedule = [
       { turn: 4, type: "shock", strength: 0.80, name: "AI自動化急加速", direction: "雇用安定↓ 希望↓" },
-      { turn: 6, type: "shock", strength: 0.70, name: "生活コスト上昇", direction: "可処分所得↓ 子ども意向↓" },
+      { turn: 6, type: "shock", strength: 0.70, name: "生活コスト上昇", direction: "可処分所得↓ 子ども希望↓" },
       { turn: 8, type: "shock", strength: 0.55, name: "SNS悲観バイアス増幅", direction: "希望↓ 分断感↑" },
       { turn: 12, type: "shock", strength: 0.60, name: "地政学リスク上昇", direction: "将来予見性↓ 制度信頼↓" },
       { turn: 18, type: "shock", strength: 0.65, name: "医療提供体制ひっ迫", direction: "制度信頼↓ メンタル負荷↑" },
@@ -2398,7 +2224,7 @@
         state.agentFilter = "all";
       }
       syncAgentFilterTabs();
-      syncScenarioTabs();
+      syncScenarioSelect();
       render();
     }
 
@@ -2442,7 +2268,7 @@
           });
           allLlmRows.push(...llmRows);
         } catch (error) {
-          console.warn(`${config.label} run data was not loaded.`, error);
+          console.warn(`${config.label} simulation data was not loaded.`, error);
         }
       }
       return { runDataByScenario: nextRunData, allLlmRows };
@@ -3338,7 +3164,7 @@
       const { counts, total } = summarize(rows);
       const distribution = document.getElementById("distribution");
       distribution.innerHTML = categories.map((category) => {
-        const value = Math.round((counts[category.key] / total) * 100);
+        const value = total ? Math.round((counts[category.key] / total) * 100) : 0;
         return `
           <div class="bar-row">
             <div>${category.label}</div>
@@ -3380,14 +3206,14 @@
       `).join("");
 
       const points = vertices.map((vertex) => {
-        const ratio = counts[vertex.category.key] / total;
+        const ratio = total ? counts[vertex.category.key] / total : 0;
         const radius = maxRadius * clamp(ratio * 2.7, 0.05, 1);
         return `${center.x + Math.cos(vertex.angle) * radius},${center.y + Math.sin(vertex.angle) * radius}`;
       }).join(" ");
       data.innerHTML = `
         <polygon points="${points}" fill="#2563eb" fill-opacity="0.22" stroke="#2563eb" stroke-width="3"></polygon>
         ${vertices.map((vertex) => {
-          const ratio = counts[vertex.category.key] / total;
+          const ratio = total ? counts[vertex.category.key] / total : 0;
           const radius = maxRadius * clamp(ratio * 2.7, 0.05, 1);
           const x = center.x + Math.cos(vertex.angle) * radius;
           const y = center.y + Math.sin(vertex.angle) * radius;
@@ -3398,20 +3224,41 @@
 
     function renderMetrics(rows) {
       const { counts, total } = summarize(rows);
-      const good = counts.good / total;
-      const neutral = counts.neutral / total;
-      const caution = counts.caution / total;
-      const danger = counts.danger / total;
       const childIntent = total
         ? rows.reduce((sum, row) => sum + (Number(row.childIntent) || 0), 0) / total
         : 0;
-      const hopeCount = rows.filter((row) => row.emotion === "希望").length;
-      document.getElementById("metric-good").textContent = `${Math.round(good * 100)}%`;
-      document.getElementById("metric-neutral").textContent = `${Math.round(neutral * 100)}%`;
-      document.getElementById("metric-caution").textContent = `${Math.round(caution * 100)}%`;
-      document.getElementById("metric-danger").textContent = `${Math.round(danger * 100)}%`;
+      document.getElementById("metric-good").textContent = `${counts.good}人`;
+      document.getElementById("metric-neutral").textContent = `${counts.neutral}人`;
+      document.getElementById("metric-caution").textContent = `${counts.caution}人`;
+      document.getElementById("metric-danger").textContent = `${counts.danger}人`;
       document.getElementById("metric-child").textContent = `${Math.round(childIntent * 100)}%`;
-      document.getElementById("metric-hope").textContent = `${hopeCount}/3`;
+    }
+
+    function currentSummaryRows() {
+      const rows = [...renderedRowsById.values()];
+      if (rows.length) return rows;
+      return visibleRowsFor(agents.map((agent) => agentState(agent, state.scenario, state.turn)));
+    }
+
+    function currentSummaryCards() {
+      const rows = currentSummaryRows();
+      const { counts, total } = summarize(rows);
+      const childIntent = total
+        ? rows.reduce((sum, row) => sum + (Number(row.childIntent) || 0), 0) / total
+        : 0;
+      const categoryCards = [
+        ["希望", counts.good],
+        ["中立", counts.neutral],
+        ["注意", counts.caution],
+        ["危険", counts.danger]
+      ].map(([label, count]) => ({
+        label,
+        value: total ? `${count}人 / ${Math.round((count / total) * 100)}%` : "0人 / 0%"
+      }));
+      return [
+        ...categoryCards,
+        { label: "子ども希望指数", value: `${Math.round(childIntent * 100)}%` }
+      ];
     }
 
     function eventsAtTurn(turn) {
@@ -3676,7 +3523,7 @@
       const ageText = row.displayAge ? `${row.displayAge}歳` : "年齢不明";
       document.getElementById("agentName").textContent = `${displayName} / ${ageText} / ${row.gender || "性別不明"} / ${category.label}`;
       const exitText = row.socialExitStatus ? ` / ${row.socialExitStatus}` : "";
-      document.getElementById("agentSummary").textContent = `${emotionText}が主状態。信頼 ${row.trust.toFixed(2)}、子ども意向 ${Math.round((row.childIntent || 0) * 100)}%${exitText}。`;
+      document.getElementById("agentSummary").textContent = `${emotionText}が主状態。信頼 ${row.trust.toFixed(2)}、子ども希望指数 ${Math.round((row.childIntent || 0) * 100)}%${exitText}。`;
       document.getElementById("kvPathway").textContent = row.pathway.toFixed(2);
       document.getElementById("kvSupport").textContent = row.support.toFixed(2);
       document.getElementById("kvIntensity").textContent = row.intensity.toFixed(2);
@@ -3763,7 +3610,7 @@
       if (llmBasis) return llmBasis;
       const category = categoryByKey[row.dominant];
       const actionCategory = row.actionCategory || actionCategoryFor(row.action, row.dominant);
-      return `${category.label}判定。未来経路 ${row.pathway.toFixed(2)}、構造支援 ${row.support.toFixed(2)}、制度信頼 ${row.trust.toFixed(2)}、子ども意向 ${Math.round((row.childIntent || 0) * 100)}%。次の行動は${actionCategory}寄り。`;
+      return `${category.label}判定。未来経路 ${row.pathway.toFixed(2)}、構造支援 ${row.support.toFixed(2)}、制度信頼 ${row.trust.toFixed(2)}、子ども希望指数 ${Math.round((row.childIntent || 0) * 100)}%。次の行動は${actionCategory}寄り。`;
     }
 
     function memoryTextFor(row) {
@@ -3850,29 +3697,20 @@
       if (!runDataByScenario.has(scenario)) return;
       state.scenario = scenario;
       applyRunDataForScenario(scenario);
-      syncScenarioTabs();
+      syncScenarioSelect();
       render();
     }
 
-    function syncScenarioTabs() {
-      document.querySelectorAll("#scenarioTabs button").forEach((button) => {
-        const loaded = runDataByScenario.has(button.dataset.scenario);
-        button.disabled = !loaded;
-        button.setAttribute("aria-pressed", String(loaded && button.dataset.scenario === state.scenario));
-      });
-      updateScenarioPolicyStatus();
+    function syncScenarioSelect() {
+      const select = document.getElementById("scenarioSelect");
+      if (select) {
+        Array.from(select.options).forEach((option) => {
+          option.disabled = !runDataByScenario.has(option.value);
+        });
+        select.value = state.scenario;
+        select.disabled = !runDataByScenario.size;
+      }
       renderScenarioBrief();
-    }
-
-    function updateScenarioPolicyStatus() {
-      const policyStatus = document.getElementById("birthGrantPolicyStatus");
-      if (policyStatus) {
-        policyStatus.textContent = runDataByScenario.has("birthGrant") ? "再生可能" : "生成中";
-      }
-      const hopeFamilyStatus = document.getElementById("hopeFamilyPolicyStatus");
-      if (hopeFamilyStatus) {
-        hopeFamilyStatus.textContent = runDataByScenario.has("hopeFamily") ? "再生可能" : "生成待ち";
-      }
     }
 
     function renderScenarioBrief() {
@@ -3918,11 +3756,12 @@
       if (kicker) kicker.textContent = "SUMMARY / 詳細分析";
       title.textContent = report.title;
       lead.textContent = report.lead;
+      const summaryCards = currentSummaryCards();
       sections.innerHTML = `
         <section class="modal-section">
           <h3 class="modal-section-title">SUMMARY</h3>
           <div class="report-summary-grid">
-            ${report.summaryCards.map((card) => `
+            ${summaryCards.map((card) => `
               <div class="report-card">
                 <div class="report-card-label">${escapeHtml(card.label)}</div>
                 <div class="report-card-value">${escapeHtml(card.value)}</div>
@@ -4034,10 +3873,8 @@
       }
     }
 
-    document.getElementById("scenarioTabs")?.addEventListener("click", (event) => {
-      const button = event.target.closest("button[data-scenario]");
-      if (!button) return;
-      setScenario(button.dataset.scenario);
+    document.getElementById("scenarioSelect")?.addEventListener("change", (event) => {
+      setScenario(event.target.value);
     });
 
     document.getElementById("scenarioDetailButton")?.addEventListener("click", openScenarioModal);
