@@ -481,7 +481,9 @@
     }
 
     .panel {
-      background: var(--surface);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 1)),
+        var(--surface);
       border: 1px solid var(--line);
       border-radius: 8px;
       box-shadow: var(--shadow);
@@ -502,15 +504,41 @@
       justify-content: space-between;
       align-items: center;
       gap: 14px;
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--line);
+      padding: 13px 16px;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      background:
+        linear-gradient(90deg, rgba(23, 32, 51, 0.045), transparent 44%),
+        linear-gradient(180deg, #ffffff, #f8fafc);
     }
 
     .panel-title {
       margin: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       font-size: 16px;
       line-height: 1.2;
-      font-weight: 800;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .panel-title::before {
+      content: "";
+      width: 8px;
+      height: 20px;
+      border-radius: 999px;
+      background: #172033;
+      box-shadow: 0 0 0 4px rgba(23, 32, 51, 0.08);
+    }
+
+    .live-voice-panel .panel-title::before {
+      background: var(--blue);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
+    }
+
+    .map-panel .panel-title::before {
+      background: var(--good);
+      box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.10);
     }
 
     .panel-title-sub {
@@ -561,20 +589,22 @@
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      padding: 10px 16px 4px;
+      padding: 10px 16px 6px;
       color: var(--muted);
       font-size: 11px;
       font-weight: 800;
+      background: linear-gradient(180deg, rgba(248, 250, 252, 0.80), rgba(255, 255, 255, 0));
     }
 
     .map-guide span {
       display: inline-flex;
       align-items: center;
       min-height: 24px;
-      border: 1px solid var(--line);
+      border: 1px solid rgba(15, 23, 42, 0.09);
       border-radius: 999px;
       padding: 2px 9px;
-      background: var(--surface-alt);
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
       max-width: 100%;
       white-space: normal;
     }
@@ -831,18 +861,59 @@
       width: 100%;
       height: 100%;
       min-height: 0;
-      border-radius: 8px;
-      background: #fbfdff;
-      border: 1px solid var(--line);
+      border-radius: 14px;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.95), transparent 42%),
+        #fbfdff;
+      border: 1px solid rgba(15, 23, 42, 0.10);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 12px 32px rgba(15, 23, 42, 0.08);
     }
 
     .room-image {
-      opacity: 0.44;
+      opacity: 0.42;
       pointer-events: none;
-      filter: saturate(0.88) contrast(0.94);
+      filter: saturate(0.92) contrast(0.96);
     }
 
     .room-tone {
+      pointer-events: none;
+    }
+
+    .room-frame {
+      fill: none;
+      stroke-width: 2;
+      pointer-events: none;
+      filter: drop-shadow(0 8px 16px rgba(15, 23, 42, 0.12));
+    }
+
+    .room-frame-caution {
+      stroke: rgba(245, 158, 11, 0.52);
+    }
+
+    .room-frame-good {
+      stroke: rgba(22, 163, 74, 0.48);
+    }
+
+    .room-frame-danger {
+      stroke: rgba(225, 29, 72, 0.48);
+    }
+
+    .room-frame-neutral {
+      stroke: rgba(100, 116, 139, 0.42);
+    }
+
+    .room-corner-mark {
+      fill: rgba(255, 255, 255, 0.78);
+      stroke: rgba(15, 23, 42, 0.10);
+      stroke-width: 1;
+      pointer-events: none;
+    }
+
+    .map-frame-outline,
+    .map-divider {
+      fill: none;
+      stroke: rgba(15, 23, 42, 0.34);
+      stroke-width: 1.4;
       pointer-events: none;
     }
 
@@ -903,9 +974,14 @@
     }
 
     .room-label-bg {
-      fill: rgba(255, 255, 255, 0.90);
-      stroke: rgba(15, 23, 42, 0.16);
+      fill: rgba(255, 255, 255, 0.86);
+      stroke: rgba(15, 23, 42, 0.11);
       stroke-width: 1;
+      pointer-events: none;
+      filter: drop-shadow(0 8px 16px rgba(15, 23, 42, 0.10));
+    }
+
+    .room-label-dot {
       pointer-events: none;
     }
 
@@ -918,7 +994,7 @@
 
     .room-label-subtitle {
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 800;
       fill: #475569;
       pointer-events: none;
     }
@@ -2248,7 +2324,7 @@
             <span>横軸: 未来経路</span>
             <span>縦軸: 構造支援</span>
             <span>点線+離脱: 逃避・不調・反発リスク</span>
-            <span>ラベル: 離脱/年齢/主感情</span>
+            <span>ラベル: 名前/年齢/性別/状態</span>
           </div>
           <div class="map-wrap">
           <svg class="map-svg" id="mapSvg" viewBox="0 28 1000 628" role="img" aria-label="future orientation two dimensional map">
@@ -2260,16 +2336,16 @@
                 <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#e2e8f0" stroke-width="1"></path>
               </pattern>
               <clipPath id="cautionRoomClip">
-                <rect x="55" y="56" width="445" height="292"></rect>
+                <rect x="55" y="56" width="445" height="292" rx="18"></rect>
               </clipPath>
               <clipPath id="goodRoomClip">
-                <rect x="500" y="56" width="445" height="292"></rect>
+                <rect x="500" y="56" width="445" height="292" rx="18"></rect>
               </clipPath>
               <clipPath id="dangerRoomClip">
-                <rect x="55" y="348" width="445" height="292"></rect>
+                <rect x="55" y="348" width="445" height="292" rx="18"></rect>
               </clipPath>
               <clipPath id="neutralRoomClip">
-                <rect x="500" y="348" width="445" height="292"></rect>
+                <rect x="500" y="348" width="445" height="292" rx="18"></rect>
               </clipPath>
             </defs>
 
@@ -2278,30 +2354,42 @@
             <image class="room-image" href="./assets/map_backgrounds/abundant.png" x="500" y="56" width="445" height="292" preserveAspectRatio="xMidYMid slice" clip-path="url(#goodRoomClip)"></image>
             <image class="room-image" href="./assets/map_backgrounds/despair.png" x="55" y="348" width="445" height="292" preserveAspectRatio="xMidYMid slice" clip-path="url(#dangerRoomClip)"></image>
             <image class="room-image" href="./assets/map_backgrounds/neutral.png" x="500" y="348" width="445" height="292" preserveAspectRatio="xMidYMid slice" clip-path="url(#neutralRoomClip)"></image>
-            <rect class="room-tone" x="55" y="56" width="445" height="292" fill="var(--caution-soft)" opacity="0.58"></rect>
-            <rect class="room-tone" x="500" y="56" width="445" height="292" fill="var(--good-soft)" opacity="0.56"></rect>
-            <rect class="room-tone" x="55" y="348" width="445" height="292" fill="var(--danger-soft)" opacity="0.60"></rect>
-            <rect class="room-tone" x="500" y="348" width="445" height="292" fill="var(--neutral-soft)" opacity="0.62"></rect>
+            <rect class="room-tone" x="55" y="56" width="445" height="292" rx="18" fill="var(--caution-soft)" opacity="0.58"></rect>
+            <rect class="room-tone" x="500" y="56" width="445" height="292" rx="18" fill="var(--good-soft)" opacity="0.56"></rect>
+            <rect class="room-tone" x="55" y="348" width="445" height="292" rx="18" fill="var(--danger-soft)" opacity="0.60"></rect>
+            <rect class="room-tone" x="500" y="348" width="445" height="292" rx="18" fill="var(--neutral-soft)" opacity="0.62"></rect>
+            <rect class="room-frame room-frame-caution" x="55" y="56" width="445" height="292" rx="18"></rect>
+            <rect class="room-frame room-frame-good" x="500" y="56" width="445" height="292" rx="18"></rect>
+            <rect class="room-frame room-frame-danger" x="55" y="348" width="445" height="292" rx="18"></rect>
+            <rect class="room-frame room-frame-neutral" x="500" y="348" width="445" height="292" rx="18"></rect>
+            <circle class="room-corner-mark" cx="476" cy="80" r="5"></circle>
+            <circle class="room-corner-mark" cx="921" cy="80" r="5"></circle>
+            <circle class="room-corner-mark" cx="476" cy="372" r="5"></circle>
+            <circle class="room-corner-mark" cx="921" cy="372" r="5"></circle>
             <rect class="map-grid-overlay" x="0" y="0" width="1000" height="680" fill="url(#grid)"></rect>
-            <rect x="55" y="56" width="890" height="584" fill="none" stroke="#334155" stroke-width="2"></rect>
-            <line x1="500" y1="56" x2="500" y2="640" stroke="#334155" stroke-width="2"></line>
-            <line x1="55" y1="348" x2="945" y2="348" stroke="#334155" stroke-width="2"></line>
+            <rect class="map-frame-outline" x="55" y="56" width="890" height="584" rx="18"></rect>
+            <line class="map-divider" x1="500" y1="56" x2="500" y2="640"></line>
+            <line class="map-divider" x1="55" y1="348" x2="945" y2="348"></line>
 
             <g id="agentLayer"></g>
             <g id="roomLabelLayer">
-              <rect x="86" y="78" width="210" height="58" rx="8" class="room-label-bg"></rect>
+              <rect x="86" y="78" width="210" height="58" rx="16" class="room-label-bg"></rect>
+              <circle cx="102" cy="102" r="5" fill="var(--caution)" class="room-label-dot"></circle>
               <text x="110" y="104" class="room-label-title">注意</text>
               <text x="110" y="124" class="room-label-subtitle">不安・怒り</text>
 
-              <rect x="531" y="78" width="238" height="58" rx="8" class="room-label-bg"></rect>
+              <rect x="531" y="78" width="238" height="58" rx="16" class="room-label-bg"></rect>
+              <circle cx="547" cy="102" r="5" fill="var(--good)" class="room-label-dot"></circle>
               <text x="555" y="104" class="room-label-title">希望</text>
               <text x="555" y="124" class="room-label-subtitle">安心・希望・連帯感</text>
 
-              <rect x="86" y="370" width="300" height="58" rx="8" class="room-label-bg"></rect>
+              <rect x="86" y="370" width="300" height="58" rx="16" class="room-label-bg"></rect>
+              <circle cx="102" cy="394" r="5" fill="var(--danger)" class="room-label-dot"></circle>
               <text x="110" y="396" class="room-label-title">危険</text>
               <text x="110" y="416" class="room-label-subtitle">裏切られ感・喪失感・絶望・諦念</text>
 
-              <rect x="531" y="370" width="150" height="58" rx="8" class="room-label-bg"></rect>
+              <rect x="531" y="370" width="150" height="58" rx="16" class="room-label-bg"></rect>
+              <circle cx="547" cy="394" r="5" fill="var(--neutral)" class="room-label-dot"></circle>
               <text x="555" y="396" class="room-label-title">中立</text>
               <text x="555" y="416" class="room-label-subtitle">平静</text>
             </g>
