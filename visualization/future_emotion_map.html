@@ -116,9 +116,9 @@
 
     .top-metrics {
       display: grid;
-      grid-template-columns: repeat(5, minmax(94px, 1fr));
+      grid-template-columns: repeat(6, minmax(88px, 1fr));
       gap: 8px;
-      width: min(700px, 58vw);
+      width: min(820px, 62vw);
     }
 
     .metric {
@@ -156,7 +156,7 @@
 
     .segmented {
       display: inline-grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       border: 1px solid var(--line);
       border-radius: 8px;
       overflow: hidden;
@@ -177,6 +177,11 @@
       background: var(--ink);
       color: #ffffff;
       font-weight: 700;
+    }
+
+    .segmented button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
     }
 
     .data-badge {
@@ -1352,6 +1357,10 @@
           <div class="metric-label">子ども意向</div>
           <div class="metric-value" id="metric-child">0%</div>
         </div>
+        <div class="metric">
+          <div class="metric-label">希望人数</div>
+          <div class="metric-value" id="metric-hope">0/3</div>
+        </div>
       </section>
     </header>
 
@@ -1359,6 +1368,8 @@
       <div class="segmented" id="scenarioTabs">
         <button type="button" data-scenario="baseline" aria-pressed="false">介入なし</button>
         <button type="button" data-scenario="sustain" aria-pressed="true">構造持続介入</button>
+        <button type="button" data-scenario="birthGrant" aria-pressed="false">構造持続+出産支援</button>
+        <button type="button" data-scenario="hopeFamily" aria-pressed="false">希望+家族形成</button>
       </div>
       <div class="data-badge" aria-label="表示対象">LLM観測rowのみ</div>
       <section class="simulation-studio" aria-label="シミュレーション生成予定">
@@ -1388,14 +1399,14 @@
             <div class="policy-detail">住居・学び直し・ケア・社会持続活動報酬</div>
           </article>
           <article class="policy-card is-next">
-            <div class="policy-status">次に生成</div>
+            <div class="policy-status" id="birthGrantPolicyStatus">生成待ち</div>
             <div class="policy-name">構造持続介入 + 出産一時金</div>
             <div class="policy-detail">一時金を住居・休息・代替ケア・教育費緩衝へ接続</div>
           </article>
           <article class="policy-card is-future">
-            <div class="policy-status">予定</div>
-            <div class="policy-name">ルールメイク達成条件</div>
-            <div class="policy-detail">金融・企業採用・国家制度の持続条件を組み合わせ検証</div>
+            <div class="policy-status" id="hopeFamilyPolicyStatus">生成待ち</div>
+            <div class="policy-name">希望+家族形成強化</div>
+            <div class="policy-detail">希望3体以上、子ども意向、非強制監査を組み合わせ検証</div>
           </article>
         </div>
       </section>
@@ -1610,6 +1621,20 @@
         countryTurnsPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/country_turns.tsv"],
         autoEventPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/auto_events_with_feedback.tsv"],
         scheduledEventPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/scheduled_events_used.tsv"]
+      },
+      birthGrant: {
+        label: "構造持続+出産支援",
+        agentTurnsPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/country_turns.tsv"],
+        autoEventPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/scheduled_events_used.tsv"]
+      },
+      hopeFamily: {
+        label: "希望+家族形成",
+        agentTurnsPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/country_turns.tsv"],
+        autoEventPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/scheduled_events_used.tsv"]
       }
     };
     const rooms = {
@@ -2086,6 +2111,10 @@
       return x * x * (3 - 2 * x);
     }
 
+    function isInterventionScenario(scenario = state.scenario) {
+      return scenario === "sustain" || scenario === "birthGrant" || scenario === "hopeFamily";
+    }
+
     function agentState(agent, scenario, turn) {
       const t = turn / 79;
       const s = agent.seed;
@@ -2289,7 +2318,7 @@
         : 0;
       const goodEmotionBoost = ["安心", "希望", "連帯感"].includes(values.emotion) ? 0.06 : 0;
       const dangerPenalty = values.dominant === "danger" ? 0.12 : values.dominant === "caution" ? 0.05 : 0;
-      const sustainBoost = values.scenario === "sustain" && values.support > 0.58 ? 0.05 : 0;
+      const sustainBoost = isInterventionScenario(values.scenario) && values.support > 0.58 ? 0.05 : 0;
       return clamp(
         base * 0.42 +
           values.pathway * 0.20 +
@@ -2345,10 +2374,10 @@
     }
 
     function actionFor(category, scenario, group, agency) {
-      if (category === "good") return scenario === "sustain" ? "継承" : "学習";
+      if (category === "good") return isInterventionScenario(scenario) ? "継承" : "学習";
       if (category === "neutral") return "待機";
       if (category === "caution") return agency > 0.48 ? "抗議" : "警戒";
-      if (category === "danger") return scenario === "sustain" ? "連帯" : "撤退";
+      if (category === "danger") return isInterventionScenario(scenario) ? "連帯" : "撤退";
       return "待機";
     }
 
@@ -2724,16 +2753,18 @@
       const childIntent = total
         ? rows.reduce((sum, row) => sum + (Number(row.childIntent) || 0), 0) / total
         : 0;
+      const hopeCount = rows.filter((row) => row.emotion === "希望").length;
       document.getElementById("metric-good").textContent = `${Math.round(good * 100)}%`;
       document.getElementById("metric-neutral").textContent = `${Math.round(neutral * 100)}%`;
       document.getElementById("metric-caution").textContent = `${Math.round(caution * 100)}%`;
       document.getElementById("metric-danger").textContent = `${Math.round(danger * 100)}%`;
       document.getElementById("metric-child").textContent = `${Math.round(childIntent * 100)}%`;
+      document.getElementById("metric-hope").textContent = `${hopeCount}/3`;
     }
 
     function eventsAtTurn(turn) {
       return eventSchedule.filter((event) => event.turn === turn && (
-        state.scenario === "sustain" || event.type !== "policy"
+        isInterventionScenario() || event.type !== "policy"
       ));
     }
 
@@ -2763,7 +2794,7 @@
     function timelineItems() {
       const byTurn = new Map();
       eventSchedule
-        .filter((event) => state.scenario === "sustain" || event.type !== "policy")
+        .filter((event) => isInterventionScenario() || event.type !== "policy")
         .filter(isTimelineEvent)
         .forEach((event) => {
           if (!byTurn.has(event.turn)) byTurn.set(event.turn, []);
@@ -2906,7 +2937,7 @@
       document.getElementById("dominantSignalLabel").textContent = signalLabel;
       document.getElementById("youthSignal").textContent = `${categoryByKey[signalTop].label}が中心`;
 
-      const institutionText = state.scenario === "sustain"
+      const institutionText = isInterventionScenario()
         ? state.turn < 18 ? "実証準備" : state.turn < 44 ? "制度更新中" : "報酬経路が定着"
         : state.turn < 22 ? "未発動" : state.turn < 52 ? "遅延対応" : "最低限の抑制";
       document.getElementById("institutionSignal").textContent = institutionText;
@@ -3164,6 +3195,7 @@
 
     function setScenario(scenario) {
       if (!runConfigs[scenario]) return;
+      if (!runDataByScenario.has(scenario)) return;
       state.scenario = scenario;
       applyRunDataForScenario(scenario);
       syncScenarioTabs();
@@ -3172,8 +3204,18 @@
 
     function syncScenarioTabs() {
       document.querySelectorAll("#scenarioTabs button").forEach((button) => {
-        button.setAttribute("aria-pressed", String(button.dataset.scenario === state.scenario));
+        const loaded = runDataByScenario.has(button.dataset.scenario);
+        button.disabled = !loaded;
+        button.setAttribute("aria-pressed", String(loaded && button.dataset.scenario === state.scenario));
       });
+      const policyStatus = document.getElementById("birthGrantPolicyStatus");
+      if (policyStatus) {
+        policyStatus.textContent = runDataByScenario.has("birthGrant") ? "再生可能" : "生成中";
+      }
+      const hopeFamilyStatus = document.getElementById("hopeFamilyPolicyStatus");
+      if (hopeFamilyStatus) {
+        hopeFamilyStatus.textContent = runDataByScenario.has("hopeFamily") ? "再生可能" : "生成待ち";
+      }
     }
 
     function setAgentFilter(filter) {

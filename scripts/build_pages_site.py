@@ -14,9 +14,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "public"
-RUN_IDS = (
+REQUIRED_RUN_IDS = (
     "no_intervention_71steps_panel48",
     "structure_intervention_100years_panel48_midprompt",
+)
+OPTIONAL_RUN_IDS = (
+    "structure_birth_grant_package_83steps_panel48",
+    "structure_hope_family_package_83steps_panel48",
 )
 RUN_FILES = (
     "agent_turns.tsv",
@@ -73,14 +77,21 @@ def build_public_site() -> None:
     html = html.replace("../outputs/runs/", "../data/runs/")
     write_text(PUBLIC / "visualization" / "future_emotion_map.html", html)
 
-    for run_id in RUN_IDS:
+    published_run_ids = []
+    for run_id in [*REQUIRED_RUN_IDS, *OPTIONAL_RUN_IDS]:
         run_source = ROOT / "outputs" / "runs" / run_id
+        required = run_id in REQUIRED_RUN_IDS
         if not run_source.exists():
-            raise SystemExit(f"Missing run output: {run_source}")
+            if required:
+                raise SystemExit(f"Missing run output: {run_source}")
+            continue
+        missing_required = [file_name for file_name in RUN_FILES if not (run_source / file_name).exists()]
+        if missing_required:
+            if required:
+                raise SystemExit(f"Missing run files in {run_source}: {', '.join(missing_required)}")
+            continue
         for file_name in RUN_FILES:
             source = run_source / file_name
-            if not source.exists():
-                raise SystemExit(f"Missing run file: {source}")
             copy_binary_or_text(source, PUBLIC / "data" / "runs" / run_id / file_name)
         for file_name, empty_fallback in OPTIONAL_RUN_FILES_WITH_EMPTY_FALLBACK.items():
             source = run_source / file_name
@@ -89,6 +100,7 @@ def build_public_site() -> None:
                 copy_binary_or_text(source, target)
             else:
                 write_text(target, empty_fallback)
+        published_run_ids.append(run_id)
 
     domain_data_source = ROOT / "domain_packs" / "agi_youth_japan" / "data"
     for file_name in DOMAIN_DATA_FILES:
@@ -122,8 +134,7 @@ GitHub Pages公開用の静的サイトです。
 
 - Demo URL: `https://karesansui-u.github.io/hackathon-singulab/visualization/future_emotion_map.html`
 - Main UI: `visualization/future_emotion_map.html`
-- Run data: `data/runs/no_intervention_71steps_panel48/`
-- Run data: `data/runs/structure_intervention_100years_panel48_midprompt/`
+- Run data: {", ".join(f"`data/runs/{run_id}/`" for run_id in published_run_ids)}
 - Domain data: `domain_packs/agi_youth_japan/data/`
 
 Source files live outside this directory. Rebuild this folder with:

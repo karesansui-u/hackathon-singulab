@@ -131,12 +131,37 @@ def apply_agent_panel_overrides(
     return patched
 
 
+def is_birth_grant_package_event(event: Dict[str, str]) -> bool:
+    event_id = event.get("イベントID", "")
+    return event_id.startswith("BP")
+
+
+def is_hope_family_package_event(event: Dict[str, str]) -> bool:
+    event_id = event.get("イベントID", "")
+    return event_id.startswith("HP")
+
+
 def filter_events_for_scenario(events: List[Dict[str, str]], scenario_mode: str) -> List[Dict[str, str]]:
     if scenario_mode == "no_intervention":
         return [
             event for event in events
-            if event.get("区分") != "政策" and not event.get("イベントID", "").startswith("P")
+            if (
+                event.get("区分") != "政策"
+                and not event.get("イベントID", "").startswith("P")
+                and not is_birth_grant_package_event(event)
+                and not is_hope_family_package_event(event)
+            )
         ]
+    if scenario_mode == "structure_intervention":
+        return [
+            event for event in events
+            if not is_birth_grant_package_event(event)
+            and not is_hope_family_package_event(event)
+        ]
+    if scenario_mode == "structure_birth_grant_package":
+        return [event for event in events if not is_hope_family_package_event(event)]
+    if scenario_mode == "structure_hope_family_package":
+        return events
     return events
 
 
@@ -1127,7 +1152,13 @@ def main() -> None:
     parser.add_argument("--previous-agent-turns-tsv", type=Path)
     parser.add_argument(
         "--scenario-mode",
-        choices=["no_intervention", "structure_intervention", "all"],
+        choices=[
+            "no_intervention",
+            "structure_intervention",
+            "structure_birth_grant_package",
+            "structure_hope_family_package",
+            "all",
+        ],
         default="structure_intervention",
         help="Filter scheduled events for comparison runs.",
     )

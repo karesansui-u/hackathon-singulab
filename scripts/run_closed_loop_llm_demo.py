@@ -342,7 +342,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--timeout", type=int, default=420)
     parser.add_argument(
         "--scenario-mode",
-        choices=["no_intervention", "structure_intervention", "all"],
+        choices=[
+            "no_intervention",
+            "structure_intervention",
+            "structure_birth_grant_package",
+            "structure_hope_family_package",
+            "all",
+        ],
         default="structure_intervention",
         help="Run comparison branch: no policies or structure-sustain interventions.",
     )
