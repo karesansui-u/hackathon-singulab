@@ -1406,7 +1406,7 @@
           <article class="policy-card is-future">
             <div class="policy-status" id="hopeFamilyPolicyStatus">生成待ち</div>
             <div class="policy-name">希望+家族形成強化</div>
-            <div class="policy-detail">希望3体以上、子ども意向、非強制監査を組み合わせ検証</div>
+            <div class="policy-detail">仮払い・住居/ケア即時枠・個別見通し面談で希望3体以上を検証</div>
           </article>
         </div>
       </section>
@@ -2898,7 +2898,7 @@
       const strength = clamp(event.strength ?? 0.5, 0.15, 1);
       const scale = (0.62 + strength * 0.70).toFixed(2);
       if (event.type === "policy") {
-        return { fill: "#dcfce7", stroke: "#16a34a", left: "62%", top: "53%", scale };
+        return { fill: "#dcfce7", stroke: "#16a34a", left: "50%", top: "53%", scale };
       }
       if (event.type === "youth") {
         return { fill: "#fef9c3", stroke: "#ca8a04", left: "35%", top: "55%", scale };
@@ -2907,7 +2907,7 @@
         return { fill: "#dbeafe", stroke: "#2563eb", left: "50%", top: "50%", scale };
       }
       if (event.type === "milestone") {
-        return { fill: "#ede9fe", stroke: "#7c3aed", left: "58%", top: "48%", scale };
+        return { fill: "#ede9fe", stroke: "#7c3aed", left: "50%", top: "48%", scale };
       }
       return { fill: "#fee2e2", stroke: "#ef4444", left: "50%", top: "50%", scale };
     }
