@@ -2326,7 +2326,7 @@
             <span>横軸: 未来経路</span>
             <span>縦軸: 構造支援</span>
             <span>点線+離脱: 逃避・不調・反発リスク</span>
-            <span>ラベル: 名前/年齢/性別/状態</span>
+            <span>ラベル: 年齢/感情</span>
           </div>
           <div class="map-wrap">
           <svg class="map-svg" id="mapSvg" viewBox="0 28 1000 628" role="img" aria-label="future orientation two dimensional map">
@@ -4228,8 +4228,8 @@
       statusDot.setAttribute("class", "agent-icon-dot");
       node.appendChild(statusDot);
 
-      const exitLabel = row.socialExitStatus ? "離脱 / " : "";
-      const mapLabel = `${exitLabel}${compactAgentName(row)} ${ageTextFor(row)} ${gender.short} ${categoryByKey[row.dominant].label}`;
+      const emotion = row.emotion || categoryByKey[row.dominant].label;
+      const mapLabel = `${ageTextFor(row)} ${emotion}`;
       appendEmotionLabel(node, row.x, row.y - size - 13, mapLabel, Boolean(row.socialExitStatus));
     }
 
@@ -5015,11 +5015,6 @@
     function ageTextFor(row) {
       const age = row.displayAge || row.age;
       return age ? `${age}歳` : "年齢不明";
-    }
-
-    function compactAgentName(row) {
-      const name = String(row.name && row.name !== row.id ? row.name : row.id || "Agent").trim();
-      return name.length > 6 ? `${name.slice(0, 6)}…` : name;
     }
 
     function renderEmergenceTrace(rows) {
