@@ -472,6 +472,7 @@
 
     .left-column {
       grid-column: 2;
+      grid-row: 1;
       display: grid;
       grid-template-rows: auto auto;
       gap: 12px;
@@ -1120,6 +1121,7 @@
 
     .side {
       grid-column: 1;
+      grid-row: 1;
       display: grid;
       grid-template-rows: 1fr;
       gap: 16px;
@@ -1517,6 +1519,7 @@
       .left-column,
       .side {
         grid-column: auto;
+        grid-row: auto;
       }
 
       .side {
@@ -1620,6 +1623,7 @@
         <span class="scenario-select-label">シミュレーション</span>
         <select class="scenario-select" id="scenarioSelect" disabled>
           <option value="baseline">介入なし</option>
+          <option value="birthOnly">出産支援のみ</option>
           <option value="sustain" selected>構造持続通貨 介入</option>
           <option value="birthGrant">構造持続+出産 介入</option>
           <option value="hopeFamily">構造持続+希望 介入</option>
@@ -1711,7 +1715,7 @@
           </svg>
           <div class="event-burst" id="eventBurst" aria-live="polite">
             <svg viewBox="0 0 500 150" role="img" aria-label="event burst">
-              <polygon id="eventBurstShape" points="250,5 274,38 326,18 324,58 386,56 348,88 414,114 338,120 344,146 292,132 274,148 250,126 226,148 208,132 156,146 162,120 86,114 152,88 114,56 176,58 174,18 226,38" fill="#fef3c7" stroke="#f59e0b" stroke-width="5"></polygon>
+              <polygon id="eventBurstShape" points="250,5 274,38 326,18 324,58 386,56 348,88 414,114 338,120 344,146 292,132 274,148 250,126 226,148 208,132 156,146 162,120 86,114 152,88 114,56 176,58 174,18 226,38" fill="#fef3c7"></polygon>
               <text id="eventBurstTitle" x="250" y="86" class="event-burst-title">EVENT</text>
             </svg>
           </div>
@@ -1869,12 +1873,24 @@
         autoEventPaths: ["../data/runs/no_intervention_71steps_panel48/auto_events_with_feedback.tsv"],
         scheduledEventPaths: ["../data/runs/no_intervention_71steps_panel48/scheduled_events_used.tsv"]
       },
+      birthOnly: {
+        label: "出産支援のみ",
+        agentTurnsPaths: ["../data/runs/no_intervention_71steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../data/runs/no_intervention_71steps_panel48/country_turns.tsv"],
+        autoEventPaths: ["../data/runs/no_intervention_71steps_panel48/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../data/runs/structure_birth_grant_package_83steps_panel48/scheduled_events_used.tsv"],
+        scheduledEventFilter: (row) => {
+          const eventId = row.event_id || "";
+          return eventId === "P04" || eventId.startsWith("BP");
+        }
+      },
       sustain: {
         label: "構造持続通貨 介入",
         agentTurnsPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/agent_turns.tsv"],
         countryTurnsPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/country_turns.tsv"],
         autoEventPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/auto_events_with_feedback.tsv"],
-        scheduledEventPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/scheduled_events_used.tsv"]
+        scheduledEventPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/scheduled_events_used.tsv"],
+        scheduledEventFilter: (row) => (row.event_id || "") !== "P04"
       },
       birthGrant: {
         label: "構造持続+出産 介入",
@@ -1911,6 +1927,29 @@
               "単一の平均的人物ではなく、若者、家族形成世代、次世代コホートに分け、年齢上昇と世代移行を持たせています。",
               "世界イベント、国家圧力、日本社会状態、個人の前回記憶を分け、同じニュースでも本人に刺さる場合だけ反応が大きくなるようにしています。",
               "感情だけでなく、内心、友達との会話、SNS発信、行動カテゴリ、因果、持ち越し懸念を固定スキーマで出すため、後から検証できます。"
+            ]
+          }
+        ]
+      },
+      birthOnly: {
+        title: "出産支援のみ",
+        summary: "構造持続通貨や役割再設計を入れず、出産一時金、産後休息、代替ケア、復帰キャリア、非強制監査だけを重ねた比較です。お金と支援メニューだけで、家族形成の現実性がどこまで戻るかを見ます。",
+        lead: "この比較は、構造持続の思想を外した時に、出生・子育て支援がどう受け取られるかを見るための対照軸です。現デモでは介入なしの観測データに、出生支援の直接効果と政策イベントだけを重ねた試算レイヤーとして表示します。正式なLLM再生成では scenario_mode=birth_grant_only を使います。",
+        sections: [
+          {
+            title: "検証している問い",
+            items: [
+              "出生・子育て支援だけで、家計、住居、雇用、ケア不安を押し返せるのか。",
+              "構造持続の役割報酬や学び直し経路がない場合、支援は希望ではなく確認行動や対象外感に吸収されないか。",
+              "出産支援を勝たせるには、金額よりもどの周辺条件が必要なのか。"
+            ]
+          },
+          {
+            title: "比較として見るポイント",
+            items: [
+              "子ども希望指数は上がっても、希望・安心・制度信頼までは自動で増えない可能性を見ます。",
+              "非婚・非出産層の反発、財政不安、条件変更への恐怖が残る設計として扱います。",
+              "構造持続のみ、構造持続+出産との差を見ることで、出生支援が単体施策なのか、構造条件の上乗せなのかを説明できます。"
             ]
           }
         ]
@@ -2002,7 +2041,7 @@
           "イベント: 世界圧力、政策介入、社会反応、組織判断、長期評価を分け、何が効いたかを後から読めるようにしています。",
           "観測: 感情だけでなく、行動、内心、友達との会話、SNS発信、因果、持ち越し記憶を固定スキーマの観測データとして保存しています。",
           "創発: LLMには結論を命令せず、状態と文脈を情報として渡し、エージェントが信じる、疑う、使う、怒る、動かない分岐を残します。",
-          "検証: 介入なし、構造持続通貨、構造持続+出産、構造持続+希望を同じ時点で比較し、効いた施策と効かなかった施策を両方説明できます。"
+          "検証: 介入なし、出産支援のみ、構造持続通貨、構造持続+出産、構造持続+希望を同じ時点で比較し、効いた施策と効かなかった施策を両方説明できます。"
         ]
       },
       {
@@ -2221,6 +2260,13 @@
         "家計と子育て可能性が悪化",
         "制度不信と撤退行動が増加"
       ],
+      birthOnly: [
+        "AGI能力上昇の初期観測",
+        "出産支援だけを上乗せ",
+        "家計・住居・雇用不安は残存",
+        "対象外感と財政不安を観測",
+        "希望化には構造条件が不足"
+      ],
       sustain: [
         "AGI能力上昇の初期観測",
         "構造持続クレジット実証開始",
@@ -2342,9 +2388,12 @@
           }
           try {
             const scheduledRows = await loadFirstAvailableTsv(config.scheduledEventPaths);
+            const filteredScheduledRows = typeof config.scheduledEventFilter === "function"
+              ? scheduledRows.filter(config.scheduledEventFilter)
+              : scheduledRows;
             scenarioEventSchedule = [
               ...scenarioEventSchedule,
-              ...buildScheduledEventSchedule(scheduledRows)
+              ...buildScheduledEventSchedule(filteredScheduledRows)
             ];
           } catch (scheduledEventError) {
             console.warn(`${config.label} scheduled events were not loaded.`, scheduledEventError);
@@ -2673,8 +2722,20 @@
       return x * x * (3 - 2 * x);
     }
 
-    function isInterventionScenario(scenario = state.scenario) {
+    function hasStructureSustainScenario(scenario = state.scenario) {
       return scenario === "sustain" || scenario === "birthGrant" || scenario === "hopeFamily";
+    }
+
+    function hasPolicyEventsScenario(scenario = state.scenario) {
+      return scenario === "birthOnly" || hasStructureSustainScenario(scenario);
+    }
+
+    function usesBaselineDynamics(scenario = state.scenario) {
+      return scenario === "baseline" || scenario === "birthOnly";
+    }
+
+    function isInterventionScenario(scenario = state.scenario) {
+      return hasPolicyEventsScenario(scenario);
     }
 
     function agentState(agent, scenario, turn) {
@@ -2701,7 +2762,7 @@
           1
         );
 
-        if (scenario === "baseline") {
+        if (usesBaselineDynamics(scenario)) {
           const decline = smoothstep(t);
           pathway = agent.initialPathway - decline * (0.12 + vulnerability * 0.28) + wobble * 0.30;
           support = agent.initialSupport - decline * (0.14 + vulnerability * 0.26) - wobble * 0.10;
@@ -2715,7 +2776,7 @@
           trust = agent.trust - earlyShock * (0.45 + vulnerability * 0.18) + recovery * (0.16 + vulnerability * 0.18);
           agency = agent.agency - earlyShock * (0.28 + vulnerability * 0.14) + recovery * (0.14 + vulnerability * 0.18);
         }
-      } else if (scenario === "baseline") {
+      } else if (usesBaselineDynamics(scenario)) {
         const decline = smoothstep(t);
         pathway = 0.58 - 0.42 * decline + groupBias + wobble;
         support = 0.60 - 0.48 * decline + groupBias * 0.7 - wobble * 0.4;
@@ -2737,7 +2798,7 @@
 
       const risk = clamp(1 - (pathway * 0.48 + support * 0.34 + trust * 0.18) + (agent.group === "youth" ? 0.07 : 0), 0, 1);
       const unfairness = clamp(1 - trust + 0.10, 0, 1);
-      const loss = clamp(1 - pathway + (scenario === "baseline" ? t * 0.16 : Math.max(0, 0.28 - t) * 0.12), 0, 1);
+      const loss = clamp(1 - pathway + (usesBaselineDynamics(scenario) ? t * 0.16 : Math.max(0, 0.28 - t) * 0.12), 0, 1);
 
       const scores = {
         good: clamp((pathway * 0.38 + support * 0.32 + trust * 0.14 + agency * 0.10) - 0.24, 0, 1),
@@ -2881,11 +2942,11 @@
         : 0;
       const goodEmotionBoost = ["安心", "希望", "連帯感"].includes(values.emotion) ? 0.06 : 0;
       const dangerPenalty = values.dominant === "danger" ? 0.12 : values.dominant === "caution" ? 0.05 : 0;
-      const sustainBoost = isInterventionScenario(values.scenario) && values.support > 0.58 ? 0.05 : 0;
+      const sustainBoost = hasStructureSustainScenario(values.scenario) && values.support > 0.58 ? 0.05 : 0;
       const familyPolicyBoost = isFamilyFormationAge
         ? values.scenario === "hopeFamily"
           ? 0.15
-          : values.scenario === "birthGrant"
+          : values.scenario === "birthGrant" || values.scenario === "birthOnly"
             ? 0.10
             : 0
         : 0;
@@ -3541,7 +3602,6 @@
               : `世界: ${event.name}`;
       const style = eventStyle(event);
       shape.setAttribute("fill", style.fill);
-      shape.setAttribute("stroke", style.stroke);
       title.style.fill = style.text || "#172033";
       burst.style.setProperty("--burst-left", style.left);
       burst.style.setProperty("--burst-top", style.top);
@@ -3555,18 +3615,18 @@
       const strength = clamp(event.strength ?? 0.5, 0.15, 1);
       const scale = (0.62 + strength * 0.70).toFixed(2);
       if (event.type === "policy") {
-        return { fill: "#dcfce7", stroke: "#16a34a", left: "50%", top: "53%", scale };
+        return { fill: "#dcfce7", left: "50%", top: "53%", scale };
       }
       if (event.type === "youth") {
-        return { fill: "#fef9c3", stroke: "#ca8a04", left: "35%", top: "55%", scale };
+        return { fill: "#fef9c3", left: "35%", top: "55%", scale };
       }
       if (event.type === "organization") {
-        return { fill: "#dbeafe", stroke: "#2563eb", left: "50%", top: "50%", scale };
+        return { fill: "#dbeafe", left: "50%", top: "50%", scale };
       }
       if (event.type === "milestone") {
-        return { fill: "#ede9fe", stroke: "#7c3aed", left: "50%", top: "48%", scale };
+        return { fill: "#ede9fe", left: "50%", top: "48%", scale };
       }
-      return { fill: "#fee2e2", stroke: "#ef4444", left: "50%", top: "50%", scale };
+      return { fill: "#fee2e2", left: "50%", top: "50%", scale };
     }
 
     function renderSignals(rows) {
