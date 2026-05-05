@@ -1,0 +1,3 @@
+step	geopolitical_risk	energy_price_pressure	labor_market_uncertainty	compute_supply_constraint	fiscal_pressure	supply_chain_fragility	sns_anxiety_amplification	japan_policy_buffer	dominant_world_pressure	high_risk_countries	world_context_for_agents
+1	64.2	54.6	52.3	47.3	52.0	56.7	56.3	50.0	地政学リスク	ウクライナ(限定戦争)、北朝鮮(間接衝突)、ロシア(間接衝突)、イスラエル(間接衝突)	ステップ1: 地政学リスクが64.2。高リスク国: ウクライナ(限定戦争)、北朝鮮(間接衝突)、ロシア(間接衝突)、イスラエル(間接衝突)。日本の緩衝政策余力は50.0。
+2	66.3	55.3	57.9	55.1	55.6	59.7	61.2	47.3	地政学リスク	ウクライナ(限定戦争)、北朝鮮(間接衝突)、ロシア(間接衝突)、イスラエル(間接衝突)	ステップ2: 地政学リスクが66.3。高リスク国: ウクライナ(限定戦争)、北朝鮮(間接衝突)、ロシア(間接衝突)、イスラエル(間接衝突)。日本の緩衝政策余力は47.3。

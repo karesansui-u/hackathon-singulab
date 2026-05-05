@@ -1,0 +1,2 @@
+step	agent_count	population_weight_total	average_pathway	average_support	average_intensity	良好_share	中立_share	注意_share	危険_share	withdrawal_pressure	institution_demand_pressure	livelihood_defense_pressure	learning_transition_pressure	solidarity_pressure	information_overload_pressure	care_pressure	side_effect_pressure	policy_fatigue_pressure	fairness_gap_pressure	coercion_pressure	fiscal_anxiety_pressure	feedback_summary
+1	20	75.0	48.7	44.4	57.2	0.0	36.7	57.5	5.8	1.8	2.8	27.1	0.3	0.0	22.3	4.9	77.8	41.8	53.7	0.0	63.1	公平感欠損53.7、政策疲労41.8、生活防衛27.1
