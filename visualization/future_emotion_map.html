@@ -1203,12 +1203,13 @@
       overflow: hidden;
       background:
         linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(241, 245, 249, 0.94)),
-        radial-gradient(circle at 18% 12%, rgba(37, 99, 235, 0.12), transparent 32%);
+        repeating-linear-gradient(135deg, rgba(148, 163, 184, 0.10) 0 1px, transparent 1px 16px);
     }
 
     .voice-stream {
       display: grid;
-      gap: 9px;
+      align-content: start;
+      gap: 10px;
       min-width: 0;
     }
 
@@ -1221,8 +1222,8 @@
       width: var(--voice-width, 88%);
       opacity: 0;
       transform: translate(var(--voice-offset, 0px), 10px) scale(0.985);
-      animation: voice-pop 360ms cubic-bezier(.2, .9, .2, 1.1) forwards;
-      animation-delay: calc(var(--voice-index, 0) * 92ms);
+      animation: voice-pop 390ms cubic-bezier(.2, .9, .18, 1.18) forwards;
+      animation-delay: calc(var(--voice-index, 0) * 78ms);
     }
 
     .voice-row.is-right {
@@ -1239,18 +1240,31 @@
     .voice-row.is-right .voice-bubble {
       grid-column: 1;
       grid-row: 1;
-      border-left-width: 1px;
-      border-left-color: var(--line);
-      border-right: 4px solid var(--voice-accent, var(--neutral));
-      border-radius: 14px 14px 5px 14px;
+      border: 0;
+      border-radius: 21px 21px 6px 21px;
+      background: var(--voice-accent, #172033);
+      color: #ffffff;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
     }
 
     .voice-row.is-right .voice-bubble::before {
       left: auto;
-      right: -6px;
+      right: -5px;
       border-left: 0;
-      border-right: 1px solid var(--line);
+      border-right: 0;
+      background: var(--voice-accent, #172033);
       transform: rotate(-45deg);
+    }
+
+    .voice-row.is-right .voice-name,
+    .voice-row.is-right .voice-text {
+      color: #ffffff;
+    }
+
+    .voice-row.is-right .voice-state,
+    .voice-row.is-right .voice-reaction {
+      background: rgba(255, 255, 255, 0.18);
+      color: rgba(255, 255, 255, 0.92);
     }
 
     @keyframes voice-pop {
@@ -1272,12 +1286,12 @@
       width: 34px;
       height: 34px;
       border-radius: 999px;
-      border: 1px solid rgba(15, 23, 42, 0.14);
+      border: 2px solid #ffffff;
       background:
         linear-gradient(145deg, rgba(255, 255, 255, 0.80), rgba(255, 255, 255, 0.18)),
         var(--avatar-bg, #e2e8f0);
       color: var(--avatar-fg, #172033);
-      box-shadow: 0 5px 12px rgba(15, 23, 42, 0.12);
+      box-shadow: 0 7px 16px rgba(15, 23, 42, 0.16);
       display: inline-grid;
       place-items: center;
       position: relative;
@@ -1302,24 +1316,27 @@
     .voice-bubble {
       position: relative;
       min-width: 0;
-      border: 1px solid var(--line);
-      border-left: 4px solid var(--voice-accent, var(--neutral));
-      border-radius: 14px 14px 14px 5px;
-      padding: 8px 10px 9px;
-      background: #ffffff;
-      box-shadow: 0 7px 18px rgba(15, 23, 42, 0.08);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      border-radius: 21px 21px 21px 6px;
+      padding: 9px 11px 8px;
+      background:
+        linear-gradient(180deg, #ffffff, #ffffff),
+        var(--voice-tint, #eef2f7);
+      color: var(--ink);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10);
     }
 
     .voice-bubble::before {
       content: "";
       position: absolute;
-      left: -6px;
-      bottom: 7px;
-      width: 10px;
-      height: 10px;
-      border-left: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
+      left: -5px;
+      bottom: 8px;
+      width: 13px;
+      height: 13px;
+      border-left: 1px solid rgba(15, 23, 42, 0.08);
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
       background: #ffffff;
+      border-radius: 0 0 0 4px;
       transform: rotate(45deg);
     }
 
@@ -1328,7 +1345,7 @@
       align-items: center;
       gap: 6px;
       min-width: 0;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
     }
 
     .voice-name {
@@ -1357,6 +1374,30 @@
       line-height: 1.52;
       font-weight: 700;
       overflow-wrap: anywhere;
+    }
+
+    .voice-reactions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 7px;
+    }
+
+    .voice-reaction {
+      display: inline-flex;
+      align-items: center;
+      min-height: 18px;
+      border-radius: 999px;
+      padding: 2px 7px;
+      background: var(--surface-alt);
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1;
+      font-weight: 900;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .voice-pulse {
@@ -4703,8 +4744,9 @@
         const displayName = row.name && row.name !== row.id ? `${row.name}` : row.id;
         const ageText = row.displayAge ? `${row.displayAge}歳` : groupLabelByKey[row.group] || "観測";
         const text = voiceTextFor(row, state.voiceMode);
+        const reactions = voiceReactionsFor(row, index);
         return `
-          <article class="voice-row ${variant.side}" style="--voice-index:${index};--voice-offset:${variant.offset}px;--voice-width:${variant.width}%;--voice-accent:${category.color}">
+          <article class="voice-row ${variant.side} is-${state.voiceMode}" style="--voice-index:${index};--voice-offset:${variant.offset}px;--voice-width:${variant.width}%;--voice-accent:${category.color};--voice-tint:${category.soft}">
             <div class="voice-avatar" style="--avatar-bg:${cohort.soft};--avatar-fg:${cohort.color};--avatar-dot:${category.color}" aria-hidden="true">
               ${escapeHtml(cohort.mark)}
               <span class="voice-avatar-dot"></span>
@@ -4715,6 +4757,9 @@
                 <span class="voice-state">${escapeHtml(category.label)}</span>
               </div>
               <div class="voice-text">${escapeHtml(text)}</div>
+              <div class="voice-reactions">
+                ${reactions.map((reaction) => `<span class="voice-reaction">${escapeHtml(reaction)}</span>`).join("")}
+              </div>
             </div>
           </article>
         `;
@@ -4750,9 +4795,22 @@
       const modeSalt = state.voiceMode === "friend" ? 197 : state.voiceMode === "action" ? 389 : 83;
       const base = idNumber(row.id) * 61 + state.turn * 97 + modeSalt + index * 29;
       const side = seeded(base) > 0.55 ? "is-right" : "is-left";
-      const offset = Math.round((seeded(base + 13) - 0.5) * 34);
-      const width = 78 + Math.round(seeded(base + 31) * 18);
+      const offset = Math.round((seeded(base + 13) - 0.5) * 42);
+      const width = 70 + Math.round(seeded(base + 31) * 25);
       return { side, offset, width };
+    }
+
+    function voiceReactionsFor(row, index) {
+      const base = idNumber(row.id) * 43 + state.turn * 71 + index * 17;
+      const signal = 18 + Math.round(seeded(base) * 64);
+      const spread = 2 + Math.round(seeded(base + 9) * 18);
+      if (state.voiceMode === "friend") {
+        return [`既読 ${1 + Math.round(seeded(base + 3) * 4)}`, `返信 ${Math.max(1, Math.round(spread / 4))}`];
+      }
+      if (state.voiceMode === "action") {
+        return [`行動 ${actionCategoryFor(row.action, row.dominant)}`, `影響 ${signal}%`];
+      }
+      return [`LIKE ${signal}`, `波及 ${spread}`];
     }
 
     function voiceModeLabel(mode) {
