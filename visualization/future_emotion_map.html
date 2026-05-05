@@ -3264,9 +3264,7 @@
 
     function renderMetrics(rows) {
       const { counts, total } = summarize(rows);
-      const childIntent = total
-        ? rows.reduce((sum, row) => sum + (Number(row.childIntent) || 0), 0) / total
-        : 0;
+      const childIntent = averageChildIntentForFamilyFormation(rows);
       document.getElementById("metric-good").textContent = `${counts.good}人`;
       document.getElementById("metric-neutral").textContent = `${counts.neutral}人`;
       document.getElementById("metric-caution").textContent = `${counts.caution}人`;
@@ -3280,12 +3278,24 @@
       return visibleRowsFor(agents.map((agent) => agentState(agent, state.scenario, state.turn)));
     }
 
+    function familyFormationRows(rows) {
+      return rows.filter((row) => {
+        const age = Number(row.displayAge);
+        return Number.isFinite(age) && age >= 23 && age <= 49;
+      });
+    }
+
+    function averageChildIntentForFamilyFormation(rows) {
+      const targetRows = familyFormationRows(rows);
+      return targetRows.length
+        ? targetRows.reduce((sum, row) => sum + (Number(row.childIntent) || 0), 0) / targetRows.length
+        : 0;
+    }
+
     function currentSummaryCards() {
       const rows = currentSummaryRows();
       const { counts, total } = summarize(rows);
-      const childIntent = total
-        ? rows.reduce((sum, row) => sum + (Number(row.childIntent) || 0), 0) / total
-        : 0;
+      const childIntent = averageChildIntentForFamilyFormation(rows);
       const categoryCards = [
         ["希望", counts.good],
         ["中立", counts.neutral],
@@ -3307,14 +3317,13 @@
       const top = categories
         .map((category) => ({ ...category, count: counts[category.key] || 0 }))
         .sort((a, b) => b.count - a.count)[0] || categories[1];
-      const childIntent = total
-        ? rows.reduce((sum, row) => sum + (Number(row.childIntent) || 0), 0) / total
-        : 0;
+      const familyRows = familyFormationRows(rows);
+      const childIntent = averageChildIntentForFamilyFormation(rows);
       const exitCount = rows.filter((row) => row.socialExitStatus).length;
       const hopeEmotionCount = rows.filter((row) => row.emotion === "希望").length;
       return [
         `${turnToYear(state.turn)}時点では${top.label}が最多です（${top.count}/${total || 0}人）。`,
-        `子ども希望指数は${Math.round(childIntent * 100)}%。希望感情は${hopeEmotionCount}人です。`,
+        `子ども希望指数は${Math.round(childIntent * 100)}%（家族形成対象年齢${familyRows.length}人）。希望感情は${hopeEmotionCount}人です。`,
         exitCount
           ? `離脱リスクは${exitCount}人。点線と「離脱」ラベルで確認できます。`
           : "離脱リスクはこの時点では目立っていません。"
