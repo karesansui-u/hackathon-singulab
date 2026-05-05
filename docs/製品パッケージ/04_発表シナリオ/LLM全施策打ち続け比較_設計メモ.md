@@ -167,12 +167,20 @@ LLMは同じように施策を考えられるが、施策の土台に以下が�
 ## 実装タスク
 
 1. `scenario_mode` に `policy_search_no_sustain` と `policy_search_with_sustain` を追加する。
-2. `scripts/run_policy_planner_llm.py` を作る。
-3. `policy_proposals.tsv` と `scheduled_events_generated.tsv` を出力する。
+2. `scripts/run_policy_planner_llm_demo.py` を作る。
+3. `policy_planner_turns.tsv`、`policy_events.tsv`、`auto_events_with_policy.tsv` を出力する。
 4. `run_closed_loop_llm_demo.py` に policy planner phase を追加する。
-5. 生成施策を `auto_events_with_feedback.tsv` と分けて保存する。
+5. 生成施策を `auto_events_with_feedback.tsv` と分けて保存し、エージェント入力時だけ合流する。
 6. UIに2シナリオを追加する。
 7. レポートで、LLMが出した施策数、却下数、危険施策数、採用施策数を表示する。
+
+## 現在の実装メモ
+
+- `scripts/run_policy_planner_llm_demo.py` が1ステップ分の政策プランナー。`--model fixture` ならAPIなしで再現性ある煙突テスト、`--model gpt-5.2` などなら実LLMで政策案を生成する。
+- `policy_search_no_sustain` は、構造持続通貨、nat報酬、構造持続という概念名を含む提案を棄却する。
+- `policy_search_with_sustain` は、構造持続通貨、社会維持活動報酬、非対象者の参加枠、異議申立を政策探索空間に入れる。
+- 個人LLMの副作用カラムから、`policy_fatigue_pressure`、`fairness_gap_pressure`、`coercion_pressure`、`fiscal_anxiety_pressure` を集約して次ステップの政策判断に戻す。
+- Pages UIは `policy_search_no_sustain_12steps_panel48` と `policy_search_with_sustain_12steps_panel48` が存在すれば、セレクトボックスに有効な比較シナリオとして表示する。
 
 ## 実行方法案
 
@@ -188,25 +196,27 @@ LLMは同じように施策を考えられるが、施策の土台に以下が�
 ```bash
 python3 scripts/run_closed_loop_llm_demo.py \
   --start-step 1 \
-  --steps 83 \
+  --steps 12 \
   --scenario-mode policy_search_no_sustain \
   --model gpt-5.2 \
+  --policy-model gpt-5.2 \
   --parallel-by-country \
   --parallel-by-organization \
   --parallel-by-agent \
   --workers 8 \
-  --output-dir outputs/runs/policy_search_no_sustain_83steps_panel48
+  --output-dir outputs/runs/policy_search_no_sustain_12steps_panel48
 
 python3 scripts/run_closed_loop_llm_demo.py \
   --start-step 1 \
-  --steps 83 \
+  --steps 12 \
   --scenario-mode policy_search_with_sustain \
   --model gpt-5.2 \
+  --policy-model gpt-5.2 \
   --parallel-by-country \
   --parallel-by-organization \
   --parallel-by-agent \
   --workers 8 \
-  --output-dir outputs/runs/policy_search_with_sustain_83steps_panel48
+  --output-dir outputs/runs/policy_search_with_sustain_12steps_panel48
 ```
 
 ### 時間優先
@@ -216,25 +226,27 @@ python3 scripts/run_closed_loop_llm_demo.py \
 ```bash
 python3 scripts/run_closed_loop_llm_demo.py \
   --start-step 1 \
-  --steps 83 \
+  --steps 12 \
   --scenario-mode policy_search_no_sustain \
   --model gpt-5.2 \
+  --policy-model gpt-5.2 \
   --parallel-by-country \
   --parallel-by-organization \
   --parallel-by-agent \
   --workers 4 \
-  --output-dir outputs/runs/policy_search_no_sustain_83steps_panel48
+  --output-dir outputs/runs/policy_search_no_sustain_12steps_panel48
 
 python3 scripts/run_closed_loop_llm_demo.py \
   --start-step 1 \
-  --steps 83 \
+  --steps 12 \
   --scenario-mode policy_search_with_sustain \
   --model gpt-5.2 \
+  --policy-model gpt-5.2 \
   --parallel-by-country \
   --parallel-by-organization \
   --parallel-by-agent \
   --workers 4 \
-  --output-dir outputs/runs/policy_search_with_sustain_83steps_panel48
+  --output-dir outputs/runs/policy_search_with_sustain_12steps_panel48
 ```
 
 ## 注意点

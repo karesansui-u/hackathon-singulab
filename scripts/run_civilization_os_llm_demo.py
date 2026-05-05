@@ -164,6 +164,8 @@ def filter_events_for_scenario(events: List[Dict[str, str]], scenario_mode: str)
             event for event in events
             if is_base_pressure_event(event) or is_direct_birth_support_event(event)
         ]
+    if scenario_mode in {"policy_search_no_sustain", "policy_search_with_sustain"}:
+        return [event for event in events if is_base_pressure_event(event)]
     if scenario_mode == "structure_intervention":
         return [
             event for event in events
@@ -410,7 +412,7 @@ def scenario_context_for_mode(scenario_mode: str, step: int) -> Dict[str, Any]:
                 "施策を増やすほど政策疲労、対象外反発、実装負荷が増え得る",
                 "悪化集団を見て、修正、一時停止、説明強化、補完策を選ぶ必要がある",
             ],
-            "what_is_not_available": [] if has_sustain else ["構造持続通貨", "nat報酬", "社会維持活動を制度上の価値として扱う探索空間"],
+            "what_is_not_available": [] if has_sustain else ["新しい通貨型の社会維持報酬", "社会維持活動を制度上の価値として扱う探索空間"],
         })
     else:
         context.update({
@@ -1465,6 +1467,8 @@ def main() -> None:
         choices=[
             "no_intervention",
             "birth_grant_only",
+            "policy_search_no_sustain",
+            "policy_search_with_sustain",
             "structure_intervention",
             "structure_birth_grant_package",
             "structure_hope_family_package",

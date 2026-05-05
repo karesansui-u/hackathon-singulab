@@ -1872,6 +1872,8 @@
           <option value="sustain" selected>構造持続通貨 介入</option>
           <option value="birthGrant">構造持続+出産 介入</option>
           <option value="hopeFamily">構造持続+希望 介入</option>
+          <option value="policyNoSustain">LLM政策探索（持続なし）</option>
+          <option value="policyWithSustain">LLM政策探索（持続あり）</option>
         </select>
       </label>
       <section class="scenario-brief" aria-label="選択中のシミュレーション概要">
@@ -2175,6 +2177,26 @@
           return eventId === "P04" || eventId.startsWith("BP");
         }
       },
+      policyNoSustain: {
+        label: "LLM政策探索（持続なし）",
+        agentTurnsPaths: ["../data/runs/policy_search_no_sustain_12steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../data/runs/policy_search_no_sustain_12steps_panel48/country_turns.tsv"],
+        autoEventPaths: [
+          "../data/runs/policy_search_no_sustain_12steps_panel48/auto_events_with_feedback.tsv",
+          "../data/runs/policy_search_no_sustain_12steps_panel48/auto_events_with_policy.tsv"
+        ],
+        scheduledEventPaths: ["../data/runs/policy_search_no_sustain_12steps_panel48/scheduled_events_used.tsv"]
+      },
+      policyWithSustain: {
+        label: "LLM政策探索（持続あり）",
+        agentTurnsPaths: ["../data/runs/policy_search_with_sustain_12steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../data/runs/policy_search_with_sustain_12steps_panel48/country_turns.tsv"],
+        autoEventPaths: [
+          "../data/runs/policy_search_with_sustain_12steps_panel48/auto_events_with_feedback.tsv",
+          "../data/runs/policy_search_with_sustain_12steps_panel48/auto_events_with_policy.tsv"
+        ],
+        scheduledEventPaths: ["../data/runs/policy_search_with_sustain_12steps_panel48/scheduled_events_used.tsv"]
+      },
       sustain: {
         label: "構造持続通貨 介入",
         agentTurnsPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/agent_turns.tsv"],
@@ -2241,6 +2263,52 @@
               "子ども希望指数は上がっても、希望・安心・制度信頼までは自動で増えない可能性を見ます。",
               "非婚・非出産層の反発、財政不安、条件変更への恐怖が残る設計として扱います。",
               "構造持続のみ、構造持続+出産との差を見ることで、出生支援が単体施策なのか、構造条件の上乗せなのかを説明できます。"
+            ]
+          }
+        ]
+      },
+      policyNoSustain: {
+        title: "LLM政策探索（持続なし）",
+        summary: "構造持続通貨の概念を使わず、LLM政策プランナーが副作用、二極化、政策疲労を見ながら、現実的な補助金、説明、窓口、規制緩和、手続き簡素化を打ち続ける比較です。",
+        lead: "このシミュレーションは、LLMに『ありとあらゆる現実的な手』を探させる一方で、構造持続通貨やnat報酬は使えない条件にしています。政策を増やせば救えるのか、それとも財政不安、対象外感、手続き疲れ、制度不信が膨らむのかを観測します。",
+        sections: [
+          {
+            title: "検証している問い",
+            items: [
+              "通常政策の組み合わせだけで、撤退圧、生活防衛、家族形成不安をどこまで押し返せるか。",
+              "施策を増やし続けるほど、対象外反発、財政不安、申請疲れが増えないか。",
+              "政策プランナーが副作用を見て、追加ではなく簡素化、説明、一時停止、順序変更へ動けるか。"
+            ]
+          },
+          {
+            title: "設計ポイント",
+            items: [
+              "個人反応から政策疲労、公平感欠損、強制感、財政不安を集約し、次ステップの政策探索へ戻します。",
+              "構造持続やnatという言葉を禁止し、既存制度の範囲でどこまで改善できるかを厳密に分けます。",
+              "勝ち筋が出ても、副作用の増加を同時に見るため、単なる政策宣伝ではなく制度設計レビューとして使えます。"
+            ]
+          }
+        ]
+      },
+      policyWithSustain: {
+        title: "LLM政策探索（持続あり）",
+        summary: "LLM政策プランナーが副作用を監査しながら、構造持続通貨、社会維持活動報酬、住居、ケア、学び直し、地域更新を組み替え続ける比較です。",
+        lead: "このシミュレーションは、構造持続の概念を最初から正解扱いしません。通常政策と同じく副作用を出し、二極化や政策疲労を観測したうえで、LLMが施策の順序、対象、説明、補完策を調整できるかを見ます。",
+        sections: [
+          {
+            title: "検証している問い",
+            items: [
+              "構造持続通貨があると、給付の追加ではなく、役割、報酬、ケア、地域維持の再設計へ探索空間が広がるか。",
+              "家族形成支援が、非婚・非出産層の対象外感を生まず、別の社会参加経路と両立できるか。",
+              "通常政策を全力で打つ比較より、現実的で副作用の少ない調整経路を見つけられるか。"
+            ]
+          },
+          {
+            title: "設計ポイント",
+            items: [
+              "政策プランナーは毎ステップ、追加、修正、順序変更、説明、局所化、簡素化、一時停止、補償を選べます。",
+              "希望が増えるかだけでなく、手続き疲れ、対象外反発、財政不安、強制感が増えていないかを同じ画面で見ます。",
+              "企業人事や自治体施策にも転用できるよう、誰に先に伝えるか、どの副作用を補完するかをイベントとして残します。"
             ]
           }
         ]
@@ -2332,7 +2400,7 @@
           "イベント: 世界圧力、政策介入、社会反応、組織判断、長期評価を分け、何が効いたかを後から読めるようにしています。",
           "観測: 感情だけでなく、行動、内心、友達との会話、SNS発信、因果、持ち越し記憶を固定スキーマの観測データとして保存しています。",
           "創発: LLMには結論を命令せず、状態と文脈を情報として渡し、エージェントが信じる、疑う、使う、怒る、動かない分岐を残します。",
-          "検証: 介入なし、出産支援のみ、構造持続通貨、構造持続+出産、構造持続+希望を同じ時点で比較し、効いた施策と効かなかった施策を両方説明できます。"
+          "検証: 介入なし、出産支援のみ、構造持続通貨、構造持続+出産、構造持続+希望、LLM政策探索の持続なし/ありを同じ時点で比較し、効いた施策と効かなかった施策を両方説明できます。"
         ]
       },
       {
@@ -2557,6 +2625,20 @@
         "家計・住居・雇用不安は残存",
         "対象外感と財政不安を観測",
         "希望化には構造条件が不足"
+      ],
+      policyNoSustain: [
+        "LLMが通常政策を探索開始",
+        "補助金・説明・窓口を順次投入",
+        "対象外感と政策疲労を監査",
+        "副作用に応じて簡素化へ修正",
+        "構造概念なしの限界を比較"
+      ],
+      policyWithSustain: [
+        "LLMが構造持続ありで探索開始",
+        "役割・報酬・ケアを束ね直す",
+        "非対象者の参加経路を補完",
+        "副作用を見て施策順序を調整",
+        "通常政策探索との差分を比較"
       ],
       sustain: [
         "AGI能力上昇の初期観測",
@@ -3050,11 +3132,11 @@
     }
 
     function hasStructureSustainScenario(scenario = state.scenario) {
-      return scenario === "sustain" || scenario === "birthGrant" || scenario === "hopeFamily";
+      return scenario === "sustain" || scenario === "birthGrant" || scenario === "hopeFamily" || scenario === "policyWithSustain";
     }
 
     function hasPolicyEventsScenario(scenario = state.scenario) {
-      return scenario === "birthOnly" || hasStructureSustainScenario(scenario);
+      return scenario === "birthOnly" || scenario === "policyNoSustain" || hasStructureSustainScenario(scenario);
     }
 
     function usesBaselineDynamics(scenario = state.scenario) {
@@ -3816,7 +3898,6 @@
       const policyLoad = recentPolicyPressure();
       const policyUseRatio = rows.filter((row) => ["制度利用", "情報収集", "相談"].includes(row.actionCategory)).length / total;
       const angerRatio = rows.filter((row) => ["怒り", "裏切られ感"].includes(row.emotion) || row.actionCategory === "抗議・発信").length / total;
-      const birthPolicy = ["birthOnly", "birthGrant", "hopeFamily"].includes(state.scenario);
       const nonTargetRiskRatio = rows.filter((row) => {
         const age = Number(row.displayAge);
         const target = Number.isFinite(age) && age >= 23 && age <= 49;
@@ -3827,6 +3908,8 @@
       const countryRows = countryRowsForCurrentTurn();
       const fiscalPressure = countryRows.length ? averageCountryPressure(countryRows, "fiscal_pressure") / 100 : 0;
       const policyEventNames = eventsAtTurn(state.turn).map((event) => `${event.name || ""} ${event.direction || ""} ${event.description || ""}`).join(" ");
+      const birthPolicy = ["birthOnly", "birthGrant", "hopeFamily"].includes(state.scenario)
+        || (["policyNoSustain", "policyWithSustain"].includes(state.scenario) && /出産|出生|子ども|家族形成/.test(policyEventNames));
       const fiscalTextPressure = /財政|増税|インフレ|負担|逆選択/.test(policyEventNames) ? 0.24 : 0;
       const implementationTextPressure = /窓口|予約|申請|面談|監査|通知|枠/.test(policyEventNames) ? 0.18 : 0;
       const coercionTextPressure = /出産|出生|子ども|家族形成/.test(policyEventNames) && birthPolicy ? 0.24 : 0;
@@ -4324,9 +4407,13 @@
 
       const institutionText = state.scenario === "birthOnly"
         ? state.turn < 18 ? "支援提示" : state.turn < 44 ? "申請確認中" : "不安が残存"
-        : hasStructureSustainScenario()
-          ? state.turn < 18 ? "実証準備" : state.turn < 44 ? "制度更新中" : "報酬経路が定着"
-          : state.turn < 22 ? "未発動" : state.turn < 52 ? "遅延対応" : "最低限の抑制";
+        : state.scenario === "policyNoSustain"
+          ? state.turn < 18 ? "政策探索中" : state.turn < 44 ? "副作用監査" : "通常政策を調整"
+          : state.scenario === "policyWithSustain"
+            ? state.turn < 18 ? "持続探索中" : state.turn < 44 ? "構造報酬を調整" : "参加経路を補完"
+            : hasStructureSustainScenario()
+              ? state.turn < 18 ? "実証準備" : state.turn < 44 ? "制度更新中" : "報酬経路が定着"
+              : state.turn < 22 ? "未発動" : state.turn < 52 ? "遅延対応" : "最低限の抑制";
       document.getElementById("institutionSignal").textContent = institutionText;
     }
 

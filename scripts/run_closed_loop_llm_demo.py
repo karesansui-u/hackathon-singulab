@@ -214,6 +214,31 @@ def build_world_to_japan(output_dir: Path, dry_run: bool, log_path: Path, step: 
 
 def current_auto_events_input(output_dir: Path) -> Path:
     for name in [
+        "auto_events_with_policy.tsv",
+        "auto_events_with_feedback.tsv",
+        "auto_events_with_organization.tsv",
+        "auto_events.tsv",
+    ]:
+        path = output_dir / name
+        if path.exists():
+            return path
+    return output_dir / "auto_events.tsv"
+
+
+def current_base_auto_events_input(output_dir: Path) -> Path:
+    for name in [
+        "auto_events_with_organization.tsv",
+        "auto_events.tsv",
+    ]:
+        path = output_dir / name
+        if path.exists():
+            return path
+    return output_dir / "auto_events.tsv"
+
+
+def current_policy_planner_auto_events_input(output_dir: Path) -> Path:
+    for name in [
+        "auto_events_with_feedback.tsv",
         "auto_events_with_organization.tsv",
         "auto_events.tsv",
     ]:
@@ -251,6 +276,11 @@ def build_agent_feedback(
     agent_panel_tsv: Path = DEFAULT_AGENT_PANEL,
 ) -> None:
     feedback_dir = output_dir / "feedback"
+    auto_events_input = (
+        current_auto_events_input(output_dir)
+        if phase == "agent_feedback_post"
+        else current_base_auto_events_input(output_dir)
+    )
     run_command(
         [
             sys.executable,
@@ -260,7 +290,7 @@ def build_agent_feedback(
             "--japan-state-tsv",
             str(output_dir / "japan_state.tsv"),
             "--auto-events-tsv",
-            str(current_auto_events_input(output_dir)),
+            str(auto_events_input),
             "--agent-panel-tsv",
             str(agent_panel_tsv),
             "--output-dir",
@@ -278,6 +308,10 @@ def build_agent_feedback(
 
 
 def maybe_feedback_input(output_dir: Path, name: str) -> Path:
+    if name == "auto_events_with_feedback.tsv":
+        policy_path = output_dir / "auto_events_with_policy.tsv"
+        if policy_path.exists():
+            return policy_path
     feedback_path = output_dir / name
     if feedback_path.exists():
         return feedback_path
@@ -289,6 +323,59 @@ def maybe_feedback_input(output_dir: Path, name: str) -> Path:
         "japan_state_feedback.tsv": "japan_state.tsv",
         "auto_events_with_feedback.tsv": "auto_events.tsv",
     }[name]
+
+
+def is_policy_search_mode(scenario_mode: str) -> bool:
+    return scenario_mode in {"policy_search_no_sustain", "policy_search_with_sustain"}
+
+
+def build_policy_planner(
+    output_dir: Path,
+    dry_run: bool,
+    log_path: Path,
+    step: int,
+    scenario_mode: str,
+    model: str,
+    budget: float,
+    timeout: int,
+    policy_events: Path,
+) -> None:
+    step_label = f"{step:03d}"
+    planner_dir = output_dir / "raw" / f"policy_step_{step_label}"
+    run_command(
+        [
+            sys.executable,
+            "scripts/run_policy_planner_llm_demo.py",
+            "--start-step",
+            str(step),
+            "--scenario-mode",
+            scenario_mode,
+            "--model",
+            model,
+            "--budget",
+            str(budget),
+            "--timeout",
+            str(timeout),
+            "--japan-state-tsv",
+            str(maybe_feedback_input(output_dir, "japan_state_feedback.tsv")),
+            "--agent-feedback-tsv",
+            str(output_dir / "agent_feedback.tsv"),
+            "--auto-events-tsv",
+            str(current_policy_planner_auto_events_input(output_dir)),
+            "--previous-policy-events-tsv",
+            str(policy_events),
+            "--output-dir",
+            str(planner_dir),
+        ],
+        dry_run,
+        log_path,
+        step,
+        "policy_planner",
+    )
+    if not dry_run:
+        append_tsv(planner_dir / "policy_planner_turns.tsv", output_dir / "policy_planner_turns.tsv")
+        append_tsv(planner_dir / "policy_events.tsv", policy_events)
+        copy_if_exists(planner_dir / "auto_events_with_policy.tsv", output_dir / "auto_events_with_policy.tsv")
 
 
 def write_manifest(output_dir: Path, args: argparse.Namespace) -> None:
@@ -305,6 +392,8 @@ def write_manifest(output_dir: Path, args: argparse.Namespace) -> None:
         "country_budget": args.country_budget,
         "organization_budget": args.organization_budget,
         "agent_budget": args.agent_budget,
+        "policy_budget": args.policy_budget,
+        "policy_model": args.policy_model,
         "agent_panel_tsv": str(args.agent_panel_tsv),
         "outputs": [
             "country_turns.tsv",
@@ -318,6 +407,9 @@ def write_manifest(output_dir: Path, args: argparse.Namespace) -> None:
             "agent_turns.tsv",
             "scheduled_events_used.tsv",
             "agent_feedback.tsv",
+            "policy_planner_turns.tsv",
+            "policy_events.tsv",
+            "auto_events_with_policy.tsv",
         ],
     }
     (output_dir / "manifest.json").write_text(
@@ -339,12 +431,20 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--country-budget", type=float, default=0.75)
     parser.add_argument("--organization-budget", type=float, default=0.45)
     parser.add_argument("--agent-budget", type=float, default=0.50)
+    parser.add_argument("--policy-budget", type=float, default=0.20)
+    parser.add_argument(
+        "--policy-model",
+        default="fixture",
+        help="Model for policy planner. Use fixture for deterministic smoke tests.",
+    )
     parser.add_argument("--timeout", type=int, default=420)
     parser.add_argument(
         "--scenario-mode",
         choices=[
             "no_intervention",
             "birth_grant_only",
+            "policy_search_no_sustain",
+            "policy_search_with_sustain",
             "structure_intervention",
             "structure_birth_grant_package",
             "structure_hope_family_package",
@@ -374,6 +474,7 @@ def main() -> None:
     organization_turns = output_dir / "organization_turns.tsv"
     agent_turns = output_dir / "agent_turns.tsv"
     scheduled_events_used = output_dir / "scheduled_events_used.tsv"
+    policy_events = output_dir / "policy_events.tsv"
     country_ids = [item.strip() for item in args.country_codes.split(",") if item.strip()]
     organization_ids = [item.strip() for item in args.organization_ids.split(",") if item.strip()]
     agent_ids = [item.strip() for item in args.agent_ids.split(",") if item.strip()]
@@ -469,6 +570,29 @@ def main() -> None:
                 "agent_feedback_pre",
                 args.agent_panel_tsv,
             )
+
+        if is_policy_search_mode(args.scenario_mode):
+            policy_done = step_complete(
+                output_dir / "policy_planner_turns.tsv",
+                step,
+                "planner_id",
+                ["POLICY_PLANNER"],
+            )
+            if policy_done and not args.dry_run:
+                print(f"Skip policy planner step {step}: already completed", flush=True)
+                log_skipped_step(log_path, step, "policy_planner", "already completed")
+            else:
+                build_policy_planner(
+                    output_dir,
+                    args.dry_run,
+                    log_path,
+                    step,
+                    args.scenario_mode,
+                    args.policy_model,
+                    args.policy_budget,
+                    args.timeout,
+                    policy_events,
+                )
 
         agent_step_dir = raw_dir / f"agent_step_{step_label}"
         agent_cmd = [

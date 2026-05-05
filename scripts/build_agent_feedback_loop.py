@@ -204,6 +204,11 @@ def build_feedback_rows(agent_turns: List[Dict[str, str]], metadata_by_id: Dict[
         pathway_sum = 0.0
         support_sum = 0.0
         intensity_sum = 0.0
+        side_effect_weighted = 0.0
+        policy_fatigue_weighted = 0.0
+        fairness_gap_weighted = 0.0
+        coercion_weighted = 0.0
+        fiscal_anxiety_weighted = 0.0
 
         for turn in turns:
             metadata = metadata_by_id.get(turn.get("agent_id", ""), {})
@@ -215,6 +220,19 @@ def build_feedback_rows(agent_turns: List[Dict[str, str]], metadata_by_id: Dict[
             pathway_sum += to_float(turn.get("pathway"), 0.0) * population_weight
             support_sum += to_float(turn.get("support"), 0.0) * population_weight
             intensity_sum += to_float(turn.get("intensity"), 0.0) * population_weight
+            side_effect = turn.get("side_effect", "")
+            if side_effect and side_effect != "なし":
+                side_effect_weighted += population_weight * 100.0
+            fatigue = to_float(turn.get("policy_fatigue"), 0.0)
+            if fatigue:
+                policy_fatigue_weighted += population_weight * fatigue
+            fairness = to_float(turn.get("fairness_perception"), -1.0)
+            if fairness >= 0:
+                fairness_gap_weighted += population_weight * max(0.0, 100.0 - fairness)
+            if side_effect == "強制感":
+                coercion_weighted += population_weight * 100.0
+            if side_effect == "財政不安":
+                fiscal_anxiety_weighted += population_weight * 100.0
 
             for key in signal_keys:
                 signal = action_signal(turn, metadata, key)
@@ -238,6 +256,11 @@ def build_feedback_rows(agent_turns: List[Dict[str, str]], metadata_by_id: Dict[
             denominator = influence_sum if key in {"institution_demand_pressure", "information_overload_pressure"} else weight_sum
             source = influence_weighted if key in {"institution_demand_pressure", "information_overload_pressure"} else weighted
             row[key] = round(source[key] / max(denominator, 0.1), 1)
+        row["side_effect_pressure"] = round(side_effect_weighted / max(weight_sum, 0.1), 1)
+        row["policy_fatigue_pressure"] = round(policy_fatigue_weighted / max(weight_sum, 0.1), 1)
+        row["fairness_gap_pressure"] = round(fairness_gap_weighted / max(weight_sum, 0.1), 1)
+        row["coercion_pressure"] = round(coercion_weighted / max(weight_sum, 0.1), 1)
+        row["fiscal_anxiety_pressure"] = round(fiscal_anxiety_weighted / max(weight_sum, 0.1), 1)
 
         row["feedback_summary"] = summarize_feedback(row)
         rows.append(row)
@@ -253,6 +276,8 @@ def summarize_feedback(row: Dict[str, Any]) -> str:
         ("連帯", row["solidarity_pressure"]),
         ("情報過敏", row["information_overload_pressure"]),
         ("ケア", row["care_pressure"]),
+        ("政策疲労", row.get("policy_fatigue_pressure", 0.0)),
+        ("公平感欠損", row.get("fairness_gap_pressure", 0.0)),
     ]
     top = sorted(signals, key=lambda item: item[1], reverse=True)[:3]
     return "、".join(f"{label}{value:.1f}" for label, value in top)
@@ -480,6 +505,11 @@ def main() -> None:
         "solidarity_pressure",
         "information_overload_pressure",
         "care_pressure",
+        "side_effect_pressure",
+        "policy_fatigue_pressure",
+        "fairness_gap_pressure",
+        "coercion_pressure",
+        "fiscal_anxiety_pressure",
         "feedback_summary",
     ]
     write_tsv(args.output_dir / "agent_feedback.tsv", feedback_rows, feedback_fieldnames)

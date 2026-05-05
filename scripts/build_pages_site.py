@@ -19,6 +19,8 @@ REQUIRED_RUN_IDS = (
     "structure_intervention_100years_panel48_midprompt",
 )
 OPTIONAL_RUN_IDS = (
+    "policy_search_no_sustain_12steps_panel48",
+    "policy_search_with_sustain_12steps_panel48",
     "birth_grant_only_83steps_panel48",
     "structure_birth_grant_package_83steps_panel48",
     "structure_hope_family_package_83steps_panel48",
@@ -37,6 +39,9 @@ OPTIONAL_RUN_FILES_WITH_EMPTY_FALLBACK = {
 OPTIONAL_RUN_FILE_MAPPINGS = {
     "interesting_observations.md": "interesting_observations.md",
     "logs/outcome_summary.tsv": "outcome_summary.tsv",
+    "policy_planner_turns.tsv": "policy_planner_turns.tsv",
+    "policy_events.tsv": "policy_events.tsv",
+    "auto_events_with_policy.tsv": "auto_events_with_policy.tsv",
 }
 DOMAIN_DATA_FILES = (
     "youth_agents.tsv",
