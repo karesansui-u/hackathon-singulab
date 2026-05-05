@@ -464,13 +464,14 @@
 
     .content {
       display: grid;
-      grid-template-columns: minmax(0, 1.45fr) minmax(380px, 0.78fr);
+      grid-template-columns: minmax(380px, 0.78fr) minmax(0, 1.45fr);
       gap: 16px;
       padding: 16px 24px 24px;
       min-height: 0;
     }
 
     .left-column {
+      grid-column: 2;
       display: grid;
       grid-template-rows: auto auto;
       gap: 12px;
@@ -1118,6 +1119,7 @@
     }
 
     .side {
+      grid-column: 1;
       display: grid;
       grid-template-rows: 1fr;
       gap: 16px;
@@ -1510,6 +1512,11 @@
 
       .content {
         grid-template-columns: 1fr;
+      }
+
+      .left-column,
+      .side {
+        grid-column: auto;
       }
 
       .side {
