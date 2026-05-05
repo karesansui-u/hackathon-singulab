@@ -1565,7 +1565,7 @@
         </div>
         <button type="button" class="scenario-detail-button" id="scenarioDetailButton">設計の詳細</button>
       </section>
-      <div class="data-badge" aria-label="表示対象">LLM観測rowのみ</div>
+      <div class="data-badge" aria-label="表示対象">LLM観測rowのみ / 画面は40年目まで / 100年視点は口頭補足</div>
       <section class="simulation-studio" aria-label="シミュレーション生成予定">
         <div class="studio-head">
           <div>
@@ -1962,7 +1962,7 @@
             items: [
               "シナリオ補足は『命令』ではなく『本人が知覚しやすい社会状況』として渡しています。",
               "LLM出力は毎step保存され、内心、会話、SNS、行動、因果、記憶が残るため、なぜ希望が増えたかを後から説明できます。",
-              "最終stepでは希望7人、良好27/32まで増えましたが、不安がゼロになったのではなく『不安を抱えたまま動ける』状態として出ています。"
+              "デモ表示範囲の40年目では希望5人、良好19人まで確認できます。不安がゼロになったのではなく『不安を抱えたまま動ける』状態として出ています。"
             ]
           },
           {
@@ -1990,6 +1990,7 @@
     ];
     const groupLabelByKey = Object.fromEntries(groups.map((group) => [group.key, group.label]));
     const mapObservationMaxAge = 64;
+    const demoMaxTurn = 71;
 
     const events = {
       baseline: [
@@ -2071,7 +2072,7 @@
           timeScheduleMaxStep = Math.max(0, ...timeScheduleRows.map((row) => Number(row.step) || 0));
           if (timeScheduleMaxStep) {
             minTurn = 1;
-            maxTurn = timeScheduleMaxStep;
+            maxTurn = Math.min(timeScheduleMaxStep, demoMaxTurn);
             if (state.turn < minTurn) state.turn = minTurn;
           }
         } catch (timeScheduleError) {
@@ -2154,7 +2155,7 @@
       if (!runData) {
         state.agentFilter = "all";
         minTurn = timeScheduleMaxStep ? 1 : 0;
-        maxTurn = timeScheduleMaxStep || 79;
+        maxTurn = Math.min(timeScheduleMaxStep || demoMaxTurn, demoMaxTurn);
         return;
       }
       llmTurnsByKey = runData.llmTurnsByKey;
@@ -2163,7 +2164,7 @@
       countryMaxStep = runData.countryMaxStep;
       eventSchedule = runData.eventSchedule;
       minTurn = runData.llmMaxStep ? 1 : 0;
-      maxTurn = runData.llmMaxStep || timeScheduleMaxStep || 79;
+      maxTurn = Math.min(runData.llmMaxStep || timeScheduleMaxStep || demoMaxTurn, demoMaxTurn);
       state.agentFilter = llmAgentIds.size ? "llm" : "all";
       state.turn = clamp(state.turn || minTurn, minTurn, maxTurn);
     }
