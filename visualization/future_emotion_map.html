@@ -593,9 +593,10 @@
 
     .map-controls {
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       padding: 0;
       border-top: 0;
       background: transparent;
@@ -653,6 +654,33 @@
       background: #172033;
       color: #ffffff;
       border-color: #172033;
+    }
+
+    .map-progress {
+      width: min(560px, calc(100% - 40px));
+      display: grid;
+      grid-template-columns: auto minmax(180px, 1fr) auto;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+      pointer-events: auto;
+    }
+
+    .map-progress-label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .map-progress input {
+      width: 100%;
+      accent-color: var(--ink);
+      cursor: pointer;
     }
 
     .event-timeline {
@@ -1621,16 +1649,19 @@
           <div class="map-controls">
             <div class="map-control-bar">
               <button type="button" class="map-control-button is-wide" id="startButton" title="最初へ" aria-label="first step">始</button>
-              <button type="button" class="map-control-button is-wide" id="jumpBackButton" title="12ステップ戻る" aria-label="jump back 12 steps">-12</button>
               <button type="button" class="map-control-button is-wide" id="prevEventButton" title="前の主要イベントへ" aria-label="previous major event">前イベント</button>
               <button type="button" class="map-control-button" id="prevButton" aria-label="previous step">‹</button>
               <button type="button" class="map-control-button" id="playButton" aria-label="play">▶</button>
               <button type="button" class="map-control-button" id="nextButton" aria-label="next step">›</button>
               <button type="button" class="map-control-button is-wide" id="nextEventButton" title="次の主要イベントへ" aria-label="next major event">次イベント</button>
-              <button type="button" class="map-control-button is-wide" id="jumpForwardButton" title="12ステップ進む" aria-label="jump forward 12 steps">+12</button>
               <button type="button" class="map-control-button is-wide" id="endButton" title="最後へ" aria-label="last step">終</button>
               <output class="turn-chip" id="turnLabel">0年</output>
             </div>
+            <label class="map-progress" for="stepSlider" aria-label="表示ステップを変更">
+              <span class="map-progress-label" id="stepMinLabel">0年</span>
+              <input id="stepSlider" type="range" min="0" max="79" value="0" step="1">
+              <span class="map-progress-label" id="stepMaxLabel">79</span>
+            </label>
           </div>
         </div>
         <div class="event-timeline" aria-label="主要イベントタイムライン">
@@ -2148,7 +2179,7 @@
 
     const state = {
       scenario: "sustain",
-      turn: 0,
+      turn: demoMaxTurn,
       agentFilter: "llm",
       selectedId: "Y01",
       playing: false,
@@ -2172,14 +2203,15 @@
     const playButton = document.getElementById("playButton");
     const startButton = document.getElementById("startButton");
     const endButton = document.getElementById("endButton");
-    const jumpBackButton = document.getElementById("jumpBackButton");
-    const jumpForwardButton = document.getElementById("jumpForwardButton");
     const prevEventButton = document.getElementById("prevEventButton");
     const nextEventButton = document.getElementById("nextEventButton");
     const prevButton = document.getElementById("prevButton");
     const nextButton = document.getElementById("nextButton");
     const eventTimeline = document.getElementById("eventTimeline");
     const eventTimelineCurrent = document.getElementById("eventTimelineCurrent");
+    const stepSlider = document.getElementById("stepSlider");
+    const stepMinLabel = document.getElementById("stepMinLabel");
+    const stepMaxLabel = document.getElementById("stepMaxLabel");
     const agentSearchInput = document.getElementById("agentSearchInput");
     const agentSearchResults = document.getElementById("agentSearchResults");
 
@@ -2913,6 +2945,16 @@
       renderEventBurst();
       renderEventTimeline();
       turnLabel.value = turnToYear(state.turn);
+      syncStepSlider();
+    }
+
+    function syncStepSlider() {
+      if (!stepSlider) return;
+      stepSlider.min = String(minTurn);
+      stepSlider.max = String(maxTurn);
+      stepSlider.value = String(state.turn);
+      if (stepMinLabel) stepMinLabel.textContent = turnToYear(minTurn);
+      if (stepMaxLabel) stepMaxLabel.textContent = turnToYear(maxTurn);
     }
 
     function hasLlmForTurn(agentId, turn = state.turn) {
@@ -3259,9 +3301,24 @@
       ];
     }
 
-    function compactReportLead(text) {
-      const firstSentence = String(text || "").split("。")[0];
-      return firstSentence ? `${firstSentence}。` : "";
+    function currentReportInsights() {
+      const rows = currentSummaryRows();
+      const { counts, total } = summarize(rows);
+      const top = categories
+        .map((category) => ({ ...category, count: counts[category.key] || 0 }))
+        .sort((a, b) => b.count - a.count)[0] || categories[1];
+      const childIntent = total
+        ? rows.reduce((sum, row) => sum + (Number(row.childIntent) || 0), 0) / total
+        : 0;
+      const exitCount = rows.filter((row) => row.socialExitStatus).length;
+      const hopeEmotionCount = rows.filter((row) => row.emotion === "希望").length;
+      return [
+        `${turnToYear(state.turn)}時点では${top.label}が最多です（${top.count}/${total || 0}人）。`,
+        `子ども希望指数は${Math.round(childIntent * 100)}%。希望感情は${hopeEmotionCount}人です。`,
+        exitCount
+          ? `離脱リスクは${exitCount}人。点線と「離脱」ラベルで確認できます。`
+          : "離脱リスクはこの時点では目立っていません。"
+      ];
     }
 
     function eventsAtTurn(turn) {
@@ -3702,6 +3759,7 @@
       }
       state.scenario = scenario;
       applyRunDataForScenario(scenario);
+      syncAgentFilterTabs();
       syncScenarioSelect();
       render();
     }
@@ -3751,17 +3809,18 @@
     }
 
     function openScenarioReportModal() {
-      const report = scenarioReports[state.scenario] || scenarioReports.sustain;
+      const description = scenarioDescriptions[state.scenario] || scenarioDescriptions.sustain;
       const modal = document.getElementById("scenarioModal");
       const title = document.getElementById("scenarioModalTitle");
       const lead = document.getElementById("scenarioModalLead");
       const sections = document.getElementById("scenarioModalSections");
       const kicker = modal?.querySelector(".modal-kicker");
       if (!modal || !title || !lead || !sections) return;
-      if (kicker) kicker.textContent = "SUMMARY / 詳細分析";
-      title.textContent = report.title;
-      lead.textContent = compactReportLead(report.lead);
+      if (kicker) kicker.textContent = "現在時点のSUMMARY";
+      title.textContent = `${description.title} レポート`;
+      lead.textContent = `${turnToYear(state.turn)}時点の表示データから再計算しています。シミュレーションを切り替えると、この内容も同じ時点で更新されます。`;
       const summaryCards = currentSummaryCards();
+      const insights = currentReportInsights();
       sections.innerHTML = `
         <section class="modal-section">
           <h3 class="modal-section-title">SUMMARY</h3>
@@ -3775,38 +3834,11 @@
           </div>
         </section>
         <section class="modal-section">
-          <h3 class="modal-section-title">2年後 / 5年後 / 10年後 / 40年後</h3>
-          <div class="report-table-wrap">
-            <table class="report-table">
-              <thead>
-                <tr>
-                  <th>時点</th>
-                  <th>観測結果</th>
-                  <th>効いたイベント</th>
-                  <th>考察</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${report.milestones.map((row) => `
-                  <tr>
-                    <td class="report-time">${escapeHtml(row.time)}</td>
-                    <td>${escapeHtml(row.summary)}</td>
-                    <td>${escapeHtml(row.event)}</td>
-                    <td>${escapeHtml(row.analysis)}</td>
-                  </tr>
-                `).join("")}
-              </tbody>
-            </table>
-          </div>
+          <h3 class="modal-section-title">読み取り</h3>
+          <ul class="modal-list">
+            ${insights.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
         </section>
-        ${report.details.map((section) => `
-          <section class="modal-section">
-            <h3 class="modal-section-title">${escapeHtml(section.title)}</h3>
-            <ul class="modal-list">
-              ${section.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-            </ul>
-          </section>
-        `).join("")}
       `;
       modal.hidden = false;
       document.body.style.overflow = "hidden";
@@ -3852,10 +3884,6 @@
       render();
     }
 
-    function jumpBy(delta) {
-      jumpToTurn(state.turn + delta);
-    }
-
     function stepToEvent(direction) {
       const turns = timelineTurns();
       const target = direction > 0
@@ -3878,9 +3906,17 @@
       }
     }
 
-    document.getElementById("scenarioSelect")?.addEventListener("change", (event) => {
-      setScenario(event.target.value);
-    });
+    function handleScenarioSelection(event) {
+      const nextScenario = event.currentTarget.value;
+      if (nextScenario === state.scenario) {
+        syncScenarioSelect();
+        return;
+      }
+      setScenario(nextScenario);
+    }
+
+    document.getElementById("scenarioSelect")?.addEventListener("input", handleScenarioSelection);
+    document.getElementById("scenarioSelect")?.addEventListener("change", handleScenarioSelection);
 
     document.getElementById("scenarioDetailButton")?.addEventListener("click", openScenarioModal);
     document.getElementById("scenarioReportButton")?.addEventListener("click", openScenarioReportModal);
@@ -3902,12 +3938,11 @@
     playButton.addEventListener("click", togglePlay);
     startButton.addEventListener("click", () => jumpToTurn(minTurn));
     endButton.addEventListener("click", () => jumpToTurn(maxTurn));
-    jumpBackButton.addEventListener("click", () => jumpBy(-12));
-    jumpForwardButton.addEventListener("click", () => jumpBy(12));
     prevEventButton.addEventListener("click", () => stepToEvent(-1));
     nextEventButton.addEventListener("click", () => stepToEvent(1));
     prevButton.addEventListener("click", () => stepBy(-1));
     nextButton.addEventListener("click", () => stepBy(1));
+    stepSlider?.addEventListener("input", (event) => jumpToTurn(event.currentTarget.value));
     agentSearchInput?.addEventListener("input", () => render());
     eventTimeline?.addEventListener("click", (event) => {
       const button = event.target.closest("button[data-turn]");
