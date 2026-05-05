@@ -1406,7 +1406,7 @@
           <article class="policy-card is-future">
             <div class="policy-status" id="hopeFamilyPolicyStatus">生成待ち</div>
             <div class="policy-name">希望+家族形成強化</div>
-            <div class="policy-detail">仮払い・住居/ケア即時枠・個別見通し面談で希望3体以上を検証</div>
+            <div class="policy-detail">nat着金・希望ケース拡張・若者メンター・家族形成利用で希望3体以上を検証</div>
           </article>
         </div>
       </section>
@@ -1650,6 +1650,7 @@
       { key: "auxiliary", label: "補助観測", count: 0 }
     ];
     const groupLabelByKey = Object.fromEntries(groups.map((group) => [group.key, group.label]));
+    const mapObservationMaxAge = 64;
 
     const events = {
       baseline: [
@@ -2457,7 +2458,9 @@
     }
 
     function visibleRowsFor(rows) {
-      const activeRows = rows.filter((row) => !row.activeFromTurn || state.turn >= row.activeFromTurn);
+      const activeRows = rows
+        .filter((row) => !row.activeFromTurn || state.turn >= row.activeFromTurn)
+        .filter((row) => isInMapObservationAge(row));
       if (state.agentFilter === "youth") return activeRows.filter((row) => row.group === "youth");
       if (state.agentFilter === "family") return activeRows.filter((row) => row.group === "family");
       if (state.agentFilter === "generation") return activeRows.filter((row) => row.group === "generation");
@@ -2469,6 +2472,12 @@
         return historicalLlmRows.length ? historicalLlmRows : activeRows;
       }
       return activeRows;
+    }
+
+    function isInMapObservationAge(row) {
+      const age = Number(row.displayAge);
+      if (!Number.isFinite(age)) return true;
+      return age <= mapObservationMaxAge;
     }
 
     function packRowsInRooms(rows) {

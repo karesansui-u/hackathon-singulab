@@ -1,0 +1,6 @@
+run_dir	outputs/runs/structure_hope_family_package_83steps_panel48
+steps	1-83
+best_hope_step	75
+best_hope_count	8
+best_family_positive_step	65
+best_family_positive_proxy	24
