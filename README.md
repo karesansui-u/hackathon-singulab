@@ -1,6 +1,6 @@
 # 構造持続理論ベースの文明OSシミュレーション
 
-**Demo:** [GitHub Pagesで開く](https://karesansui-u.github.io/hackathon-singulab/visualization/future_emotion_map.html)
+**Demo:** [未来感情・行動シミュレーション](https://karesansui-u.github.io/hackathon-singulab/visualization/future_emotion_map.html) / [シミュレーション作成スタジオ モック](https://karesansui-u.github.io/hackathon-singulab/visualization/simulation_studio_mock.html)
 
 制度や施策を実行する前に、人々がどう感じ、どう動き、その反応が社会全体へどう跳ね返るかをLLMエージェントで事前検証する**創発反応の観測装置**です。
 
@@ -22,7 +22,9 @@ GitHub Pagesで公開しています。
 
 https://karesansui-u.github.io/hackathon-singulab/visualization/future_emotion_map.html
 
-UIでは、介入なしrunと構造持続介入runを切り替えながら、AGI/シンギュラリティ時代の社会イベントに対して、若者・家族形成世代・次世代コホートがどう感じ、どう行動するかを4部屋マップで再生できます。
+https://karesansui-u.github.io/hackathon-singulab/visualization/simulation_studio_mock.html
+
+UIでは、介入なしrun、構造持続介入run、構造持続+出産支援run、希望+家族形成runを切り替えながら、AGI/シンギュラリティ時代の社会イベントに対して、若者・家族形成世代・次世代コホートがどう感じ、どう行動するかを4部屋マップで再生できます。
 
 ## ドキュメントの入口
 
