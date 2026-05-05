@@ -344,6 +344,7 @@ def parse_args() -> argparse.Namespace:
         "--scenario-mode",
         choices=[
             "no_intervention",
+            "birth_grant_only",
             "structure_intervention",
             "structure_birth_grant_package",
             "structure_hope_family_package",

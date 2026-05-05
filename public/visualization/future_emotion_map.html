@@ -3654,9 +3654,11 @@
       document.getElementById("dominantSignalLabel").textContent = signalLabel;
       document.getElementById("youthSignal").textContent = `${categoryByKey[signalTop].label}が中心`;
 
-      const institutionText = isInterventionScenario()
-        ? state.turn < 18 ? "実証準備" : state.turn < 44 ? "制度更新中" : "報酬経路が定着"
-        : state.turn < 22 ? "未発動" : state.turn < 52 ? "遅延対応" : "最低限の抑制";
+      const institutionText = state.scenario === "birthOnly"
+        ? state.turn < 18 ? "支援提示" : state.turn < 44 ? "申請確認中" : "不安が残存"
+        : hasStructureSustainScenario()
+          ? state.turn < 18 ? "実証準備" : state.turn < 44 ? "制度更新中" : "報酬経路が定着"
+          : state.turn < 22 ? "未発動" : state.turn < 52 ? "遅延対応" : "最低限の抑制";
       document.getElementById("institutionSignal").textContent = institutionText;
     }
 

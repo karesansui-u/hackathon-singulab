@@ -12,13 +12,14 @@
   - `BP01`〜`BP07` の政策イベントが定義済み（「構造持続型出産一時金の上乗せ」「産後休息・代替ケア保障」「希望経路の可視化と達成共有」等）。
   - 追加の勝ち筋として `HP01`〜`HP25` も定義済み（若者希望経路、初職リカバリー、地域持分、子育て共同体、異議申立、仮払い、住居/ケア即時枠、家族形成見通し面談、初期成功ケース、パーソナル予算枠、個別資格通知、先行契約枠、空き枠可視化、SNS希望反転、財政監査クリア、nat初回着金、家族形成見通し通知、希望ケース地域拡張、若者メンター、家族形成初回利用、希望継続コミュニティ、家族形成2回目プラン、分断補正、希望3体以上観測ゲート）。
 2. `scripts/run_civilization_os_llm_demo.py`
-   - `scenario_mode` に `structure_birth_grant_package` が存在。
+   - `scenario_mode` に `birth_grant_only` / `structure_birth_grant_package` が存在。
    - イベントフィルタ仕様:
      - `no_intervention`: `区分=政策` と `イベントID` が `P*` と `BP*` を除外
-     - `structure_intervention`: `BP*` のみ除外（`P*` は含める）
+     - `birth_grant_only`: 構造持続系 `P*` を除外し、`P04` と `BP*` の出生・家族形成支援だけを含める
+     - `structure_intervention`: `P04` / `BP*` / `HP*` を除外（構造持続系 `P*` のみ含める）
      - `structure_birth_grant_package`: 全イベント（`P*` + `BP*`）を含める
 3. `scripts/run_closed_loop_llm_demo.py`
-   - `--scenario-mode` の choices に `structure_birth_grant_package` が入っている。
+   - `--scenario-mode` の choices に `birth_grant_only` / `structure_birth_grant_package` が入っている。
 
 ### 追加が必要になりがちなもの（未反映の可能性が高い）
 
@@ -81,7 +82,8 @@
 
 - `P*` が構造持続介入のベース（住居、学び直し、ケア、nat報酬など）
 - `BP*` が家族形成パッケージの追加要素（出産一時金上乗せ、産後ケア、企業負担補正、住居・教育費緩衝、非強制ガードレール、財政監査、希望経路可視化）
-- `structure_intervention` は `BP*` を除外して「構造持続のみ」を表現
+- `birth_grant_only` は `P04 + BP*` で「構造持続なしの出産・家族形成支援のみ」を表現
+- `structure_intervention` は `P04 + BP*` を除外して「構造持続のみ」を表現
 - `structure_birth_grant_package` は `P* + BP*` で「構造持続 + 家族形成パッケージ」を表現
 - `structure_hope_family_package` は `P* + BP* + HP*` で「希望を持つ若者と子どもを迎えられる人を増やす追加設計」を表現
 

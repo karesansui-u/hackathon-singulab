@@ -47,6 +47,9 @@ publish_pages() {
   fi
 }
 
+run_scenario "birth_grant_only" "birth_grant_only_83steps_panel48"
+publish_pages "birth grant only"
+
 run_scenario "structure_birth_grant_package" "structure_birth_grant_package_83steps_panel48"
 publish_pages "birth grant package"
 

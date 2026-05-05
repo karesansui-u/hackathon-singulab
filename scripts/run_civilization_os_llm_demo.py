@@ -141,21 +141,33 @@ def is_hope_family_package_event(event: Dict[str, str]) -> bool:
     return event_id.startswith("HP")
 
 
+def is_direct_birth_support_event(event: Dict[str, str]) -> bool:
+    event_id = event.get("イベントID", "")
+    return event_id == "P04" or is_birth_grant_package_event(event)
+
+
+def is_base_pressure_event(event: Dict[str, str]) -> bool:
+    event_id = event.get("イベントID", "")
+    return (
+        event.get("区分") != "政策"
+        and not event_id.startswith("P")
+        and not is_birth_grant_package_event(event)
+        and not is_hope_family_package_event(event)
+    )
+
+
 def filter_events_for_scenario(events: List[Dict[str, str]], scenario_mode: str) -> List[Dict[str, str]]:
     if scenario_mode == "no_intervention":
+        return [event for event in events if is_base_pressure_event(event)]
+    if scenario_mode == "birth_grant_only":
         return [
             event for event in events
-            if (
-                event.get("区分") != "政策"
-                and not event.get("イベントID", "").startswith("P")
-                and not is_birth_grant_package_event(event)
-                and not is_hope_family_package_event(event)
-            )
+            if is_base_pressure_event(event) or is_direct_birth_support_event(event)
         ]
     if scenario_mode == "structure_intervention":
         return [
             event for event in events
-            if not is_birth_grant_package_event(event)
+            if not is_direct_birth_support_event(event)
             and not is_hope_family_package_event(event)
         ]
     if scenario_mode == "structure_birth_grant_package":
@@ -1195,6 +1207,7 @@ def main() -> None:
         "--scenario-mode",
         choices=[
             "no_intervention",
+            "birth_grant_only",
             "structure_intervention",
             "structure_birth_grant_package",
             "structure_hope_family_package",

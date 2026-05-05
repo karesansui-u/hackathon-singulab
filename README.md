@@ -109,6 +109,11 @@ python3 scripts/run_closed_loop_llm_demo.py \
 
 python3 scripts/run_closed_loop_llm_demo.py \
   --steps 83 \
+  --scenario-mode birth_grant_only \
+  --output-dir outputs/runs/birth_grant_only_83steps_panel48
+
+python3 scripts/run_closed_loop_llm_demo.py \
+  --steps 83 \
   --scenario-mode structure_birth_grant_package \
   --output-dir outputs/runs/structure_birth_grant_package_83steps_panel48
 
@@ -121,7 +126,8 @@ python3 scripts/run_closed_loop_llm_demo.py \
 | `--scenario-mode` | 内容 |
 |---|---|
 | `no_intervention` | `events.tsv` の政策イベント（P系）を除外し、ショックと世界圧力のみを与える |
-| `structure_intervention` | 政策イベント（P系）も含む、構造持続論ベースの介入あり |
+| `birth_grant_only` | 構造持続の住居、nat報酬、学び直し、地域ケア等を入れず、P04とBP系の出生・産後・復帰・監査支援だけを与える |
+| `structure_intervention` | P04とBP/HP系を除外し、構造持続論ベースの住居、nat報酬、学び直し、地域ケア等だけを与える |
 | `structure_birth_grant_package` | 構造持続介入に、出産一時金、産後休息、代替ケア、復帰キャリア、住居/教育費緩衝、出生非強制監査、財政監査を上乗せする |
 | `structure_hope_family_package` | さらに若者希望経路、初職リカバリー、地域持分、子育て共同体、異議申立、希望3体以上の観測ゲートを上乗せする |
 | `all` | すべての予定イベントを入れた検証用 |

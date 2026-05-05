@@ -19,6 +19,7 @@ REQUIRED_RUN_IDS = (
     "structure_intervention_100years_panel48_midprompt",
 )
 OPTIONAL_RUN_IDS = (
+    "birth_grant_only_83steps_panel48",
     "structure_birth_grant_package_83steps_panel48",
     "structure_hope_family_package_83steps_panel48",
 )
