@@ -29,6 +29,7 @@
       --female: #ef4444;
       --other-gender: #8b5cf6;
       --shadow: 0 18px 44px rgba(15, 23, 42, 0.10);
+      --room-height: clamp(320px, calc(100vh - 460px), 500px);
     }
 
     * {
@@ -580,7 +581,7 @@
 
     .map-wrap {
       width: min(100%, 980px);
-      height: clamp(320px, calc(100vh - 460px), 500px);
+      height: var(--room-height);
       justify-self: center;
       min-height: 0;
       padding: 6px 12px 0;
@@ -990,11 +991,25 @@
 
     .agent-label {
       pointer-events: none;
-      font-size: 9px;
+      font-size: 10px;
       fill: #ffffff;
-      font-weight: 800;
+      font-weight: 900;
       text-anchor: middle;
       dominant-baseline: central;
+    }
+
+    .agent-icon-base,
+    .agent-icon-core,
+    .agent-icon-dot {
+      pointer-events: none;
+    }
+
+    .agent-icon-text {
+      pointer-events: none;
+      font-weight: 900;
+      text-anchor: middle;
+      dominant-baseline: central;
+      letter-spacing: 0;
     }
 
     .face-line {
@@ -1144,6 +1159,9 @@
 
     .live-voice-panel {
       grid-area: voice;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      height: var(--room-height);
       min-height: 0;
     }
 
@@ -1180,7 +1198,8 @@
       padding: 12px;
       display: grid;
       gap: 9px;
-      max-height: 560px;
+      min-height: 0;
+      max-height: none;
       overflow: hidden;
       background:
         linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(241, 245, 249, 0.94)),
@@ -1199,24 +1218,53 @@
       gap: 8px;
       align-items: end;
       min-width: 0;
+      width: var(--voice-width, 88%);
       opacity: 0;
-      transform: translateY(10px) scale(0.985);
+      transform: translate(var(--voice-offset, 0px), 10px) scale(0.985);
       animation: voice-pop 360ms cubic-bezier(.2, .9, .2, 1.1) forwards;
       animation-delay: calc(var(--voice-index, 0) * 92ms);
+    }
+
+    .voice-row.is-right {
+      justify-content: end;
+      grid-template-columns: minmax(0, 1fr) 34px;
+      margin-left: auto;
+    }
+
+    .voice-row.is-right .voice-avatar {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .voice-row.is-right .voice-bubble {
+      grid-column: 1;
+      grid-row: 1;
+      border-left-width: 1px;
+      border-left-color: var(--line);
+      border-right: 4px solid var(--voice-accent, var(--neutral));
+      border-radius: 14px 14px 5px 14px;
+    }
+
+    .voice-row.is-right .voice-bubble::before {
+      left: auto;
+      right: -6px;
+      border-left: 0;
+      border-right: 1px solid var(--line);
+      transform: rotate(-45deg);
     }
 
     @keyframes voice-pop {
       0% {
         opacity: 0;
-        transform: translateY(10px) scale(0.985);
+        transform: translate(var(--voice-offset, 0px), 10px) scale(0.985);
       }
       68% {
         opacity: 1;
-        transform: translateY(-1px) scale(1.01);
+        transform: translate(var(--voice-offset, 0px), -1px) scale(1.01);
       }
       100% {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translate(var(--voice-offset, 0px), 0) scale(1);
       }
     }
 
@@ -1224,17 +1272,38 @@
       width: 34px;
       height: 34px;
       border-radius: 999px;
-      border: 1px solid rgba(15, 23, 42, 0.12);
-      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, 0.14);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.80), rgba(255, 255, 255, 0.18)),
+        var(--avatar-bg, #e2e8f0);
+      color: var(--avatar-fg, #172033);
       box-shadow: 0 5px 12px rgba(15, 23, 42, 0.12);
-      object-fit: cover;
+      display: inline-grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 900;
+      flex: 0 0 auto;
+    }
+
+    .voice-avatar-dot {
+      position: absolute;
+      right: -1px;
+      bottom: -1px;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      border: 2px solid #ffffff;
+      background: var(--avatar-dot, #94a3b8);
     }
 
     .voice-bubble {
       position: relative;
       min-width: 0;
       border: 1px solid var(--line);
-      border-left: 4px solid var(--neutral);
+      border-left: 4px solid var(--voice-accent, var(--neutral));
       border-radius: 14px 14px 14px 5px;
       padding: 8px 10px 9px;
       background: #ffffff;
@@ -1922,6 +1991,11 @@
 
       .live-voice-panel {
         grid-area: voice;
+        height: auto;
+      }
+
+      .voice-body {
+        max-height: 560px;
       }
     }
 
@@ -2340,17 +2414,17 @@
     const runConfigs = {
       baseline: {
         label: "介入なし",
-        agentTurnsPaths: ["../data/runs/no_intervention_71steps_panel48/agent_turns.tsv"],
-        countryTurnsPaths: ["../data/runs/no_intervention_71steps_panel48/country_turns.tsv"],
-        autoEventPaths: ["../data/runs/no_intervention_71steps_panel48/auto_events_with_feedback.tsv"],
-        scheduledEventPaths: ["../data/runs/no_intervention_71steps_panel48/scheduled_events_used.tsv"]
+        agentTurnsPaths: ["../outputs/runs/no_intervention_71steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../outputs/runs/no_intervention_71steps_panel48/country_turns.tsv"],
+        autoEventPaths: ["../outputs/runs/no_intervention_71steps_panel48/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../outputs/runs/no_intervention_71steps_panel48/scheduled_events_used.tsv"]
       },
       birthOnly: {
         label: "出産支援のみ",
-        agentTurnsPaths: ["../data/runs/no_intervention_71steps_panel48/agent_turns.tsv"],
-        countryTurnsPaths: ["../data/runs/no_intervention_71steps_panel48/country_turns.tsv"],
-        autoEventPaths: ["../data/runs/no_intervention_71steps_panel48/auto_events_with_feedback.tsv"],
-        scheduledEventPaths: ["../data/runs/structure_birth_grant_package_83steps_panel48/scheduled_events_used.tsv"],
+        agentTurnsPaths: ["../outputs/runs/no_intervention_71steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../outputs/runs/no_intervention_71steps_panel48/country_turns.tsv"],
+        autoEventPaths: ["../outputs/runs/no_intervention_71steps_panel48/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/scheduled_events_used.tsv"],
         scheduledEventFilter: (row) => {
           const eventId = row.event_id || "";
           return eventId === "P04" || eventId.startsWith("BP");
@@ -2358,45 +2432,45 @@
       },
       policyNoSustain: {
         label: "LLM政策探索（持続なし）",
-        agentTurnsPaths: ["../data/runs/policy_search_no_sustain_12steps_panel48/agent_turns.tsv"],
-        countryTurnsPaths: ["../data/runs/policy_search_no_sustain_12steps_panel48/country_turns.tsv"],
+        agentTurnsPaths: ["../outputs/runs/policy_search_no_sustain_12steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../outputs/runs/policy_search_no_sustain_12steps_panel48/country_turns.tsv"],
         autoEventPaths: [
-          "../data/runs/policy_search_no_sustain_12steps_panel48/auto_events_with_feedback.tsv",
-          "../data/runs/policy_search_no_sustain_12steps_panel48/auto_events_with_policy.tsv"
+          "../outputs/runs/policy_search_no_sustain_12steps_panel48/auto_events_with_feedback.tsv",
+          "../outputs/runs/policy_search_no_sustain_12steps_panel48/auto_events_with_policy.tsv"
         ],
-        scheduledEventPaths: ["../data/runs/policy_search_no_sustain_12steps_panel48/scheduled_events_used.tsv"]
+        scheduledEventPaths: ["../outputs/runs/policy_search_no_sustain_12steps_panel48/scheduled_events_used.tsv"]
       },
       policyWithSustain: {
         label: "LLM政策探索（持続あり）",
-        agentTurnsPaths: ["../data/runs/policy_search_with_sustain_12steps_panel48/agent_turns.tsv"],
-        countryTurnsPaths: ["../data/runs/policy_search_with_sustain_12steps_panel48/country_turns.tsv"],
+        agentTurnsPaths: ["../outputs/runs/policy_search_with_sustain_12steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../outputs/runs/policy_search_with_sustain_12steps_panel48/country_turns.tsv"],
         autoEventPaths: [
-          "../data/runs/policy_search_with_sustain_12steps_panel48/auto_events_with_feedback.tsv",
-          "../data/runs/policy_search_with_sustain_12steps_panel48/auto_events_with_policy.tsv"
+          "../outputs/runs/policy_search_with_sustain_12steps_panel48/auto_events_with_feedback.tsv",
+          "../outputs/runs/policy_search_with_sustain_12steps_panel48/auto_events_with_policy.tsv"
         ],
-        scheduledEventPaths: ["../data/runs/policy_search_with_sustain_12steps_panel48/scheduled_events_used.tsv"]
+        scheduledEventPaths: ["../outputs/runs/policy_search_with_sustain_12steps_panel48/scheduled_events_used.tsv"]
       },
       sustain: {
         label: "構造持続通貨 介入",
-        agentTurnsPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/agent_turns.tsv"],
-        countryTurnsPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/country_turns.tsv"],
-        autoEventPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/auto_events_with_feedback.tsv"],
-        scheduledEventPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/scheduled_events_used.tsv"],
+        agentTurnsPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/agent_turns.tsv"],
+        countryTurnsPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/country_turns.tsv"],
+        autoEventPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/scheduled_events_used.tsv"],
         scheduledEventFilter: (row) => (row.event_id || "") !== "P04"
       },
       birthGrant: {
         label: "構造持続+出産 介入",
-        agentTurnsPaths: ["../data/runs/structure_birth_grant_package_83steps_panel48/agent_turns.tsv"],
-        countryTurnsPaths: ["../data/runs/structure_birth_grant_package_83steps_panel48/country_turns.tsv"],
-        autoEventPaths: ["../data/runs/structure_birth_grant_package_83steps_panel48/auto_events_with_feedback.tsv"],
-        scheduledEventPaths: ["../data/runs/structure_birth_grant_package_83steps_panel48/scheduled_events_used.tsv"]
+        agentTurnsPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/country_turns.tsv"],
+        autoEventPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/scheduled_events_used.tsv"]
       },
       hopeFamily: {
         label: "構造持続+希望 介入",
-        agentTurnsPaths: ["../data/runs/structure_hope_family_package_83steps_panel48/agent_turns.tsv"],
-        countryTurnsPaths: ["../data/runs/structure_hope_family_package_83steps_panel48/country_turns.tsv"],
-        autoEventPaths: ["../data/runs/structure_hope_family_package_83steps_panel48/auto_events_with_feedback.tsv"],
-        scheduledEventPaths: ["../data/runs/structure_hope_family_package_83steps_panel48/scheduled_events_used.tsv"]
+        agentTurnsPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/country_turns.tsv"],
+        autoEventPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/scheduled_events_used.tsv"]
       }
     };
     const scenarioDescriptions = {
@@ -2787,6 +2861,13 @@
       { key: "auxiliary", label: "補助観測", count: 0 }
     ];
     const groupLabelByKey = Object.fromEntries(groups.map((group) => [group.key, group.label]));
+    const cohortIconByKey = {
+      youth: { mark: "若", color: "#2563eb", soft: "#dbeafe" },
+      family: { mark: "家", color: "#db2777", soft: "#fce7f3" },
+      generation: { mark: "世", color: "#7c3aed", soft: "#ede9fe" },
+      auxiliary: { mark: "観", color: "#0f766e", soft: "#ccfbf1" },
+      unknown: { mark: "人", color: "#475569", soft: "#e2e8f0" }
+    };
     const mapObservationMaxAge = 64;
     const demoMaxTurn = 71;
 
@@ -3835,12 +3916,14 @@
           <span class="swatch" style="background:${category.color}"></span>${category.label}
         </span>
       `).join("") + `
-        <span class="legend-item">
-          <span class="swatch" style="background:var(--male)"></span>男性
-        </span>
-        <span class="legend-item">
-          <span class="swatch" style="background:var(--female)"></span>女性
-        </span>
+        ${groups.map((group) => {
+          const cohort = cohortIconByKey[group.key] || cohortIconByKey.unknown;
+          return `
+            <span class="legend-item">
+              <span class="swatch" style="background:${cohort.color}"></span>${group.label}
+            </span>
+          `;
+        }).join("")}
       `;
     }
 
@@ -3848,7 +3931,7 @@
       agentLayer.innerHTML = "";
       const fragment = document.createDocumentFragment();
       rows.forEach((row) => {
-        const color = genderColor(row.gender);
+        const cohort = cohortIconFor(row);
         const categoryColor = categoryByKey[row.dominant].color;
         const size = 7 + row.intensity * 9;
         const node = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -3868,13 +3951,13 @@
         node.style.animationDelay = `${-(idleSeed % 9) * 0.23}s`;
 
         const selected = row.id === state.selectedId;
-        appendFaceIcon(node, row, size, color, categoryColor, selected);
+        appendAgentIcon(node, row, size, cohort, categoryColor, selected);
         fragment.appendChild(node);
       });
       agentLayer.appendChild(fragment);
     }
 
-    function appendFaceIcon(node, row, size, fillColor, categoryColor, selected) {
+    function appendAgentIcon(node, row, size, cohort, categoryColor, selected) {
       if (selected) {
         const glow = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         glow.setAttribute("cx", row.x);
@@ -3901,51 +3984,45 @@
         node.appendChild(exitRing);
       }
 
-      const head = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      head.setAttribute("cx", row.x);
-      head.setAttribute("cy", row.y);
-      head.setAttribute("r", size);
-      head.setAttribute("fill", fillColor);
-      head.setAttribute("stroke", selected ? "#111827" : categoryColor);
-      head.setAttribute("stroke-width", selected ? "4" : "2.4");
-      node.appendChild(head);
+      const base = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      base.setAttribute("cx", row.x);
+      base.setAttribute("cy", row.y);
+      base.setAttribute("r", size);
+      base.setAttribute("fill", cohort.soft);
+      base.setAttribute("stroke", selected ? "#111827" : categoryColor);
+      base.setAttribute("stroke-width", selected ? "4" : "2.4");
+      base.setAttribute("class", "agent-icon-base");
+      node.appendChild(base);
 
-      const emotion = row.emotion || categoryByKey[row.dominant].emotions;
-      const face = faceDefinition(emotion);
-      const scale = size / 16;
-      const addCircle = (cx, cy, r, className = "face-fill-dark") => {
-        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circle.setAttribute("cx", row.x + cx * scale);
-        circle.setAttribute("cy", row.y + cy * scale);
-        circle.setAttribute("r", Math.max(1.2, r * scale));
-        circle.setAttribute("class", className);
-        node.appendChild(circle);
-      };
-      const addPath = (d, className = "face-line") => {
-        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        path.setAttribute("d", d.replace(/(-?\d+(\.\d+)?),(-?\d+(\.\d+)?)/g, (_, x, _dx, y) => {
-          return `${row.x + Number(x) * scale},${row.y + Number(y) * scale}`;
-        }));
-        path.setAttribute("class", className);
-        node.appendChild(path);
-      };
-      const addText = (text, dx, dy, fontSize) => {
-        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        label.setAttribute("x", row.x + dx * scale);
-        label.setAttribute("y", row.y + dy * scale);
-        label.setAttribute("text-anchor", "middle");
-        label.setAttribute("dominant-baseline", "central");
-        label.setAttribute("font-size", fontSize * scale);
-        label.setAttribute("font-weight", "900");
-        label.setAttribute("fill", "#172033");
-        label.setAttribute("pointer-events", "none");
-        label.textContent = text;
-        node.appendChild(label);
-      };
+      const core = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      core.setAttribute("cx", row.x);
+      core.setAttribute("cy", row.y);
+      core.setAttribute("r", Math.max(5, size * 0.62));
+      core.setAttribute("fill", "#ffffff");
+      core.setAttribute("opacity", "0.88");
+      core.setAttribute("class", "agent-icon-core");
+      node.appendChild(core);
 
-      face.circles.forEach((circle) => addCircle(...circle));
-      face.paths.forEach((path) => addPath(path));
-      face.texts.forEach((text) => addText(...text));
+      const mark = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      mark.setAttribute("x", row.x);
+      mark.setAttribute("y", row.y + 0.4);
+      mark.setAttribute("font-size", Math.max(8.4, size * 0.72));
+      mark.setAttribute("fill", cohort.color);
+      mark.setAttribute("class", "agent-icon-text");
+      mark.textContent = cohort.mark;
+      node.appendChild(mark);
+
+      const statusDot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      statusDot.setAttribute("cx", row.x + size * 0.58);
+      statusDot.setAttribute("cy", row.y + size * 0.58);
+      statusDot.setAttribute("r", Math.max(2.4, size * 0.23));
+      statusDot.setAttribute("fill", categoryColor);
+      statusDot.setAttribute("stroke", "#ffffff");
+      statusDot.setAttribute("stroke-width", "1.6");
+      statusDot.setAttribute("class", "agent-icon-dot");
+      node.appendChild(statusDot);
+
+      const emotion = row.emotion || categoryByKey[row.dominant].label;
       const exitLabel = row.socialExitStatus ? "離脱 / " : "";
       const ageEmotionLabel = row.displayAge ? `${exitLabel}${row.displayAge}歳 ${emotion}` : `${exitLabel}${emotion}`;
       appendEmotionLabel(node, row.x, row.y - size - 13, ageEmotionLabel, Boolean(row.socialExitStatus));
@@ -4612,21 +4689,27 @@
         return;
       }
 
-      const voiceRows = rows
+      const priorityRows = rows
         .map((row) => ({ row, score: voicePriority(row) }))
         .sort((a, b) => b.score - a.score || String(a.row.id).localeCompare(String(b.row.id), "ja", { numeric: true }))
         .slice(0, 9)
         .map((item) => item.row);
+      const voiceRows = shuffleVoiceRows(priorityRows);
 
       stream.innerHTML = voiceRows.map((row, index) => {
         const category = categoryByKey[row.dominant] || categoryByKey.neutral;
+        const cohort = cohortIconFor(row);
+        const variant = voiceBubbleVariant(row, index);
         const displayName = row.name && row.name !== row.id ? `${row.name}` : row.id;
         const ageText = row.displayAge ? `${row.displayAge}歳` : groupLabelByKey[row.group] || "観測";
         const text = voiceTextFor(row, state.voiceMode);
         return `
-          <article class="voice-row" style="--voice-index:${index}">
-            <img class="voice-avatar" src="${avatarSrcFor(row)}" alt="" loading="lazy">
-            <div class="voice-bubble" style="border-left-color:${category.color}">
+          <article class="voice-row ${variant.side}" style="--voice-index:${index};--voice-offset:${variant.offset}px;--voice-width:${variant.width}%;--voice-accent:${category.color}">
+            <div class="voice-avatar" style="--avatar-bg:${cohort.soft};--avatar-fg:${cohort.color};--avatar-dot:${category.color}" aria-hidden="true">
+              ${escapeHtml(cohort.mark)}
+              <span class="voice-avatar-dot"></span>
+            </div>
+            <div class="voice-bubble">
               <div class="voice-meta">
                 <span class="voice-name">${escapeHtml(displayName)} / ${escapeHtml(ageText)}</span>
                 <span class="voice-state">${escapeHtml(category.label)}</span>
@@ -4651,6 +4734,27 @@
       return selectedBoost + llmBoost + riskBoost + (Number(row.intensity) || 0);
     }
 
+    function shuffleVoiceRows(rows) {
+      const modeSalt = state.voiceMode === "friend" ? 311 : state.voiceMode === "action" ? 607 : 109;
+      const scenarioSalt = String(state.scenario || "").split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+      return rows
+        .map((row, index) => ({
+          row,
+          order: seeded(idNumber(row.id) * 47 + state.turn * 131 + modeSalt + scenarioSalt + index * 19)
+        }))
+        .sort((a, b) => a.order - b.order)
+        .map((item) => item.row);
+    }
+
+    function voiceBubbleVariant(row, index) {
+      const modeSalt = state.voiceMode === "friend" ? 197 : state.voiceMode === "action" ? 389 : 83;
+      const base = idNumber(row.id) * 61 + state.turn * 97 + modeSalt + index * 29;
+      const side = seeded(base) > 0.55 ? "is-right" : "is-left";
+      const offset = Math.round((seeded(base + 13) - 0.5) * 34);
+      const width = 78 + Math.round(seeded(base + 31) * 18);
+      return { side, offset, width };
+    }
+
     function voiceModeLabel(mode) {
       if (mode === "friend") return "友達トーク";
       if (mode === "action") return "行動";
@@ -4668,11 +4772,8 @@
       return row.socialPost || fallback[2]?.text || "いまの変化を見ながら、次の判断材料を探している。";
     }
 
-    function avatarSrcFor(row) {
-      const avatarCount = 18;
-      const number = idNumber(row.id) || Math.max(1, String(row.id || "").length);
-      const index = ((number - 1) % avatarCount) + 1;
-      return `./assets/avatars/open-peeps/avatar-${String(index).padStart(2, "0")}.svg`;
+    function cohortIconFor(row) {
+      return cohortIconByKey[row.group] || cohortIconByKey.unknown;
     }
 
     function renderEmergenceTrace(rows) {
