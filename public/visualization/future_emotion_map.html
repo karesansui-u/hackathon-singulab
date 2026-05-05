@@ -184,6 +184,63 @@
       opacity: 0.45;
     }
 
+    .scenario-brief {
+      flex: 1 1 460px;
+      min-width: 320px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px 12px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 11px;
+      background: #fbfdff;
+    }
+
+    .scenario-brief-main {
+      min-width: 0;
+    }
+
+    .scenario-brief-kicker {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .scenario-brief-title {
+      margin-top: 2px;
+      font-size: 13px;
+      line-height: 1.25;
+      font-weight: 900;
+    }
+
+    .scenario-brief-summary {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+      font-weight: 700;
+    }
+
+    .scenario-detail-button,
+    .modal-close,
+    .modal-footer-button {
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    .scenario-detail-button {
+      min-height: 34px;
+      padding: 0 10px;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
     .data-badge {
       min-height: 38px;
       display: inline-flex;
@@ -315,6 +372,125 @@
     .policy-card.is-future .policy-status {
       background: #ede9fe;
       color: #6d28d9;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      background: rgba(15, 23, 42, 0.46);
+    }
+
+    .modal-backdrop[hidden] {
+      display: none;
+    }
+
+    .scenario-modal {
+      width: min(860px, 100%);
+      max-height: min(82vh, 820px);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22);
+      overflow: hidden;
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfdff;
+    }
+
+    .modal-kicker {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .modal-title {
+      margin: 4px 0 0;
+      font-size: 20px;
+      line-height: 1.25;
+      font-weight: 900;
+    }
+
+    .modal-close {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 auto;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .modal-body {
+      min-height: 0;
+      overflow: auto;
+      padding: 18px 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .modal-lead {
+      margin: 0;
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.7;
+      font-weight: 750;
+    }
+
+    #scenarioModalSections {
+      display: grid;
+      gap: 12px;
+    }
+
+    .modal-section {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px 14px;
+      background: #ffffff;
+    }
+
+    .modal-section-title {
+      margin: 0 0 8px;
+      font-size: 13px;
+      line-height: 1.35;
+      font-weight: 900;
+    }
+
+    .modal-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+      font-weight: 700;
+    }
+
+    .modal-list li + li {
+      margin-top: 4px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      padding: 12px 20px;
+      border-top: 1px solid var(--line);
+      background: #fbfdff;
+    }
+
+    .modal-footer-button {
+      min-height: 36px;
+      padding: 0 14px;
+      font-size: 12px;
     }
 
     .timeline {
@@ -1307,6 +1483,15 @@
         width: 100%;
       }
 
+      .scenario-brief {
+        min-width: 0;
+        grid-template-columns: 1fr;
+      }
+
+      .scenario-detail-button {
+        width: 100%;
+      }
+
       .top-metrics,
       .studio-flow,
       .policy-plan,
@@ -1372,6 +1557,14 @@
         <button type="button" data-scenario="birthGrant" aria-pressed="false">構造持続+出産支援</button>
         <button type="button" data-scenario="hopeFamily" aria-pressed="false">希望+家族形成</button>
       </div>
+      <section class="scenario-brief" aria-label="選択中のシミュレーション概要">
+        <div class="scenario-brief-main">
+          <div class="scenario-brief-kicker">選択中のシミュレーション</div>
+          <div class="scenario-brief-title" id="scenarioBriefTitle">構造持続介入</div>
+          <div class="scenario-brief-summary" id="scenarioBriefSummary">住居、学び直し、ケア、社会持続活動への報酬が、若者と家族形成世代の未来感情をどう変えるかを観測します。</div>
+        </div>
+        <button type="button" class="scenario-detail-button" id="scenarioDetailButton">設計の詳細</button>
+      </section>
       <div class="data-badge" aria-label="表示対象">LLM観測rowのみ</div>
       <section class="simulation-studio" aria-label="シミュレーション生成予定">
         <div class="studio-head">
@@ -1412,6 +1605,25 @@
         </div>
       </section>
     </section>
+
+    <div class="modal-backdrop" id="scenarioModal" hidden>
+      <section class="scenario-modal" role="dialog" aria-modal="true" aria-labelledby="scenarioModalTitle">
+        <header class="modal-head">
+          <div>
+            <div class="modal-kicker">シナリオ設計の詳細</div>
+            <h2 class="modal-title" id="scenarioModalTitle">構造持続介入</h2>
+          </div>
+          <button type="button" class="modal-close" id="scenarioModalClose" aria-label="閉じる">×</button>
+        </header>
+        <div class="modal-body">
+          <p class="modal-lead" id="scenarioModalLead"></p>
+          <div id="scenarioModalSections"></div>
+        </div>
+        <footer class="modal-footer">
+          <button type="button" class="modal-footer-button" id="scenarioModalFooterClose">閉じる</button>
+        </footer>
+      </section>
+    </div>
 
     <section class="content">
       <section class="left-column">
@@ -1636,6 +1848,132 @@
         countryTurnsPaths: ["../data/runs/structure_hope_family_package_83steps_panel48/country_turns.tsv"],
         autoEventPaths: ["../data/runs/structure_hope_family_package_83steps_panel48/auto_events_with_feedback.tsv"],
         scheduledEventPaths: ["../data/runs/structure_hope_family_package_83steps_panel48/scheduled_events_used.tsv"]
+      }
+    };
+    const scenarioDescriptions = {
+      baseline: {
+        title: "介入なし",
+        summary: "AGI/AIロボ普及、生活コスト、地政学不安、SNS悲観が進む一方で、制度側の新しい支援を入れない比較基準です。若者・家族形成世代・次世代が、不安、生活防衛、制度不信、社会からの撤退へどう動くかを観測します。",
+        lead: "このrunは「何もしなかったらこうなる」を見せる基準線です。LLMには悲観するよう命令せず、社会圧力、属性、年齢、雇用・住居・ケア制約、前ステップの記憶だけを渡して、各エージェントが自然にどう受け取るかをrowデータとして保存しています。",
+        sections: [
+          {
+            title: "検証している問い",
+            items: [
+              "AIによる仕事・役割の再編が進む時、若者は未来経路を見失うのか。",
+              "家族形成世代は、住居、所得、ケア、教育費の不確実性を前に、子どもを迎える現実性を保てるのか。",
+              "社会全体の不安やSNS増幅が、個人の生活防衛、諦念、制度不信へどう連鎖するのか。"
+            ]
+          },
+          {
+            title: "リアルに寄せた設計ポイント",
+            items: [
+              "単一の平均的人物ではなく、若者、家族形成世代、次世代コホートに分け、年齢上昇と世代移行を持たせています。",
+              "世界イベント、国家圧力、日本社会状態、個人の前回記憶を分け、同じニュースでも本人に刺さる場合だけ反応が大きくなるようにしています。",
+              "感情だけでなく、内心、友達との会話、SNS発信、行動カテゴリ、因果、持ち越し懸念を固定スキーマで出すため、後から検証できます。"
+            ]
+          },
+          {
+            title: "発表で刺す見方",
+            items: [
+              "これは未来予言ではなく、施策を入れる前の比較対象です。",
+              "介入ありrunが良く見えるかどうかは、この基準線と比べて初めて意味を持ちます。",
+              "不安が増えること自体より、どの制約で人が動けなくなるかを発見するためのrunです。"
+            ]
+          }
+        ]
+      },
+      sustain: {
+        title: "構造持続介入",
+        summary: "住居、学び直し、ケア、地域更新、社会持続活動への報酬を入れたrunです。経済成長だけでなく、社会を維持・修復する行動が役割と所得になると、人の未来感情と行動がどう変わるかを見ます。",
+        lead: "構造持続理論を社会制度に落とす最初の介入です。資源や給付額だけでなく、本人が『直す・変える・続ける経路』を持てるか、社会を維持する活動が飯の種になるかを観測します。",
+        sections: [
+          {
+            title: "検証している問い",
+            items: [
+              "AIで従来の仕事が揺らぐ時、人間の役割を経済活動だけでなく社会持続活動へ拡張できるか。",
+              "若者に、学び直し、地域更新、ケア補助、制度改善のような新しい希望経路が見えるか。",
+              "危険・注意レイヤーにいる人が、支援と役割経路によって良好・中立へ戻れるか。"
+            ]
+          },
+          {
+            title: "創発を観測するための設計ポイント",
+            items: [
+              "LLMに『希望を持て』とは言わず、制度、イベント、本人属性、前回の記憶を情報として渡しています。",
+              "個人の反応を集約して、生活防衛、制度要求、連帯、撤退圧などの社会フィードバックへ戻す閉ループにしています。",
+              "一部の人だけが救われるのではなく、対象外感、地方実装、財政不安、SNS反発の副作用も出るようにしています。"
+            ]
+          },
+          {
+            title: "発表で刺す見方",
+            items: [
+              "資本主義を否定するのではなく、資本主義が評価しづらい『系を持続させる仕事』を報酬化する提案です。",
+              "希望は気分ではなく、住居、役割、ケア、学び直し、制度信頼の束で発生することを見せます。",
+              "このrunは、構造持続理論を制度シミュレーションに接続する中核です。"
+            ]
+          }
+        ]
+      },
+      birthGrant: {
+        title: "構造持続+出産支援",
+        summary: "出産一時金を単体給付にせず、住居、産後休息、代替ケア、教育費、復帰キャリア、財政監査へ接続したrunです。『お金を増やせば子ども意向が戻るのか』ではなく、条件の束として効くかを検証します。",
+        lead: "このrunは、子どもを産ませる制度ではありません。望む人が子どもを迎えられる条件に支払うと、家族形成世代や若者の認識がどう変わるか、また給付があっても希望に変換されない詰まりがどこにあるかを観測します。",
+        sections: [
+          {
+            title: "検証している問い",
+            items: [
+              "出産一時金や子育て支援は、住居、休息、代替ケア、復帰キャリアと束ねないと効かないのか。",
+              "制度が存在しても、届くまでの空白、申請負荷、条件変更への恐怖があると希望化しないのか。",
+              "家族形成支援が、非婚・非出産層の不公平感や反発を生まないように設計できるか。"
+            ]
+          },
+          {
+            title: "リアルに寄せた設計ポイント",
+            items: [
+              "成果報酬として『産んだら支払う』のではなく、住居、休息、代替ケア、復帰、教育費の条件整備として扱っています。",
+              "財政持続監査と非強制監査を入れ、金融・インフレ・対象外感で制度が崩れる可能性も観測対象にしています。",
+              "結果として、支援があっても『自分に届くか分からない』と不安に吸収されるケースを許容しています。"
+            ]
+          },
+          {
+            title: "発表で刺す見方",
+            items: [
+              "このrunの面白さは、給付を入れても希望が増えない場合があることです。",
+              "つまり、このシミュレーターは都合の良い政策宣伝ではなく、副作用や詰まりを発見する装置として機能しています。",
+              "審査員には『なぜ効かなかったのか』を説明できる点を見せると強いです。"
+            ]
+          }
+        ]
+      },
+      hopeFamily: {
+        title: "希望+家族形成",
+        summary: "給付や制度名だけでなく、個別資格通知、即時予約、nat着金、若者メンター、地域の成功ケース、家族形成面談を追加したrunです。不安が高い社会でも、具体的な次の一手が届くと希望が立ち上がるかを検証します。",
+        lead: "このrunは、希望を直接命令していません。『本人に届く通知』『予約できる枠』『初回着金』『伴走者』『監査の継続性』という社会的事実を追加し、エージェントがそれを信じる、疑う、使う、相談する、まだ不安に留まるなどの分岐を観測しています。",
+        sections: [
+          {
+            title: "検証している問い",
+            items: [
+              "抽象的な支援ではなく、自分が使える条件と日付が見えると、若者は希望・安心・制度利用へ動くのか。",
+              "家族形成は、給付額よりも住居、所得、ケア、復帰、監査、相談先が揃った時に現実的選択肢へ戻るのか。",
+              "希望が増えても、財政不安、条件変更、枠外の反発で折れるリスクはどこに残るのか。"
+            ]
+          },
+          {
+            title: "創発を観測するための設計ポイント",
+            items: [
+              "シナリオ補足は『命令』ではなく『本人が知覚しやすい社会状況』として渡しています。",
+              "LLM出力は毎step保存され、内心、会話、SNS、行動、因果、記憶が残るため、なぜ希望が増えたかを後から説明できます。",
+              "最終stepでは希望7人、良好27/32まで増えましたが、不安がゼロになったのではなく『不安を抱えたまま動ける』状態として出ています。"
+            ]
+          },
+          {
+            title: "発表で刺す見方",
+            items: [
+              "勝ち筋は『お金』だけではなく、通知、予約、着金、伴走、監査という実在感です。",
+              "希望が増えた理由を、具体的な発話と行動rowで示せるため、LLMキャラ遊びではなく制度設計の事前リハーサルとして見せられます。",
+              "このrunは、UIから施策パッケージを追加生成して比較するプロダクト構想にもそのまま接続できます。"
+            ]
+          }
+        ]
       }
     };
     const rooms = {
@@ -3226,6 +3564,44 @@
       if (hopeFamilyStatus) {
         hopeFamilyStatus.textContent = runDataByScenario.has("hopeFamily") ? "再生可能" : "生成待ち";
       }
+      renderScenarioBrief();
+    }
+
+    function renderScenarioBrief() {
+      const description = scenarioDescriptions[state.scenario] || scenarioDescriptions.sustain;
+      const title = document.getElementById("scenarioBriefTitle");
+      const summary = document.getElementById("scenarioBriefSummary");
+      if (title) title.textContent = description.title;
+      if (summary) summary.textContent = description.summary;
+    }
+
+    function openScenarioModal() {
+      const description = scenarioDescriptions[state.scenario] || scenarioDescriptions.sustain;
+      const modal = document.getElementById("scenarioModal");
+      const title = document.getElementById("scenarioModalTitle");
+      const lead = document.getElementById("scenarioModalLead");
+      const sections = document.getElementById("scenarioModalSections");
+      if (!modal || !title || !lead || !sections) return;
+      title.textContent = description.title;
+      lead.textContent = description.lead;
+      sections.innerHTML = description.sections.map((section) => `
+        <section class="modal-section">
+          <h3 class="modal-section-title">${escapeHtml(section.title)}</h3>
+          <ul class="modal-list">
+            ${section.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        </section>
+      `).join("");
+      modal.hidden = false;
+      document.body.style.overflow = "hidden";
+      document.getElementById("scenarioModalClose")?.focus();
+    }
+
+    function closeScenarioModal() {
+      const modal = document.getElementById("scenarioModal");
+      if (!modal) return;
+      modal.hidden = true;
+      document.body.style.overflow = "";
     }
 
     function setAgentFilter(filter) {
@@ -3290,6 +3666,16 @@
       const button = event.target.closest("button[data-scenario]");
       if (!button) return;
       setScenario(button.dataset.scenario);
+    });
+
+    document.getElementById("scenarioDetailButton")?.addEventListener("click", openScenarioModal);
+    document.getElementById("scenarioModalClose")?.addEventListener("click", closeScenarioModal);
+    document.getElementById("scenarioModalFooterClose")?.addEventListener("click", closeScenarioModal);
+    document.getElementById("scenarioModal")?.addEventListener("click", (event) => {
+      if (event.target.id === "scenarioModal") closeScenarioModal();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeScenarioModal();
     });
 
     document.getElementById("agentFilterTabs")?.addEventListener("click", (event) => {
