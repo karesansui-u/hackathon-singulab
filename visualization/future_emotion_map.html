@@ -7,17 +7,16 @@
   <style>
     :root {
       color-scheme: light;
-      --bg: #f8fbf7;
+      --bg: #f7fafc;
       --surface: #ffffff;
-      --surface-alt: #f4faf7;
-      --ink: #16202a;
-      --muted: #667085;
-      --line: #d5e4df;
-      --pop-mint: #2dd4bf;
-      --pop-lime: #d9f99d;
-      --pop-yellow: #fde047;
-      --pop-coral: #fb7185;
-      --pop-sky: #38bdf8;
+      --surface-alt: #f3f7f8;
+      --ink: #102033;
+      --muted: #617080;
+      --line: #d4dde5;
+      --gov-navy: #102033;
+      --gov-blue: #1d4f7a;
+      --gov-teal: #0f766e;
+      --gov-gold: #b7791f;
       --good: #16a34a;
       --good-soft: #dcfce7;
       --neutral: #94a3b8;
@@ -33,7 +32,7 @@
       --male: #2563eb;
       --female: #ef4444;
       --other-gender: #8b5cf6;
-      --shadow: 0 18px 38px rgba(22, 32, 42, 0.08);
+      --shadow: 0 18px 38px rgba(16, 32, 51, 0.09);
       --room-height: clamp(320px, calc(100vh - 460px), 500px);
     }
 
@@ -45,9 +44,9 @@
       margin: 0;
       min-height: 100vh;
       background:
-        repeating-linear-gradient(90deg, rgba(45, 212, 191, 0.018) 0 1px, transparent 1px 34px),
-        repeating-linear-gradient(0deg, rgba(251, 113, 133, 0.014) 0 1px, transparent 1px 34px),
-        linear-gradient(180deg, #fbfffc 0%, #f7fbff 48%, #fbfff5 100%);
+        repeating-linear-gradient(90deg, rgba(16, 32, 51, 0.020) 0 1px, transparent 1px 40px),
+        repeating-linear-gradient(0deg, rgba(15, 118, 110, 0.018) 0 1px, transparent 1px 40px),
+        linear-gradient(180deg, #fbfdff 0%, #f7fafc 58%, #fbfcfb 100%);
       color: var(--ink);
       font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       letter-spacing: 0;
@@ -78,7 +77,7 @@
       position: sticky;
       top: 0;
       z-index: 10;
-      box-shadow: 0 10px 26px rgba(22, 32, 42, 0.055);
+      box-shadow: 0 10px 26px rgba(16, 32, 51, 0.06);
     }
 
     .topbar::after {
@@ -89,8 +88,8 @@
       bottom: -2px;
       height: 3px;
       border-radius: 999px;
-      background: linear-gradient(90deg, var(--pop-mint), var(--pop-lime) 38%, var(--pop-yellow) 70%, var(--pop-coral));
-      opacity: 0.56;
+      background: linear-gradient(90deg, var(--gov-navy), var(--gov-blue) 45%, var(--gov-teal) 78%, var(--gov-gold));
+      opacity: 0.72;
     }
 
     .brand {
@@ -114,12 +113,12 @@
 
     .view-nav {
       display: inline-flex;
-      border: 1px solid rgba(22, 32, 42, 0.10);
+      border: 1px solid rgba(16, 32, 51, 0.12);
       border-radius: 8px;
       overflow: hidden;
       background: #ffffff;
       flex: none;
-      box-shadow: inset 0 -2px 0 rgba(217, 249, 157, 0.42);
+      box-shadow: inset 0 -2px 0 rgba(183, 121, 31, 0.26);
     }
 
     .view-nav a {
@@ -137,7 +136,7 @@
     .view-nav a[aria-current="page"] {
       background: #16202a;
       color: #ffffff;
-      box-shadow: inset 0 -3px 0 var(--pop-mint);
+      box-shadow: inset 0 -3px 0 var(--gov-gold);
     }
 
     .top-metrics {
@@ -153,15 +152,15 @@
       border-radius: 8px;
       padding: 8px 10px;
       min-width: 0;
-      box-shadow: inset 0 -3px 0 rgba(217, 249, 157, 0.40);
+      box-shadow: inset 0 -3px 0 rgba(183, 121, 31, 0.25);
     }
 
     .metric:nth-child(2n) {
-      box-shadow: inset 0 -3px 0 rgba(45, 212, 191, 0.24);
+      box-shadow: inset 0 -3px 0 rgba(15, 118, 110, 0.22);
     }
 
     .metric:nth-child(3n) {
-      box-shadow: inset 0 -3px 0 rgba(251, 113, 133, 0.20);
+      box-shadow: inset 0 -3px 0 rgba(29, 79, 122, 0.20);
     }
 
     .metric-label {
@@ -213,11 +212,11 @@
       color: var(--ink);
       cursor: pointer;
       font-weight: 700;
-      box-shadow: inset 0 -2px 0 rgba(45, 212, 191, 0.16);
+      box-shadow: inset 0 -2px 0 rgba(29, 79, 122, 0.16);
     }
 
     .scenario-select:focus {
-      outline: 3px solid rgba(217, 249, 157, 0.78);
+      outline: 3px solid rgba(29, 79, 122, 0.18);
       outline-offset: 2px;
     }
 
@@ -237,7 +236,7 @@
       border-radius: 8px;
       padding: 9px 11px;
       background: #ffffff;
-      box-shadow: inset 3px 0 0 rgba(217, 249, 157, 0.84);
+      box-shadow: inset 3px 0 0 rgba(183, 121, 31, 0.45);
     }
 
     .scenario-brief-main {
@@ -540,7 +539,7 @@
       left: 0;
       right: 0;
       height: 3px;
-      background: linear-gradient(90deg, rgba(45, 212, 191, 0.52), rgba(217, 249, 157, 0.58), rgba(251, 113, 133, 0.32));
+      background: linear-gradient(90deg, var(--gov-navy), var(--gov-blue) 45%, var(--gov-teal) 76%, var(--gov-gold));
       pointer-events: none;
       z-index: 1;
     }
@@ -559,9 +558,9 @@
       align-items: center;
       gap: 14px;
       padding: 13px 16px;
-      border-bottom: 1px solid rgba(22, 32, 42, 0.08);
+      border-bottom: 1px solid rgba(16, 32, 51, 0.10);
       background:
-        linear-gradient(90deg, rgba(217, 249, 157, 0.20), transparent 36%),
+        linear-gradient(90deg, rgba(29, 79, 122, 0.055), transparent 36%),
         #ffffff;
     }
 
@@ -581,18 +580,18 @@
       width: 10px;
       height: 10px;
       border-radius: 999px;
-      background: var(--pop-lime);
-      box-shadow: 0 0 0 4px rgba(217, 249, 157, 0.38);
+      background: var(--gov-gold);
+      box-shadow: 0 0 0 4px rgba(183, 121, 31, 0.14);
     }
 
     .live-voice-panel .panel-title::before {
-      background: var(--pop-mint);
-      box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.18);
+      background: var(--gov-teal);
+      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.14);
     }
 
     .map-panel .panel-title::before {
-      background: var(--good);
-      box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.12);
+      background: var(--gov-blue);
+      box-shadow: 0 0 0 4px rgba(29, 79, 122, 0.13);
     }
 
     .panel-title-sub {
@@ -1309,10 +1308,10 @@
       align-items: center;
       gap: 5px;
       padding: 3px;
-      border: 1px solid rgba(22, 32, 42, 0.10);
+      border: 1px solid rgba(16, 32, 51, 0.10);
       border-radius: 999px;
       background: #ffffff;
-      box-shadow: inset 0 -2px 0 rgba(217, 249, 157, 0.34);
+      box-shadow: inset 0 -2px 0 rgba(183, 121, 31, 0.18);
     }
 
     .voice-tab {
@@ -1329,9 +1328,9 @@
     }
 
     .voice-tab[aria-pressed="true"] {
-      background: #16202a;
+      background: var(--gov-navy);
       color: #ffffff;
-      box-shadow: inset 0 -3px 0 var(--pop-mint), 0 6px 12px rgba(22, 32, 42, 0.12);
+      box-shadow: inset 0 -3px 0 var(--gov-gold), 0 6px 12px rgba(16, 32, 51, 0.13);
     }
 
     .voice-body {
@@ -1342,8 +1341,8 @@
       max-height: none;
       overflow: auto;
       background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 253, 250, 0.90)),
-        repeating-linear-gradient(0deg, rgba(45, 212, 191, 0.055) 0 1px, transparent 1px 28px);
+        linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(247, 250, 252, 0.92)),
+        repeating-linear-gradient(0deg, rgba(29, 79, 122, 0.045) 0 1px, transparent 1px 28px);
     }
 
     .voice-stream {
@@ -1911,7 +1910,7 @@
       background: #ffffff;
       color: var(--ink);
       font-size: 13px;
-      box-shadow: inset 0 -2px 0 rgba(56, 189, 248, 0.14);
+      box-shadow: inset 0 -2px 0 rgba(29, 79, 122, 0.13);
     }
 
     .agent-search-results {
@@ -1935,16 +1934,16 @@
     }
 
     .agent-pick.is-llm {
-      border-color: rgba(56, 189, 248, 0.55);
-      background: #f0f9ff;
-      color: #1d4ed8;
+      border-color: rgba(29, 79, 122, 0.42);
+      background: #f2f7fb;
+      color: var(--gov-blue);
     }
 
     .agent-pick[aria-pressed="true"] {
       border-color: #16202a;
       background: #16202a;
       color: #ffffff;
-      box-shadow: inset 0 -3px 0 var(--pop-lime);
+      box-shadow: inset 0 -3px 0 var(--gov-gold);
     }
 
     .selected-emotion-card,
@@ -1978,8 +1977,8 @@
 
     .selected-action-card {
       gap: 7px;
-      border-color: rgba(45, 212, 191, 0.24);
-      background: #fbfffd;
+      border-color: rgba(29, 79, 122, 0.18);
+      background: #fbfdff;
     }
 
     .selected-action-main {
@@ -1987,12 +1986,12 @@
       width: fit-content;
       border-radius: 999px;
       padding: 5px 10px;
-      background: #16202a;
+      background: var(--gov-navy);
       color: #ffffff;
       font-size: 15px;
       line-height: 1.2;
       font-weight: 900;
-      box-shadow: inset 0 -3px 0 var(--pop-coral);
+      box-shadow: inset 0 -3px 0 var(--gov-gold);
     }
 
     .selected-action-detail {
