@@ -22,7 +22,7 @@ GitHub Pagesで公開しています。
 
 https://karesansui-u.github.io/hackathon-singulab/visualization/future_emotion_map.html
 
-UIでは、AGI/シンギュラリティ時代の社会イベントと構造持続論ベースの介入に対して、若者・家族形成世代・次世代コホートがどう感じ、どう行動するかを4部屋マップで再生できます。
+UIでは、介入なしrunと構造持続介入runを切り替えながら、AGI/シンギュラリティ時代の社会イベントに対して、若者・家族形成世代・次世代コホートがどう感じ、どう行動するかを4部屋マップで再生できます。
 
 ## ドキュメントの入口
 

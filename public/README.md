@@ -4,6 +4,7 @@ GitHub Pages公開用の静的サイトです。
 
 - Demo URL: `https://karesansui-u.github.io/hackathon-singulab/visualization/future_emotion_map.html`
 - Main UI: `visualization/future_emotion_map.html`
+- Run data: `data/runs/no_intervention_71steps_panel48/`
 - Run data: `data/runs/structure_intervention_100years_panel48_midprompt/`
 - Domain data: `domain_packs/agi_youth_japan/data/`
 

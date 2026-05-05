@@ -1127,7 +1127,10 @@
     </header>
 
     <section class="controls" aria-label="simulation controls">
-      <div class="data-badge" aria-label="シナリオ">構造持続介入run</div>
+      <div class="segmented" id="scenarioTabs">
+        <button type="button" data-scenario="baseline" aria-pressed="false">介入なし</button>
+        <button type="button" data-scenario="sustain" aria-pressed="true">構造持続介入</button>
+      </div>
       <div class="data-badge" aria-label="表示対象">LLM観測rowのみ</div>
     </section>
 
@@ -1312,17 +1315,20 @@
     const youthTsvPath = "../domain_packs/agi_youth_japan/data/youth_agents.tsv";
     const workingTsvPath = "../domain_packs/agi_youth_japan/data/working_agents.tsv";
     const timeScheduleTsvPath = "../domain_packs/agi_youth_japan/data/time_schedule.tsv";
-    const llmTurnsTsvPaths = [
-      "../outputs/runs/structure_intervention_100years_panel48_midprompt/agent_turns.tsv"
-    ];
-    const llmTurnsOverlayPaths = [
-    ];
-    const countryTurnsTsvPaths = [
-      "../outputs/runs/structure_intervention_100years_panel48_midprompt/country_turns.tsv"
-    ];
-    const autoEventTsvPaths = [
-      "../outputs/runs/structure_intervention_100years_panel48_midprompt/auto_events_with_feedback.tsv"
-    ];
+    const runConfigs = {
+      baseline: {
+        label: "介入なし",
+        agentTurnsPaths: ["../outputs/runs/no_intervention_71steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../outputs/runs/no_intervention_71steps_panel48/country_turns.tsv"],
+        autoEventPaths: ["../outputs/runs/no_intervention_71steps_panel48/auto_events_with_feedback.tsv"]
+      },
+      sustain: {
+        label: "構造持続介入",
+        agentTurnsPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/agent_turns.tsv"],
+        countryTurnsPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/country_turns.tsv"],
+        autoEventPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/auto_events_with_feedback.tsv"]
+      }
+    };
     const rooms = {
       caution: { xMin: 72, xMax: 483, yMin: 144, yMax: 326 },
       good: { xMin: 517, xMax: 928, yMin: 144, yMax: 326 },
@@ -1353,7 +1359,7 @@
         "希望経路と世代継承意欲が回復"
       ]
     };
-    let eventSchedule = [
+    const fallbackEventSchedule = [
       { turn: 4, type: "shock", strength: 0.80, name: "AI自動化急加速", direction: "雇用安定↓ 希望↓" },
       { turn: 6, type: "shock", strength: 0.70, name: "生活コスト上昇", direction: "可処分所得↓ 子ども意向↓" },
       { turn: 8, type: "shock", strength: 0.55, name: "SNS悲観バイアス増幅", direction: "希望↓ 分断感↑" },
@@ -1367,6 +1373,7 @@
       { turn: 24, type: "youth", strength: 0.45, name: "SNS抗議拡散", direction: "怒り共有↑ 制度応答要求↑" },
       { turn: 30, type: "policy", strength: 0.60, name: "nat通貨の逆進性補正", direction: "格差↓ 制度信頼↑" }
     ];
+    let eventSchedule = [...fallbackEventSchedule];
 
     const state = {
       scenario: "sustain",
@@ -1378,6 +1385,7 @@
     };
 
     let agents = buildFallbackAgents();
+    let runDataByScenario = new Map();
     let llmTurnsByKey = new Map();
     let llmAgentIds = new Set();
     let renderedRowsById = new Map();
@@ -1413,44 +1421,13 @@
         } catch (timeScheduleError) {
           console.warn("Time schedule was not loaded; using generated max step.", timeScheduleError);
         }
-        try {
-          const baseLlmRows = await loadFirstAvailableTsv(llmTurnsTsvPaths);
-          const overlayRows = [];
-          for (const path of llmTurnsOverlayPaths) {
-            try {
-              overlayRows.push(...await loadTsvRows(path));
-            } catch (overlayError) {
-              console.warn(`LLM overlay output was not loaded: ${path}`, overlayError);
-            }
-          }
-          const llmRows = [...baseLlmRows, ...overlayRows];
-          agents = mergeLlmOnlyAgents(agents, llmRows);
-          llmTurnsByKey = buildLlmTurnMap(llmRows);
-          llmAgentIds = new Set(llmRows.map((row) => row.agent_id).filter(Boolean));
-          const llmMaxStep = Math.max(0, ...llmRows.map((row) => Number(row.step) || 0));
-          if (llmMaxStep) maxTurn = llmMaxStep;
-          if (llmMaxStep) minTurn = 1;
-          if (llmMaxStep && state.turn < minTurn) state.turn = minTurn;
-          if (llmMaxStep && state.turn > maxTurn) state.turn = maxTurn;
-          if (!llmAgentIds.size) state.agentFilter = "all";
-        } catch (llmError) {
-          console.warn("LLM smoke output was not loaded; using deterministic demo updates.", llmError);
-          state.agentFilter = "all";
+        const loadedRuns = await loadRunDataByScenario();
+        runDataByScenario = loadedRuns.runDataByScenario;
+        agents = mergeLlmOnlyAgents(agents, loadedRuns.allLlmRows);
+        if (!runDataByScenario.has(state.scenario)) {
+          state.scenario = runDataByScenario.has("sustain") ? "sustain" : runDataByScenario.keys().next().value || state.scenario;
         }
-        try {
-          const countryRows = await loadFirstAvailableTsv(countryTurnsTsvPaths);
-          countryTurnsByStep = buildCountryTurnMap(countryRows);
-          countryMaxStep = Math.max(0, ...countryRows.map((row) => Number(row.step) || 0));
-        } catch (countryError) {
-          console.warn("Country LLM output was not loaded; hiding world pressure signal.", countryError);
-        }
-        try {
-          const autoEventRows = await loadFirstAvailableTsv(autoEventTsvPaths);
-          const autoEventSchedule = buildAutoEventSchedule(autoEventRows);
-          if (autoEventSchedule.length) eventSchedule = autoEventSchedule;
-        } catch (autoEventError) {
-          console.warn("Auto events were not loaded; using static event schedule.", autoEventError);
-        }
+        applyRunDataForScenario(state.scenario);
         const defaultAgent = state.agentFilter === "llm"
           ? agents.find((agent) => llmAgentIds.has(agent.id))
           : agents.find((agent) => agent.group === "youth");
@@ -1460,7 +1437,60 @@
         state.agentFilter = "all";
       }
       syncAgentFilterTabs();
+      syncScenarioTabs();
       render();
+    }
+
+    async function loadRunDataByScenario() {
+      const nextRunData = new Map();
+      const allLlmRows = [];
+      for (const [scenario, config] of Object.entries(runConfigs)) {
+        try {
+          const llmRows = await loadFirstAvailableTsv(config.agentTurnsPaths);
+          const countryRows = await loadFirstAvailableTsv(config.countryTurnsPaths);
+          let scenarioEventSchedule = [...fallbackEventSchedule];
+          try {
+            const autoEventRows = await loadFirstAvailableTsv(config.autoEventPaths);
+            const autoEventSchedule = buildAutoEventSchedule(autoEventRows);
+            if (autoEventSchedule.length) scenarioEventSchedule = autoEventSchedule;
+          } catch (autoEventError) {
+            console.warn(`${config.label} auto events were not loaded; using static event schedule.`, autoEventError);
+          }
+          nextRunData.set(scenario, {
+            ...config,
+            llmRows,
+            llmTurnsByKey: buildLlmTurnMap(llmRows),
+            llmAgentIds: new Set(llmRows.map((row) => row.agent_id).filter(Boolean)),
+            llmMaxStep: Math.max(0, ...llmRows.map((row) => Number(row.step) || 0)),
+            countryTurnsByStep: buildCountryTurnMap(countryRows),
+            countryMaxStep: Math.max(0, ...countryRows.map((row) => Number(row.step) || 0)),
+            eventSchedule: scenarioEventSchedule
+          });
+          allLlmRows.push(...llmRows);
+        } catch (error) {
+          console.warn(`${config.label} run data was not loaded.`, error);
+        }
+      }
+      return { runDataByScenario: nextRunData, allLlmRows };
+    }
+
+    function applyRunDataForScenario(scenario) {
+      const runData = runDataByScenario.get(scenario);
+      if (!runData) {
+        state.agentFilter = "all";
+        minTurn = timeScheduleMaxStep ? 1 : 0;
+        maxTurn = timeScheduleMaxStep || 79;
+        return;
+      }
+      llmTurnsByKey = runData.llmTurnsByKey;
+      llmAgentIds = runData.llmAgentIds;
+      countryTurnsByStep = runData.countryTurnsByStep;
+      countryMaxStep = runData.countryMaxStep;
+      eventSchedule = runData.eventSchedule;
+      minTurn = runData.llmMaxStep ? 1 : 0;
+      maxTurn = runData.llmMaxStep || timeScheduleMaxStep || 79;
+      state.agentFilter = llmAgentIds.size ? "llm" : "all";
+      state.turn = clamp(state.turn || minTurn, minTurn, maxTurn);
     }
 
     async function loadTsvRows(path) {
@@ -2621,11 +2651,17 @@
     }
 
     function setScenario(scenario) {
+      if (!runConfigs[scenario]) return;
       state.scenario = scenario;
-      document.querySelectorAll("#scenarioTabs button").forEach((button) => {
-        button.setAttribute("aria-pressed", String(button.dataset.scenario === scenario));
-      });
+      applyRunDataForScenario(scenario);
+      syncScenarioTabs();
       render();
+    }
+
+    function syncScenarioTabs() {
+      document.querySelectorAll("#scenarioTabs button").forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.scenario === state.scenario));
+      });
     }
 
     function setAgentFilter(filter) {

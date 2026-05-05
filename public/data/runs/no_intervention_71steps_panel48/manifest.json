@@ -1,0 +1,26 @@
+{
+  "kind": "closed_loop_llm_demo",
+  "start_step": 67,
+  "steps": 5,
+  "model": "gpt-5.2",
+  "scenario_mode": "no_intervention",
+  "country_codes": "USA,CHN,JPN,TWN,KOR,PRK,RUS,UKR,IRN,ISR,SAU,EU",
+  "agent_ids": "A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A14,A12,A13,A15,A17,A18,A27,W02,W22",
+  "organization_ids": "O02,O04,O07,O10,O11,O12,O14,O15",
+  "country_budget": 0.75,
+  "organization_budget": 0.45,
+  "agent_budget": 0.5,
+  "agent_panel_tsv": "/Users/sunagawa/Project/hackathon-singulab/domain_packs/agi_youth_japan/data/demo_panel_48.tsv",
+  "outputs": [
+    "country_turns.tsv",
+    "organization_turns.tsv",
+    "japan_state.tsv",
+    "auto_events.tsv",
+    "organization_events.tsv",
+    "auto_events_with_organization.tsv",
+    "japan_state_feedback.tsv",
+    "auto_events_with_feedback.tsv",
+    "agent_turns.tsv",
+    "agent_feedback.tsv"
+  ]
+}

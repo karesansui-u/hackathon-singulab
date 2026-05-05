@@ -14,7 +14,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "public"
-RUN_ID = "structure_intervention_100years_panel48_midprompt"
+RUN_IDS = (
+    "no_intervention_71steps_panel48",
+    "structure_intervention_100years_panel48_midprompt",
+)
 RUN_FILES = (
     "agent_turns.tsv",
     "country_turns.tsv",
@@ -66,14 +69,15 @@ def build_public_site() -> None:
     html = html.replace("../outputs/runs/", "../data/runs/")
     write_text(PUBLIC / "visualization" / "future_emotion_map.html", html)
 
-    run_source = ROOT / "outputs" / "runs" / RUN_ID
-    if not run_source.exists():
-        raise SystemExit(f"Missing run output: {run_source}")
-    for file_name in RUN_FILES:
-        source = run_source / file_name
-        if not source.exists():
-            raise SystemExit(f"Missing run file: {source}")
-        copy_binary_or_text(source, PUBLIC / "data" / "runs" / RUN_ID / file_name)
+    for run_id in RUN_IDS:
+        run_source = ROOT / "outputs" / "runs" / run_id
+        if not run_source.exists():
+            raise SystemExit(f"Missing run output: {run_source}")
+        for file_name in RUN_FILES:
+            source = run_source / file_name
+            if not source.exists():
+                raise SystemExit(f"Missing run file: {source}")
+            copy_binary_or_text(source, PUBLIC / "data" / "runs" / run_id / file_name)
 
     domain_data_source = ROOT / "domain_packs" / "agi_youth_japan" / "data"
     for file_name in DOMAIN_DATA_FILES:
@@ -107,7 +111,8 @@ GitHub Pages公開用の静的サイトです。
 
 - Demo URL: `https://karesansui-u.github.io/hackathon-singulab/visualization/future_emotion_map.html`
 - Main UI: `visualization/future_emotion_map.html`
-- Run data: `data/runs/{RUN_ID}/`
+- Run data: `data/runs/no_intervention_71steps_panel48/`
+- Run data: `data/runs/structure_intervention_100years_panel48_midprompt/`
 - Domain data: `domain_packs/agi_youth_japan/data/`
 
 Source files live outside this directory. Rebuild this folder with:
