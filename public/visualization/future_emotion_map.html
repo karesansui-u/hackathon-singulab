@@ -2580,17 +2580,17 @@
     const runConfigs = {
       baseline: {
         label: "介入なし",
-        agentTurnsPaths: ["../outputs/runs/no_intervention_71steps_panel48/agent_turns.tsv"],
-        countryTurnsPaths: ["../outputs/runs/no_intervention_71steps_panel48/country_turns.tsv"],
-        autoEventPaths: ["../outputs/runs/no_intervention_71steps_panel48/auto_events_with_feedback.tsv"],
-        scheduledEventPaths: ["../outputs/runs/no_intervention_71steps_panel48/scheduled_events_used.tsv"]
+        agentTurnsPaths: ["../data/runs/no_intervention_71steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../data/runs/no_intervention_71steps_panel48/country_turns.tsv"],
+        autoEventPaths: ["../data/runs/no_intervention_71steps_panel48/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../data/runs/no_intervention_71steps_panel48/scheduled_events_used.tsv"]
       },
       birthOnly: {
         label: "出産支援のみ",
-        agentTurnsPaths: ["../outputs/runs/no_intervention_71steps_panel48/agent_turns.tsv"],
-        countryTurnsPaths: ["../outputs/runs/no_intervention_71steps_panel48/country_turns.tsv"],
-        autoEventPaths: ["../outputs/runs/no_intervention_71steps_panel48/auto_events_with_feedback.tsv"],
-        scheduledEventPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/scheduled_events_used.tsv"],
+        agentTurnsPaths: ["../data/runs/no_intervention_71steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../data/runs/no_intervention_71steps_panel48/country_turns.tsv"],
+        autoEventPaths: ["../data/runs/no_intervention_71steps_panel48/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../data/runs/structure_birth_grant_package_83steps_panel48/scheduled_events_used.tsv"],
         scheduledEventFilter: (row) => {
           const eventId = row.event_id || "";
           return eventId === "P04" || eventId.startsWith("BP");
@@ -2598,45 +2598,45 @@
       },
       policyNoSustain: {
         label: "LLM政策探索（持続なし）",
-        agentTurnsPaths: ["../outputs/runs/policy_search_no_sustain_12steps_panel48/agent_turns.tsv"],
-        countryTurnsPaths: ["../outputs/runs/policy_search_no_sustain_12steps_panel48/country_turns.tsv"],
+        agentTurnsPaths: ["../data/runs/policy_search_no_sustain_12steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../data/runs/policy_search_no_sustain_12steps_panel48/country_turns.tsv"],
         autoEventPaths: [
-          "../outputs/runs/policy_search_no_sustain_12steps_panel48/auto_events_with_feedback.tsv",
-          "../outputs/runs/policy_search_no_sustain_12steps_panel48/auto_events_with_policy.tsv"
+          "../data/runs/policy_search_no_sustain_12steps_panel48/auto_events_with_feedback.tsv",
+          "../data/runs/policy_search_no_sustain_12steps_panel48/auto_events_with_policy.tsv"
         ],
-        scheduledEventPaths: ["../outputs/runs/policy_search_no_sustain_12steps_panel48/scheduled_events_used.tsv"]
+        scheduledEventPaths: ["../data/runs/policy_search_no_sustain_12steps_panel48/scheduled_events_used.tsv"]
       },
       policyWithSustain: {
         label: "LLM政策探索（持続あり）",
-        agentTurnsPaths: ["../outputs/runs/policy_search_with_sustain_12steps_panel48/agent_turns.tsv"],
-        countryTurnsPaths: ["../outputs/runs/policy_search_with_sustain_12steps_panel48/country_turns.tsv"],
+        agentTurnsPaths: ["../data/runs/policy_search_with_sustain_12steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../data/runs/policy_search_with_sustain_12steps_panel48/country_turns.tsv"],
         autoEventPaths: [
-          "../outputs/runs/policy_search_with_sustain_12steps_panel48/auto_events_with_feedback.tsv",
-          "../outputs/runs/policy_search_with_sustain_12steps_panel48/auto_events_with_policy.tsv"
+          "../data/runs/policy_search_with_sustain_12steps_panel48/auto_events_with_feedback.tsv",
+          "../data/runs/policy_search_with_sustain_12steps_panel48/auto_events_with_policy.tsv"
         ],
-        scheduledEventPaths: ["../outputs/runs/policy_search_with_sustain_12steps_panel48/scheduled_events_used.tsv"]
+        scheduledEventPaths: ["../data/runs/policy_search_with_sustain_12steps_panel48/scheduled_events_used.tsv"]
       },
       sustain: {
         label: "構造持続通貨 介入",
-        agentTurnsPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/agent_turns.tsv"],
-        countryTurnsPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/country_turns.tsv"],
-        autoEventPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/auto_events_with_feedback.tsv"],
-        scheduledEventPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/scheduled_events_used.tsv"],
+        agentTurnsPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/agent_turns.tsv"],
+        countryTurnsPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/country_turns.tsv"],
+        autoEventPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/scheduled_events_used.tsv"],
         scheduledEventFilter: (row) => (row.event_id || "") !== "P04"
       },
       birthGrant: {
         label: "構造持続+出産 介入",
-        agentTurnsPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/agent_turns.tsv"],
-        countryTurnsPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/country_turns.tsv"],
-        autoEventPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/auto_events_with_feedback.tsv"],
-        scheduledEventPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/scheduled_events_used.tsv"]
+        agentTurnsPaths: ["../data/runs/structure_birth_grant_package_83steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../data/runs/structure_birth_grant_package_83steps_panel48/country_turns.tsv"],
+        autoEventPaths: ["../data/runs/structure_birth_grant_package_83steps_panel48/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../data/runs/structure_birth_grant_package_83steps_panel48/scheduled_events_used.tsv"]
       },
       hopeFamily: {
         label: "構造持続+希望 介入",
-        agentTurnsPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/agent_turns.tsv"],
-        countryTurnsPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/country_turns.tsv"],
-        autoEventPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/auto_events_with_feedback.tsv"],
-        scheduledEventPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/scheduled_events_used.tsv"]
+        agentTurnsPaths: ["../data/runs/structure_hope_family_package_83steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../data/runs/structure_hope_family_package_83steps_panel48/country_turns.tsv"],
+        autoEventPaths: ["../data/runs/structure_hope_family_package_83steps_panel48/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../data/runs/structure_hope_family_package_83steps_panel48/scheduled_events_used.tsv"]
       }
     };
     const scenarioDescriptions = {
@@ -3118,6 +3118,7 @@
     let runDataByScenario = new Map();
     let llmTurnsByKey = new Map();
     let llmAgentIds = new Set();
+    let fallbackPanelAgentIds = new Set();
     let renderedRowsById = new Map();
     let timeScheduleByStep = new Map();
     let timeScheduleMaxStep = 0;
@@ -3167,6 +3168,7 @@
         }
         const loadedRuns = await loadRunDataByScenario(worldTimelineEvents);
         runDataByScenario = loadedRuns.runDataByScenario;
+        fallbackPanelAgentIds = new Set(loadedRuns.allLlmRows.map((row) => row.agent_id).filter(Boolean));
         agents = mergeLlmOnlyAgents(agents, loadedRuns.allLlmRows);
         if (!runConfigs[state.scenario]) state.scenario = "sustain";
         applyRunDataForScenario(state.scenario);
@@ -3236,11 +3238,11 @@
       const runData = runDataByScenario.get(scenario);
       if (!runData) {
         llmTurnsByKey = new Map();
-        llmAgentIds = new Set();
+        llmAgentIds = new Set(fallbackPanelAgentIds);
         countryTurnsByStep = new Map();
         countryMaxStep = 0;
         eventSchedule = fallbackScheduleForScenario(scenario);
-        if (state.agentFilter === "llm") state.agentFilter = "all";
+        state.agentFilter = llmAgentIds.size ? "llm" : "all";
         minTurn = timeScheduleMaxStep ? 1 : 0;
         maxTurn = Math.min(timeScheduleMaxStep || demoMaxTurn, demoMaxTurn);
         state.turn = clamp(state.turn || minTurn, minTurn, maxTurn);
@@ -3324,7 +3326,6 @@
     function buildAutoEventSchedule(rows) {
       return rows
         .filter((row) => row.step && row["イベント名"])
-        .filter((row) => row["発生源"] !== "国家LLMリスク段階")
         .map((row) => {
           const category = row["区分"] || "";
           const name = row["イベント名"] || "";
@@ -4704,8 +4705,13 @@
 
     function isTimelineEvent(event) {
       if (!event || event.turn < minTurn || event.turn > maxTurn) return false;
-      if (/企業・組織の採用育成判断|生活防衛シフト/.test(event.name || "")) return false;
+      if (/企業・組織の採用育成判断/.test(event.name || "")) return false;
       if (["policy", "milestone", "youth"].includes(event.type)) return true;
+      const category = event.category || "";
+      const source = event.source || "";
+      if (category.includes("戦争") || source === "国家LLMリスク段階") return (event.strength || 0) >= 0.55;
+      if (category.includes("世界") || category.includes("制度制約")) return (event.strength || 0) >= 0.55;
+      if (category.includes("社会反応")) return (event.strength || 0) >= 0.65;
       return (event.strength || 0) >= 0.68;
     }
 
