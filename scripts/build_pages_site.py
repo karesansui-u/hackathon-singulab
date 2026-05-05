@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+"""Build a GitHub Pages-ready static demo site.
+
+The development viewer reads local paths under ``outputs/runs``. This builder
+copies only the publishable demo artifacts into ``public/`` and rewrites the
+copied HTML to read from ``public/data/runs``.
+"""
+
+from __future__ import annotations
+
+import shutil
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+PUBLIC = ROOT / "public"
+RUN_ID = "structure_intervention_100years_panel48_midprompt"
+RUN_FILES = (
+    "agent_turns.tsv",
+    "country_turns.tsv",
+    "auto_events_with_feedback.tsv",
+    "agent_feedback.tsv",
+    "japan_state.tsv",
+    "manifest.json",
+)
+DOMAIN_DATA_FILES = (
+    "youth_agents.tsv",
+    "working_agents.tsv",
+    "time_schedule.tsv",
+)
+TEXT_SUFFIXES = {".html", ".json", ".md", ".tsv", ".txt", ".yaml", ".yml"}
+
+
+def write_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def copy_text(source: Path, target: Path) -> None:
+    text = source.read_text(encoding="utf-8").replace("\r\n", "\n")
+    write_text(target, text)
+
+
+def copy_binary_or_text(source: Path, target: Path) -> None:
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if source.suffix in TEXT_SUFFIXES:
+        copy_text(source, target)
+    else:
+        shutil.copy2(source, target)
+
+
+def clean_public() -> None:
+    if PUBLIC.exists():
+        shutil.rmtree(PUBLIC)
+    PUBLIC.mkdir(parents=True, exist_ok=True)
+
+
+def build_public_site() -> None:
+    clean_public()
+
+    source_html = ROOT / "visualization" / "future_emotion_map.html"
+    if not source_html.exists():
+        raise SystemExit(f"Missing UI source: {source_html}")
+
+    html = source_html.read_text(encoding="utf-8")
+    html = html.replace("../outputs/runs/", "../data/runs/")
+    write_text(PUBLIC / "visualization" / "future_emotion_map.html", html)
+
+    run_source = ROOT / "outputs" / "runs" / RUN_ID
+    if not run_source.exists():
+        raise SystemExit(f"Missing run output: {run_source}")
+    for file_name in RUN_FILES:
+        source = run_source / file_name
+        if not source.exists():
+            raise SystemExit(f"Missing run file: {source}")
+        copy_binary_or_text(source, PUBLIC / "data" / "runs" / RUN_ID / file_name)
+
+    domain_data_source = ROOT / "domain_packs" / "agi_youth_japan" / "data"
+    for file_name in DOMAIN_DATA_FILES:
+        source = domain_data_source / file_name
+        if not source.exists():
+            raise SystemExit(f"Missing domain data file: {source}")
+        copy_text(source, PUBLIC / "domain_packs" / "agi_youth_japan" / "data" / file_name)
+
+    write_text(
+        PUBLIC / "index.html",
+        """<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>文明OSシミュレーション デモ</title>
+  <meta http-equiv="refresh" content="0; url=visualization/future_emotion_map.html">
+  <link rel="canonical" href="visualization/future_emotion_map.html">
+</head>
+<body>
+  <p><a href="visualization/future_emotion_map.html">文明OSシミュレーション デモ</a></p>
+</body>
+</html>
+""",
+    )
+    write_text(
+        PUBLIC / "README.md",
+        f"""# 文明OSシミュレーション デモ
+
+GitHub Pages公開用の静的サイトです。
+
+- Demo URL: `https://karesansui-u.github.io/hackathon-singulab/visualization/future_emotion_map.html`
+- Main UI: `visualization/future_emotion_map.html`
+- Run data: `data/runs/{RUN_ID}/`
+- Domain data: `domain_packs/agi_youth_japan/data/`
+
+Source files live outside this directory. Rebuild this folder with:
+
+```bash
+python3 scripts/build_pages_site.py
+```
+""",
+    )
+    write_text(PUBLIC / ".nojekyll", "")
+    print(f"Wrote GitHub Pages site to {PUBLIC}")
+
+
+def main() -> None:
+    build_public_site()
+
+
+if __name__ == "__main__":
+    main()

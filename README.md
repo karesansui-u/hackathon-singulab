@@ -1,5 +1,7 @@
 # 構造持続理論ベースの文明OSシミュレーション
 
+**Demo:** [GitHub Pagesで開く](https://karesansui-u.github.io/hackathon-singulab/visualization/future_emotion_map.html)
+
 制度や施策を実行する前に、人々がどう感じ、どう動き、その反応が社会全体へどう跳ね返るかをLLMエージェントで事前検証する**創発反応の観測装置**です。
 
 ```text
@@ -13,6 +15,14 @@
 https://github.com/user-attachments/assets/e405f2c3-9518-489d-87c3-c155d7fca38b
 
 このリポジトリはハッカソン配布の2D火災シミュレータをベースに、**物理空間の避難**ではなく **心理・制度空間の反応観測** へ骨格を抽象化したものです。
+
+## 公開デモ
+
+GitHub Pagesで公開しています。
+
+https://karesansui-u.github.io/hackathon-singulab/visualization/future_emotion_map.html
+
+UIでは、AGI/シンギュラリティ時代の社会イベントと構造持続論ベースの介入に対して、若者・家族形成世代・次世代コホートがどう感じ、どう行動するかを4部屋マップで再生できます。
 
 ## ドキュメントの入口
 
@@ -34,18 +44,19 @@ https://github.com/user-attachments/assets/e405f2c3-9518-489d-87c3-c155d7fca38b
 | ドメイン定義 | `domain_packs/agi_youth_japan/domain.yaml` |
 | エージェント | `data/youth_agents.tsv`, `working_agents.tsv`, `country_agents.tsv`, `organization_agents.tsv` |
 | 本番デモ用パネル（48枠） | `data/demo_panel_48.tsv`（国家12・0〜14歳コホート8・15〜22歳12・23〜40歳8・組織8） |
-| 時間設計（71ステップ） | `data/time_schedule.tsv` |
+| 時間設計（83ステップ） | `data/time_schedule.tsv` |
 | 世界イベント | `data/world_events.tsv` |
 | 国家→日本の波及経路 | `data/country_to_japan_channels.tsv` |
 | シナリオ | `scenarios/baseline.yaml`, `scenarios/stress.yaml` |
 | プロンプト雛形 | `prompts/` |
 | ビューア設定 | `viewer/viewer_config.yaml` |
 
-時間軸は次の3レンジで構成します。
+時間軸は次の4レンジで構成します。
 
 - ステップ 1-60: 直近5年を月次
 - ステップ 61-65: 次の5年を年次
 - ステップ 66-71: 15年目から40年目までを5年単位
+- ステップ 72-83: 45年目から100年目までを5年単位
 
 ## 必要な環境
 
@@ -75,8 +86,8 @@ claude login
 
 ```bash
 python3 scripts/run_closed_loop_llm_demo.py \
-  --steps 71 \
-  --output-dir outputs/runs/closed_loop_llm_71steps_40years
+  --steps 83 \
+  --output-dir outputs/runs/closed_loop_llm_83steps_100years
 ```
 
 同じ `--output-dir` で再実行すると、完了済みの国家step/組織step/エージェントstepはスキップして途中から再開します。
@@ -85,14 +96,14 @@ python3 scripts/run_closed_loop_llm_demo.py \
 
 ```bash
 python3 scripts/run_closed_loop_llm_demo.py \
-  --steps 71 \
+  --steps 83 \
   --scenario-mode no_intervention \
-  --output-dir outputs/runs/no_intervention_71steps_40years
+  --output-dir outputs/runs/no_intervention_83steps_100years
 
 python3 scripts/run_closed_loop_llm_demo.py \
-  --steps 71 \
+  --steps 83 \
   --scenario-mode structure_intervention \
-  --output-dir outputs/runs/structure_intervention_71steps_40years
+  --output-dir outputs/runs/structure_intervention_83steps_100years
 ```
 
 | `--scenario-mode` | 内容 |
@@ -107,7 +118,7 @@ python3 scripts/run_closed_loop_llm_demo.py \
 
 | オプション | デフォルト | 説明 |
 |---|---|---|
-| `--steps` | `71` | 実行ステップ数 |
+| `--steps` | `83` | 実行ステップ数 |
 | `--start-step` | `1` | 開始ステップ |
 | `--model` | `sonnet` | `claude --model` に渡す値 |
 | `--country-codes` | `USA,CHN,JPN,...` | 国家エージェントの絞り込み |
@@ -146,6 +157,12 @@ LLMには定性評価や指示は与えず、属性・状態・イベントの�
 | [visualization/generate_video.py](visualization/generate_video.py) | フレーム画像から MP4 を生成（FFmpeg + Pillow 必要） |
 
 ブラウザビューアは `outputs/runs/{run_id}/` を選択して読み込みます。Chrome / Edge ではディレクトリごと選択できます。
+
+GitHub Pages用の静的サイトは `public/` に置きます。公開用データを作り直す場合は次を実行します。
+
+```bash
+python3 scripts/build_pages_site.py
+```
 
 ## ドメインパックを差し替える
 
