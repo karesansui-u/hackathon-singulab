@@ -234,6 +234,14 @@
       font-weight: 900;
     }
 
+    .scenario-brief-actions {
+      display: inline-flex;
+      gap: 7px;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
     .scenario-detail-button {
       min-height: 34px;
       padding: 0 10px;
@@ -477,6 +485,70 @@
 
     .modal-list li + li {
       margin-top: 4px;
+    }
+
+    .report-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .report-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 11px;
+      background: #fbfdff;
+      min-width: 0;
+    }
+
+    .report-card-label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .report-card-value {
+      margin-top: 4px;
+      font-size: 17px;
+      line-height: 1.2;
+      font-weight: 900;
+    }
+
+    .report-table-wrap {
+      overflow-x: auto;
+    }
+
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 680px;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .report-table th,
+    .report-table td {
+      border-bottom: 1px solid var(--line);
+      padding: 9px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .report-table th {
+      background: #f8fafc;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .report-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .report-time {
+      white-space: nowrap;
+      font-weight: 900;
     }
 
     .modal-footer {
@@ -1488,13 +1560,18 @@
         grid-template-columns: 1fr;
       }
 
-      .scenario-detail-button {
+      .scenario-brief-actions {
         width: 100%;
+      }
+
+      .scenario-detail-button {
+        flex: 1 1 140px;
       }
 
       .top-metrics,
       .studio-flow,
       .policy-plan,
+      .report-summary-grid,
       .map-footer,
       .left-summary-grid,
       .side {
@@ -1553,17 +1630,20 @@
     <section class="controls" aria-label="simulation controls">
       <div class="segmented" id="scenarioTabs">
         <button type="button" data-scenario="baseline" aria-pressed="false">介入なし</button>
-        <button type="button" data-scenario="sustain" aria-pressed="true">構造持続介入</button>
-        <button type="button" data-scenario="birthGrant" aria-pressed="false">構造持続+出産支援</button>
-        <button type="button" data-scenario="hopeFamily" aria-pressed="false">希望+家族形成</button>
+        <button type="button" data-scenario="sustain" aria-pressed="true">構造持続通貨 介入</button>
+        <button type="button" data-scenario="birthGrant" aria-pressed="false">構造持続+出産 介入</button>
+        <button type="button" data-scenario="hopeFamily" aria-pressed="false">構造持続+希望 介入</button>
       </div>
       <section class="scenario-brief" aria-label="選択中のシミュレーション概要">
         <div class="scenario-brief-main">
           <div class="scenario-brief-kicker">選択中のシミュレーション</div>
-          <div class="scenario-brief-title" id="scenarioBriefTitle">構造持続介入</div>
+          <div class="scenario-brief-title" id="scenarioBriefTitle">構造持続通貨 介入</div>
           <div class="scenario-brief-summary" id="scenarioBriefSummary">住居、学び直し、ケア、社会持続活動への報酬が、若者と家族形成世代の未来感情をどう変えるかを観測します。</div>
         </div>
-        <button type="button" class="scenario-detail-button" id="scenarioDetailButton">設計の詳細</button>
+        <div class="scenario-brief-actions">
+          <button type="button" class="scenario-detail-button" id="scenarioDetailButton">設計の詳細</button>
+          <button type="button" class="scenario-detail-button" id="scenarioReportButton">分析レポート</button>
+        </div>
       </section>
       <div class="data-badge" aria-label="表示対象">LLM観測rowのみ / 画面は40年目まで / 100年視点は口頭補足</div>
       <section class="simulation-studio" aria-label="シミュレーション生成予定">
@@ -1589,17 +1669,17 @@
           </article>
           <article class="policy-card">
             <div class="policy-status">再生中</div>
-            <div class="policy-name">構造持続介入</div>
+            <div class="policy-name">構造持続通貨 介入</div>
             <div class="policy-detail">住居・学び直し・ケア・社会持続活動報酬</div>
           </article>
           <article class="policy-card is-next">
             <div class="policy-status" id="birthGrantPolicyStatus">生成待ち</div>
-            <div class="policy-name">構造持続介入 + 出産一時金</div>
+            <div class="policy-name">構造持続+出産 介入</div>
             <div class="policy-detail">一時金を住居・休息・代替ケア・教育費緩衝へ接続</div>
           </article>
           <article class="policy-card is-future">
             <div class="policy-status" id="hopeFamilyPolicyStatus">生成待ち</div>
-            <div class="policy-name">希望+家族形成強化</div>
+            <div class="policy-name">構造持続+希望 介入</div>
             <div class="policy-detail">nat着金・希望ケース拡張・若者メンター・家族形成利用で希望3体以上を検証</div>
           </article>
         </div>
@@ -1611,7 +1691,7 @@
         <header class="modal-head">
           <div>
             <div class="modal-kicker">シナリオ設計の詳細</div>
-            <h2 class="modal-title" id="scenarioModalTitle">構造持続介入</h2>
+            <h2 class="modal-title" id="scenarioModalTitle">構造持続通貨 介入</h2>
           </div>
           <button type="button" class="modal-close" id="scenarioModalClose" aria-label="閉じる">×</button>
         </header>
@@ -1829,21 +1909,21 @@
         scheduledEventPaths: ["../data/runs/no_intervention_71steps_panel48/scheduled_events_used.tsv"]
       },
       sustain: {
-        label: "構造持続介入",
+        label: "構造持続通貨 介入",
         agentTurnsPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/agent_turns.tsv"],
         countryTurnsPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/country_turns.tsv"],
         autoEventPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/auto_events_with_feedback.tsv"],
         scheduledEventPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/scheduled_events_used.tsv"]
       },
       birthGrant: {
-        label: "構造持続+出産支援",
+        label: "構造持続+出産 介入",
         agentTurnsPaths: ["../data/runs/structure_birth_grant_package_83steps_panel48/agent_turns.tsv"],
         countryTurnsPaths: ["../data/runs/structure_birth_grant_package_83steps_panel48/country_turns.tsv"],
         autoEventPaths: ["../data/runs/structure_birth_grant_package_83steps_panel48/auto_events_with_feedback.tsv"],
         scheduledEventPaths: ["../data/runs/structure_birth_grant_package_83steps_panel48/scheduled_events_used.tsv"]
       },
       hopeFamily: {
-        label: "希望+家族形成",
+        label: "構造持続+希望 介入",
         agentTurnsPaths: ["../data/runs/structure_hope_family_package_83steps_panel48/agent_turns.tsv"],
         countryTurnsPaths: ["../data/runs/structure_hope_family_package_83steps_panel48/country_turns.tsv"],
         autoEventPaths: ["../data/runs/structure_hope_family_package_83steps_panel48/auto_events_with_feedback.tsv"],
@@ -1883,7 +1963,7 @@
         ]
       },
       sustain: {
-        title: "構造持続介入",
+        title: "構造持続通貨 介入",
         summary: "住居、学び直し、ケア、地域更新、社会持続活動への報酬を入れたrunです。経済成長だけでなく、社会を維持・修復する行動が役割と所得になると、人の未来感情と行動がどう変わるかを見ます。",
         lead: "構造持続理論を社会制度に落とす最初の介入です。資源や給付額だけでなく、本人が『直す・変える・続ける経路』を持てるか、社会を維持する活動が飯の種になるかを観測します。",
         sections: [
@@ -1914,7 +1994,7 @@
         ]
       },
       birthGrant: {
-        title: "構造持続+出産支援",
+        title: "構造持続+出産 介入",
         summary: "出産一時金を単体給付にせず、住居、産後休息、代替ケア、教育費、復帰キャリア、財政監査へ接続したrunです。『お金を増やせば子ども意向が戻るのか』ではなく、条件の束として効くかを検証します。",
         lead: "このrunは、子どもを産ませる制度ではありません。望む人が子どもを迎えられる条件に支払うと、家族形成世代や若者の認識がどう変わるか、また給付があっても希望に変換されない詰まりがどこにあるかを観測します。",
         sections: [
@@ -1945,7 +2025,7 @@
         ]
       },
       hopeFamily: {
-        title: "希望+家族形成",
+        title: "構造持続+希望 介入",
         summary: "給付や制度名だけでなく、個別資格通知、即時予約、nat着金、若者メンター、地域の成功ケース、家族形成面談を追加したrunです。不安が高い社会でも、具体的な次の一手が届くと希望が立ち上がるかを検証します。",
         lead: "このrunは、希望を直接命令していません。『本人に届く通知』『予約できる枠』『初回着金』『伴走者』『監査の継続性』という社会的事実を追加し、エージェントがそれを信じる、疑う、使う、相談する、まだ不安に留まるなどの分岐を観測しています。",
         sections: [
@@ -1971,6 +2051,220 @@
               "勝ち筋は『お金』だけではなく、通知、予約、着金、伴走、監査という実在感です。",
               "希望が増えた理由を、具体的な発話と行動rowで示せるため、LLMキャラ遊びではなく制度設計の事前リハーサルとして見せられます。",
               "このrunは、UIから施策パッケージを追加生成して比較するプロダクト構想にもそのまま接続できます。"
+            ]
+          }
+        ]
+      }
+    };
+    const scenarioReports = {
+      baseline: {
+        title: "介入なし レポート",
+        lead: "制度側の追加介入を置かず、AGI/AIロボ普及、生活コスト、地政学不安、SNS悲観、医療・介護負荷がそのまま進む比較基準です。希望が消えるかどうかだけでなく、どのイベントが生活防衛や撤退圧へ変換されるかを見ます。",
+        summaryCards: [
+          { label: "40年後の主状態", value: "注意18 / 危険10" },
+          { label: "希望人数", value: "全期間0" },
+          { label: "効いた圧力", value: "生活コスト・介護・SNS不安" }
+        ],
+        milestones: [
+          {
+            time: "2年後",
+            summary: "危険17/22、希望0。諦念11が最多で、早い段階から未来経路の閉塞感が強い。",
+            event: "AI自動化急加速、生活コスト上昇、SNS悲観、医療・介護負荷が重なる。",
+            analysis: "不安より先に諦念が立つのが特徴。仕事・住居・ケアのどれも自分で変えにくいと感じ、生活防衛と回避が増える。"
+          },
+          {
+            time: "5年後",
+            summary: "危険21/23、希望0。諦念18で、注意よりも危険側に沈む。",
+            event: "制度応答が弱いまま、雇用移行と家計負担が固定化する。",
+            analysis: "単発のショックより、改善経路が見えない時間の蓄積が効いている。静観、ケア継続、回避・縮小が増え、主体的な参加へ移りにくい。"
+          },
+          {
+            time: "10年後",
+            summary: "危険18、注意8、希望0。情報収集は増えるが、希望には変わらない。",
+            event: "AI後の役割再編が長引き、家族形成・教育費・介護の先送りが常態化する。",
+            analysis: "危険から注意へ少し戻っても、これは回復というより慢性的な不安への適応。制度利用は少数で、生活の選択肢を広げる力が弱い。"
+          },
+          {
+            time: "40年後",
+            summary: "注意18、危険10、希望0。行動は生活防衛24に集中。",
+            event: "子ども世代が大人になるが、前世代の制度不信と生活防衛が継承される。",
+            analysis: "地図上は危険だけではなく注意も増えるが、希望経路は立ち上がっていない。社会に参加して未来を作るより、損失を避ける行動が支配的になる。"
+          }
+        ],
+        details: [
+          {
+            title: "大きく効いたイベント",
+            items: [
+              "生活コスト上昇は、子ども意向や住居選択だけでなく、進学・転職・転居の自由度を削る。",
+              "医療・介護ショックは、若者にも家族責任や将来負担として届き、自由時間と自己効力感を削る。",
+              "SNS悲観は、個人の不安を『みんな詰んでいる』という集団認識へ増幅する。"
+            ]
+          },
+          {
+            title: "発表での見せ方",
+            items: [
+              "介入なしは、希望が0のままでも単なる悲観シナリオではなく、比較実験の基準線として扱う。",
+              "重要なのは『不安になる』ではなく、生活防衛に固定されると制度利用や連帯に向かわない点。",
+              "この基準線があるため、介入ありrunの差分が説明できる。"
+            ]
+          }
+        ]
+      },
+      sustain: {
+        title: "構造持続通貨 介入 レポート",
+        lead: "住居、学び直し、ケア、地域更新、社会持続活動へのnat報酬を入れたrunです。資本主義の外側に逃げるのではなく、社会を維持・修復する活動を役割と所得に変えた時、危険域から戻れるかを見ます。",
+        summaryCards: [
+          { label: "40年後の主状態", value: "注意22 / 中立6" },
+          { label: "希望人数", value: "全期間0" },
+          { label: "効いた介入", value: "情報収集・制度利用の増加" }
+        ],
+        milestones: [
+          {
+            time: "2年後",
+            summary: "注意21/22、希望0。介入なしより危険は大きく減る。",
+            event: "住居安定、社会持続活動nat報酬、学び直し・移行雇用保証が入り始める。",
+            analysis: "危険域から注意域へ戻す効果はある。ただし本人にはまだ『本当に届くか』『自分が使えるか』が見えておらず、希望より情報収集と生活防衛が強い。"
+          },
+          {
+            time: "5年後",
+            summary: "注意22、中立1、希望0。情報収集14、制度利用4。",
+            event: "制度メニューが増えるが、使った成功体験はまだ薄い。",
+            analysis: "制度の存在は認識されているが、安心や希望に変わるほどの実効感が弱い。これは『政策名』だけでは感情が動かないことを示す。"
+          },
+          {
+            time: "10年後",
+            summary: "注意21、中立5、希望0。制度利用10まで増える。",
+            event: "nat報酬や移行雇用が社会に定着し始める。",
+            analysis: "生活防衛から制度利用へ一部移る。構造持続通貨は撤退を防ぐ床として効くが、希望を生むには個別導線、成功例、即時性が足りない。"
+          },
+          {
+            time: "40年後",
+            summary: "注意22、中立6、希望0。情報収集17、制度利用10。",
+            event: "今の子ども世代が家族形成期に入るが、制度はまだ『使うか検討する対象』に留まる。",
+            analysis: "長期でも危険の底抜けは抑えるが、創造的希望までは立ち上がらない。制度があるだけではなく、本人の人生に接続する手触りが必要。"
+          }
+        ],
+        details: [
+          {
+            title: "大きく効いたイベント",
+            items: [
+              "社会持続活動nat報酬は、従来の仕事が揺らいだ時の新しい役割候補として効く。",
+              "学び直し・移行雇用保証は、危険域への落下を防ぐが、採用や収入の実績が見えるまで希望化しにくい。",
+              "住居安定は基礎条件として効くが、ケアや家族形成まで束ねないと未来選択の回復は限定的。"
+            ]
+          },
+          {
+            title: "発表での見せ方",
+            items: [
+              "構造持続通貨介入は、いきなり希望を作る魔法ではなく、危険域から落ちないための社会的な床として説明する。",
+              "介入なしとの違いは、危険が注意・中立へ戻ること。構造持続+希望との違いは、具体的な実効サインがまだ不足していること。",
+              "このrunは『構造持続理論を入れると何が変わるか』の中核比較になる。"
+            ]
+          }
+        ]
+      },
+      birthGrant: {
+        title: "構造持続+出産 介入 レポート",
+        lead: "出産一時金を単独給付にせず、住居、休息、代替ケア、教育費、復帰キャリア、財政監査へ接続したrunです。結論として、制度利用は増えるが希望は0のままで、支援が『届く実感』へ変換されない詰まりが見えます。",
+        summaryCards: [
+          { label: "40年後の主状態", value: "注意28 / 希望0" },
+          { label: "10年後の行動", value: "制度利用13" },
+          { label: "効いたが足りない点", value: "給付より導線・即時性" }
+        ],
+        milestones: [
+          {
+            time: "2年後",
+            summary: "注意20、危険2、希望0。情報収集9、生活防衛9。",
+            event: "出産一時金、産後休息、代替ケア、住居・教育費緩衝が提示される。",
+            analysis: "支援メニューは認知されるが、本人にとってはまだ『将来の制度』で、目の前の家計・住居・雇用不安を押し返すほどではない。"
+          },
+          {
+            time: "5年後",
+            summary: "注意23、希望0。制度利用7まで増える。",
+            event: "家族形成支援が継続し、相談や申請が増える。",
+            analysis: "制度は使われ始めるが、希望にはならない。申請負荷、対象条件、待機、財政で途中変更される恐怖が残る。"
+          },
+          {
+            time: "10年後",
+            summary: "注意23、中立3、希望0。制度利用13、情報収集10。",
+            event: "出産・子育て支援が制度として見え、利用行動は増える。",
+            analysis: "ここが重要な観測点。制度利用が増えても希望0なので、『支援がある』と『未来を選べる』の間に深い断絶がある。"
+          },
+          {
+            time: "40年後",
+            summary: "注意28、希望0。情報収集16、生活防衛6、制度利用5。",
+            event: "家族形成支援は残るが、制度記憶としては不安と確認行動に寄る。",
+            analysis: "長期でも安心・希望には届かない。出生や家族形成を支援するなら、給付額よりも個別見通し、即時予約、実利用完了、継続監査が必要。"
+          }
+        ],
+        details: [
+          {
+            title: "大きく効いたイベント",
+            items: [
+              "出産一時金は単独では希望を生まず、情報収集と制度確認を増やす。",
+              "産後休息・代替ケアは重要だが、地域の空き枠や予約可能性が見えないと実効感が弱い。",
+              "財政監査は必要だが、条件変更への恐怖を下げる運用まで見えないと不安が残る。"
+            ]
+          },
+          {
+            title: "発表での見せ方",
+            items: [
+              "このrunは失敗ではなく、むしろプロダクト価値が出るrun。政策の副作用や詰まりを実施前に発見している。",
+              "『お金を配れば解決』ではないことを、制度利用増・希望0という対比で示せる。",
+              "次の構造持続+希望介入へつなぐための問題発見runとして使う。"
+            ]
+          }
+        ]
+      },
+      hopeFamily: {
+        title: "構造持続+希望 介入 レポート",
+        lead: "構造持続通貨と家族形成支援に加え、個別資格通知、即時予約、nat初回着金、若者メンター、地域の成功ケース、家族形成面談を入れたrunです。不安を消すのではなく、不安を抱えたまま動ける条件を作れるかを見ます。",
+        summaryCards: [
+          { label: "5年後", value: "良好12 / 希望4" },
+          { label: "10年後", value: "良好25 / 希望7" },
+          { label: "40年後", value: "良好19 / 希望5" }
+        ],
+        milestones: [
+          {
+            time: "2年後",
+            summary: "注意18、中立4、希望0。まだ立ち上がり前。",
+            event: "個別資格通知、即時予約、先行契約枠、家族形成面談が入り始める。",
+            analysis: "制度の存在だけでなく、自分宛てに届くかを確認している段階。情報収集、制度利用、相談が増え、希望の前段階が形成される。"
+          },
+          {
+            time: "5年後",
+            summary: "良好12、中立10、希望4。制度利用18、相談5。",
+            event: "nat着金、実体験共有、個別通知、予約、成功ケースが重なる。",
+            analysis: "ここで明確に差が出る。希望は抽象的な楽観ではなく、『通知が来た』『予約できる』『着金した』という実在感から立ち上がる。"
+          },
+          {
+            time: "10年後",
+            summary: "良好25、中立1、希望7。安心18が最多。",
+            event: "制度が一時的なキャンペーンではなく、運用として見え始める。",
+            analysis: "希望だけでなく安心が厚くなる。これは不安が消えたのではなく、条件と段取りが見えることで生活防衛から制度利用へ移った状態。"
+          },
+          {
+            time: "40年後",
+            summary: "良好19、中立9、希望5、連帯感1。制度利用20、参加・連帯2。",
+            event: "今の子ども世代が大人になり、制度記憶と実利用経験を受け取る。",
+            analysis: "40年後も希望は残るが、万能ではない。条件変更や財政不安があるため、継続監査と異議申立、地域の受け皿を残すことが重要。"
+          }
+        ],
+        details: [
+          {
+            title: "大きく効いたイベント",
+            items: [
+              "個別資格通知と即時予約は、抽象的な制度を本人の次の一手に変換する。",
+              "nat初回着金は、社会を維持する行動が本当に飯の種になるという証拠として効く。",
+              "若者メンター、成功ケース共有、家族形成面談は、孤立した制度利用を継続行動へつなぐ。"
+            ]
+          },
+          {
+            title: "発表での見せ方",
+            items: [
+              "勝ち筋は『希望を持て』ではなく、希望が自然に発生する社会条件を渡したこと。",
+              "構造持続+出産では希望0、構造持続+希望では5年後から希望が出る。この差分が一番強い。",
+              "政策を実施する前に、どのイベントが効いたか、どの副作用が残るかを観測できることを強調する。"
             ]
           }
         ]
@@ -3582,7 +3876,9 @@
       const title = document.getElementById("scenarioModalTitle");
       const lead = document.getElementById("scenarioModalLead");
       const sections = document.getElementById("scenarioModalSections");
+      const kicker = modal?.querySelector(".modal-kicker");
       if (!modal || !title || !lead || !sections) return;
+      if (kicker) kicker.textContent = "シナリオ設計の詳細";
       title.textContent = description.title;
       lead.textContent = description.lead;
       sections.innerHTML = description.sections.map((section) => `
@@ -3593,6 +3889,68 @@
           </ul>
         </section>
       `).join("");
+      modal.hidden = false;
+      document.body.style.overflow = "hidden";
+      document.getElementById("scenarioModalClose")?.focus();
+    }
+
+    function openScenarioReportModal() {
+      const report = scenarioReports[state.scenario] || scenarioReports.sustain;
+      const modal = document.getElementById("scenarioModal");
+      const title = document.getElementById("scenarioModalTitle");
+      const lead = document.getElementById("scenarioModalLead");
+      const sections = document.getElementById("scenarioModalSections");
+      const kicker = modal?.querySelector(".modal-kicker");
+      if (!modal || !title || !lead || !sections) return;
+      if (kicker) kicker.textContent = "SUMMARY / 詳細分析";
+      title.textContent = report.title;
+      lead.textContent = report.lead;
+      sections.innerHTML = `
+        <section class="modal-section">
+          <h3 class="modal-section-title">SUMMARY</h3>
+          <div class="report-summary-grid">
+            ${report.summaryCards.map((card) => `
+              <div class="report-card">
+                <div class="report-card-label">${escapeHtml(card.label)}</div>
+                <div class="report-card-value">${escapeHtml(card.value)}</div>
+              </div>
+            `).join("")}
+          </div>
+        </section>
+        <section class="modal-section">
+          <h3 class="modal-section-title">2年後 / 5年後 / 10年後 / 40年後</h3>
+          <div class="report-table-wrap">
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>時点</th>
+                  <th>観測結果</th>
+                  <th>効いたイベント</th>
+                  <th>考察</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${report.milestones.map((row) => `
+                  <tr>
+                    <td class="report-time">${escapeHtml(row.time)}</td>
+                    <td>${escapeHtml(row.summary)}</td>
+                    <td>${escapeHtml(row.event)}</td>
+                    <td>${escapeHtml(row.analysis)}</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          </div>
+        </section>
+        ${report.details.map((section) => `
+          <section class="modal-section">
+            <h3 class="modal-section-title">${escapeHtml(section.title)}</h3>
+            <ul class="modal-list">
+              ${section.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+            </ul>
+          </section>
+        `).join("")}
+      `;
       modal.hidden = false;
       document.body.style.overflow = "hidden";
       document.getElementById("scenarioModalClose")?.focus();
@@ -3670,6 +4028,7 @@
     });
 
     document.getElementById("scenarioDetailButton")?.addEventListener("click", openScenarioModal);
+    document.getElementById("scenarioReportButton")?.addEventListener("click", openScenarioReportModal);
     document.getElementById("scenarioModalClose")?.addEventListener("click", closeScenarioModal);
     document.getElementById("scenarioModalFooterClose")?.addEventListener("click", closeScenarioModal);
     document.getElementById("scenarioModal")?.addEventListener("click", (event) => {
