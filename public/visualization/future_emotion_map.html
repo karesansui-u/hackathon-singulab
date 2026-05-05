@@ -116,9 +116,9 @@
 
     .top-metrics {
       display: grid;
-      grid-template-columns: repeat(4, minmax(98px, 1fr));
+      grid-template-columns: repeat(5, minmax(94px, 1fr));
       gap: 8px;
-      width: min(560px, 52vw);
+      width: min(700px, 58vw);
     }
 
     .metric {
@@ -191,6 +191,125 @@
       font-size: 12px;
       font-weight: 800;
       white-space: nowrap;
+    }
+
+    .simulation-studio {
+      flex: 1 1 760px;
+      display: grid;
+      grid-template-columns: minmax(260px, 0.72fr) minmax(420px, 1.28fr);
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 10px;
+      background: #f8fafc;
+    }
+
+    .studio-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+      grid-column: 1;
+    }
+
+    .studio-title {
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .studio-sub {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .studio-run-button {
+      min-height: 32px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 0 10px;
+      background: #ffffff;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .studio-flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 7px;
+      grid-column: 1;
+    }
+
+    .studio-step {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 8px;
+      background: #ffffff;
+      color: var(--ink);
+      font-size: 11px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .policy-plan {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      grid-column: 2;
+      grid-row: 1 / span 2;
+    }
+
+    .policy-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 9px;
+      background: #ffffff;
+      min-width: 0;
+    }
+
+    .policy-name {
+      font-size: 12px;
+      line-height: 1.25;
+      font-weight: 900;
+    }
+
+    .policy-detail {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+
+    .policy-status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 20px;
+      border-radius: 999px;
+      padding: 2px 7px;
+      margin-bottom: 6px;
+      background: #e0f2fe;
+      color: #075985;
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .policy-card.is-next .policy-status {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .policy-card.is-future .policy-status {
+      background: #ede9fe;
+      color: #6d28d9;
     }
 
     .timeline {
@@ -343,6 +462,8 @@
       background: #ffffff;
       box-shadow: 0 8px 22px rgba(15, 23, 42, 0.14);
       pointer-events: auto;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     .map-control-button {
@@ -362,6 +483,14 @@
       background: #e2e8f0;
     }
 
+    .map-control-button.is-wide {
+      width: auto;
+      min-width: 58px;
+      padding: 0 9px;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
     .map-controls .turn-chip {
       min-width: 70px;
       padding: 8px 10px;
@@ -369,6 +498,85 @@
       background: #172033;
       color: #ffffff;
       border-color: #172033;
+    }
+
+    .event-timeline {
+      border-top: 1px solid var(--line);
+      padding: 8px 16px 12px;
+      display: grid;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.74);
+    }
+
+    .event-timeline-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .event-timeline-title {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .event-timeline-current {
+      color: var(--ink);
+      font-size: 11px;
+      font-weight: 800;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    .event-timeline-track {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: thin;
+    }
+
+    .timeline-event {
+      flex: 0 0 auto;
+      max-width: 190px;
+      min-height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 9px;
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .timeline-event:hover,
+    .timeline-event.is-active {
+      border-color: #172033;
+      background: #172033;
+      color: #ffffff;
+    }
+
+    .timeline-event-type {
+      flex: 0 0 auto;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--muted);
+    }
+
+    .timeline-event-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .map-svg {
@@ -1049,6 +1257,21 @@
         grid-template-columns: 1fr;
       }
 
+      .simulation-studio {
+        grid-template-columns: 1fr;
+      }
+
+      .studio-head,
+      .studio-flow,
+      .policy-plan {
+        grid-column: auto;
+        grid-row: auto;
+      }
+
+      .policy-plan {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
       .side {
         grid-template-columns: 1fr;
         grid-template-rows: auto;
@@ -1080,6 +1303,8 @@
       }
 
       .top-metrics,
+      .studio-flow,
+      .policy-plan,
       .map-footer,
       .left-summary-grid,
       .side {
@@ -1123,6 +1348,10 @@
           <div class="metric-label">危険</div>
           <div class="metric-value" id="metric-danger">0%</div>
         </div>
+        <div class="metric">
+          <div class="metric-label">子ども意向</div>
+          <div class="metric-value" id="metric-child">0%</div>
+        </div>
       </section>
     </header>
 
@@ -1132,6 +1361,44 @@
         <button type="button" data-scenario="sustain" aria-pressed="true">構造持続介入</button>
       </div>
       <div class="data-badge" aria-label="表示対象">LLM観測rowのみ</div>
+      <section class="simulation-studio" aria-label="シミュレーション生成予定">
+        <div class="studio-head">
+          <div>
+            <div class="studio-title">想定設計：施策パッケージ生成</div>
+            <div class="studio-sub">ユーザーがUI上から施策パッケージを生成し、シミュレーションをどんどん追加できる設計想定</div>
+          </div>
+          <button type="button" class="studio-run-button" disabled>追加生成は予定</button>
+        </div>
+        <div class="studio-flow" aria-label="生成フロー">
+          <div class="studio-step">問い</div>
+          <div class="studio-step">施策パッケージ</div>
+          <div class="studio-step">LLM生成</div>
+          <div class="studio-step">row保存</div>
+          <div class="studio-step">再生</div>
+        </div>
+        <div class="policy-plan" aria-label="希望を持てる施策・設計リスト">
+          <article class="policy-card">
+            <div class="policy-status">再生中</div>
+            <div class="policy-name">介入なし</div>
+            <div class="policy-detail">現状延長の不安・生活防衛・制度不信を観測</div>
+          </article>
+          <article class="policy-card">
+            <div class="policy-status">再生中</div>
+            <div class="policy-name">構造持続介入</div>
+            <div class="policy-detail">住居・学び直し・ケア・社会持続活動報酬</div>
+          </article>
+          <article class="policy-card is-next">
+            <div class="policy-status">次に生成</div>
+            <div class="policy-name">構造持続介入 + 出産一時金</div>
+            <div class="policy-detail">一時金を住居・休息・代替ケア・教育費緩衝へ接続</div>
+          </article>
+          <article class="policy-card is-future">
+            <div class="policy-status">予定</div>
+            <div class="policy-name">ルールメイク達成条件</div>
+            <div class="policy-detail">金融・企業採用・国家制度の持続条件を組み合わせ検証</div>
+          </article>
+        </div>
+      </section>
     </section>
 
     <section class="content">
@@ -1188,12 +1455,25 @@
           </div>
           <div class="map-controls">
             <div class="map-control-bar">
+              <button type="button" class="map-control-button is-wide" id="startButton" title="最初へ" aria-label="first step">始</button>
+              <button type="button" class="map-control-button is-wide" id="jumpBackButton" title="12ステップ戻る" aria-label="jump back 12 steps">-12</button>
+              <button type="button" class="map-control-button is-wide" id="prevEventButton" title="前の主要イベントへ" aria-label="previous major event">前イベント</button>
               <button type="button" class="map-control-button" id="prevButton" aria-label="previous step">‹</button>
               <button type="button" class="map-control-button" id="playButton" aria-label="play">▶</button>
               <button type="button" class="map-control-button" id="nextButton" aria-label="next step">›</button>
+              <button type="button" class="map-control-button is-wide" id="nextEventButton" title="次の主要イベントへ" aria-label="next major event">次イベント</button>
+              <button type="button" class="map-control-button is-wide" id="jumpForwardButton" title="12ステップ進む" aria-label="jump forward 12 steps">+12</button>
+              <button type="button" class="map-control-button is-wide" id="endButton" title="最後へ" aria-label="last step">終</button>
               <output class="turn-chip" id="turnLabel">0年</output>
             </div>
           </div>
+        </div>
+        <div class="event-timeline" aria-label="主要イベントタイムライン">
+          <div class="event-timeline-head">
+            <div class="event-timeline-title">主要イベントタイムライン</div>
+            <div class="event-timeline-current" id="eventTimelineCurrent">読み込み中</div>
+          </div>
+          <div class="event-timeline-track" id="eventTimeline"></div>
         </div>
         <footer class="map-footer">
           <div class="signal">
@@ -1287,8 +1567,8 @@
                 <div class="kv-value" id="kvIntensity">0.00</div>
               </div>
               <div class="kv">
-                <div class="kv-label">次の行動</div>
-                <div class="kv-value" id="kvAction">待機</div>
+                <div class="kv-label">子ども意向</div>
+                <div class="kv-value" id="kvChildIntent">0%</div>
               </div>
             </div>
           </div>
@@ -1315,18 +1595,21 @@
     const youthTsvPath = "../domain_packs/agi_youth_japan/data/youth_agents.tsv";
     const workingTsvPath = "../domain_packs/agi_youth_japan/data/working_agents.tsv";
     const timeScheduleTsvPath = "../domain_packs/agi_youth_japan/data/time_schedule.tsv";
+    const worldEventsTsvPath = "../domain_packs/agi_youth_japan/data/world_events.tsv";
     const runConfigs = {
       baseline: {
         label: "介入なし",
         agentTurnsPaths: ["../data/runs/no_intervention_71steps_panel48/agent_turns.tsv"],
         countryTurnsPaths: ["../data/runs/no_intervention_71steps_panel48/country_turns.tsv"],
-        autoEventPaths: ["../data/runs/no_intervention_71steps_panel48/auto_events_with_feedback.tsv"]
+        autoEventPaths: ["../data/runs/no_intervention_71steps_panel48/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../data/runs/no_intervention_71steps_panel48/scheduled_events_used.tsv"]
       },
       sustain: {
         label: "構造持続介入",
         agentTurnsPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/agent_turns.tsv"],
         countryTurnsPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/country_turns.tsv"],
-        autoEventPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/auto_events_with_feedback.tsv"]
+        autoEventPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/scheduled_events_used.tsv"]
       }
     };
     const rooms = {
@@ -1399,8 +1682,16 @@
     const agentLayer = document.getElementById("agentLayer");
     const turnLabel = document.getElementById("turnLabel");
     const playButton = document.getElementById("playButton");
+    const startButton = document.getElementById("startButton");
+    const endButton = document.getElementById("endButton");
+    const jumpBackButton = document.getElementById("jumpBackButton");
+    const jumpForwardButton = document.getElementById("jumpForwardButton");
+    const prevEventButton = document.getElementById("prevEventButton");
+    const nextEventButton = document.getElementById("nextEventButton");
     const prevButton = document.getElementById("prevButton");
     const nextButton = document.getElementById("nextButton");
+    const eventTimeline = document.getElementById("eventTimeline");
+    const eventTimelineCurrent = document.getElementById("eventTimelineCurrent");
     const agentSearchInput = document.getElementById("agentSearchInput");
     const agentSearchResults = document.getElementById("agentSearchResults");
 
@@ -1421,7 +1712,13 @@
         } catch (timeScheduleError) {
           console.warn("Time schedule was not loaded; using generated max step.", timeScheduleError);
         }
-        const loadedRuns = await loadRunDataByScenario();
+        let worldTimelineEvents = [];
+        try {
+          worldTimelineEvents = buildWorldTimelineSchedule(await loadTsvRows(worldEventsTsvPath));
+        } catch (worldEventError) {
+          console.warn("World timeline events were not loaded.", worldEventError);
+        }
+        const loadedRuns = await loadRunDataByScenario(worldTimelineEvents);
         runDataByScenario = loadedRuns.runDataByScenario;
         agents = mergeLlmOnlyAgents(agents, loadedRuns.allLlmRows);
         if (!runDataByScenario.has(state.scenario)) {
@@ -1441,7 +1738,7 @@
       render();
     }
 
-    async function loadRunDataByScenario() {
+    async function loadRunDataByScenario(worldTimelineEvents = []) {
       const nextRunData = new Map();
       const allLlmRows = [];
       for (const [scenario, config] of Object.entries(runConfigs)) {
@@ -1456,6 +1753,19 @@
           } catch (autoEventError) {
             console.warn(`${config.label} auto events were not loaded; using static event schedule.`, autoEventError);
           }
+          try {
+            const scheduledRows = await loadFirstAvailableTsv(config.scheduledEventPaths);
+            scenarioEventSchedule = [
+              ...scenarioEventSchedule,
+              ...buildScheduledEventSchedule(scheduledRows)
+            ];
+          } catch (scheduledEventError) {
+            console.warn(`${config.label} scheduled events were not loaded.`, scheduledEventError);
+          }
+          scenarioEventSchedule = [
+            ...scenarioEventSchedule,
+            ...worldTimelineEvents
+          ];
           nextRunData.set(scenario, {
             ...config,
             llmRows,
@@ -1569,9 +1879,59 @@
             type,
             strength: Number(row["強度_0to1"]) || 0.50,
             name,
-            direction: row["主な影響方向"] || ""
+            direction: row["主な影響方向"] || "",
+            category,
+            source: row["発生源"] || ""
           };
         });
+    }
+
+    function buildScheduledEventSchedule(rows) {
+      const seen = new Set();
+      return rows
+        .filter((row) => row.event_name)
+        .map((row) => {
+          const turn = Number(row.start_step) || Number(row.step) || 0;
+          const eventId = row.event_id || `${turn}:${row.event_name}`;
+          const key = `${eventId}:${turn}`;
+          if (!turn || seen.has(key)) return null;
+          seen.add(key);
+          const category = row.event_type || "";
+          const type = category.includes("政策")
+            ? "policy"
+            : category.includes("若者")
+              ? "youth"
+              : "shock";
+          return {
+            turn,
+            type,
+            strength: Number(row.intensity_0to1) || 0.50,
+            name: row.event_name,
+            direction: row.direction || "",
+            description: row.description || "",
+            category,
+            source: "予定イベント",
+            eventId
+          };
+        })
+        .filter(Boolean);
+    }
+
+    function buildWorldTimelineSchedule(rows) {
+      const majorWorldSteps = new Set([1, 4, 8, 12, 18, 22, 24, 36, 48, 60, 61, 64, 65, 66, 67, 68, 69, 70, 71, 74, 79]);
+      return rows
+        .filter((row) => row.step && row["世界イベント名"])
+        .filter((row) => majorWorldSteps.has(Number(row.step) || 0))
+        .map((row) => ({
+          turn: Number(row.step) || 0,
+          type: "milestone",
+          strength: 0.58,
+          name: row["世界イベント名"],
+          direction: "長期評価",
+          description: row["説明"] || "",
+          category: "長期評価",
+          source: "世界イベント設計"
+        }));
     }
 
     function buildAgentsFromTsvRows(youthRows, workingRows) {
@@ -1837,6 +2197,18 @@
         actionDetail = llmTurn.action_detail || actionDetailFor(action, actionCategory);
       }
       const displayAge = llmDisplayAge || projectedAge(agent, turn);
+      const displayRisk = clamp(1 - (pathway * 0.48 + support * 0.34 + trust * 0.18) + (agent.group === "youth" ? 0.07 : 0), 0, 1);
+      const childIntent = childIntentFor(agent, {
+        pathway,
+        support,
+        trust,
+        agency,
+        risk: displayRisk,
+        dominant,
+        emotion,
+        displayAge,
+        scenario
+      });
       const displayGroup = groupKeyFromLayerOrAge(llmTurn?.layer || agent.label, displayAge, agent.group);
       const displayLabel = groupLabelByKey[displayGroup] || agent.label;
       const positionedAgent = { ...agent, group: displayGroup };
@@ -1855,11 +2227,12 @@
         support,
         trust,
         agency,
-        risk,
+        risk: displayRisk,
         scores,
         dominant,
         intensity,
         emotion,
+        childIntent,
         action,
         actionCategory,
         actionDetail,
@@ -1900,6 +2273,37 @@
       const baseAge = Number(agent.age);
       if (!Number.isFinite(baseAge)) return "";
       return Math.floor(baseAge + elapsedYearsForTurn(turn));
+    }
+
+    function childIntentFor(agent, values) {
+      const base = Number.isFinite(agent.childIntent) ? agent.childIntent : 0.35;
+      const age = Number(values.displayAge);
+      const ageFit = Number.isFinite(age)
+        ? age >= 23 && age <= 40
+          ? 0.10
+          : age >= 15 && age <= 22
+            ? 0.03
+            : age >= 41 && age <= 49
+              ? -0.06
+              : -0.12
+        : 0;
+      const goodEmotionBoost = ["安心", "希望", "連帯感"].includes(values.emotion) ? 0.06 : 0;
+      const dangerPenalty = values.dominant === "danger" ? 0.12 : values.dominant === "caution" ? 0.05 : 0;
+      const sustainBoost = values.scenario === "sustain" && values.support > 0.58 ? 0.05 : 0;
+      return clamp(
+        base * 0.42 +
+          values.pathway * 0.20 +
+          values.support * 0.18 +
+          values.trust * 0.12 +
+          values.agency * 0.08 -
+          values.risk * 0.12 +
+          ageFit +
+          goodEmotionBoost +
+          sustainBoost -
+          dangerPenalty,
+        0,
+        1
+      );
     }
 
     function socialExitStatus(row) {
@@ -2015,6 +2419,7 @@
       renderDetail(selected);
       renderAgentSearch(rows);
       renderEventBurst();
+      renderEventTimeline();
       turnLabel.value = turnToYear(state.turn);
     }
 
@@ -2316,35 +2721,136 @@
       const neutral = counts.neutral / total;
       const caution = counts.caution / total;
       const danger = counts.danger / total;
+      const childIntent = total
+        ? rows.reduce((sum, row) => sum + (Number(row.childIntent) || 0), 0) / total
+        : 0;
       document.getElementById("metric-good").textContent = `${Math.round(good * 100)}%`;
       document.getElementById("metric-neutral").textContent = `${Math.round(neutral * 100)}%`;
       document.getElementById("metric-caution").textContent = `${Math.round(caution * 100)}%`;
       document.getElementById("metric-danger").textContent = `${Math.round(danger * 100)}%`;
+      document.getElementById("metric-child").textContent = `${Math.round(childIntent * 100)}%`;
+    }
+
+    function eventsAtTurn(turn) {
+      return eventSchedule.filter((event) => event.turn === turn && (
+        state.scenario === "sustain" || event.type !== "policy"
+      ));
+    }
+
+    function pickPrimaryEvent(events) {
+      if (!events.length) return null;
+      return [...events].sort((a, b) => eventRank(b) - eventRank(a))[0];
+    }
+
+    function eventRank(event) {
+      const typeScore = {
+        policy: 5,
+        milestone: 4.5,
+        youth: 4,
+        shock: 3,
+        organization: 2
+      }[event.type] || 1;
+      return typeScore + clamp(event.strength || 0, 0, 1);
+    }
+
+    function isTimelineEvent(event) {
+      if (!event || event.turn < minTurn || event.turn > maxTurn) return false;
+      if (/企業・組織の採用育成判断|生活防衛シフト/.test(event.name || "")) return false;
+      if (["policy", "milestone", "youth"].includes(event.type)) return true;
+      return (event.strength || 0) >= 0.68;
+    }
+
+    function timelineItems() {
+      const byTurn = new Map();
+      eventSchedule
+        .filter((event) => state.scenario === "sustain" || event.type !== "policy")
+        .filter(isTimelineEvent)
+        .forEach((event) => {
+          if (!byTurn.has(event.turn)) byTurn.set(event.turn, []);
+          byTurn.get(event.turn).push(event);
+        });
+      return [...byTurn.entries()]
+        .map(([turn, events]) => ({ turn, event: pickPrimaryEvent(events), count: events.length }))
+        .filter((item) => item.event)
+        .sort((a, b) => a.turn - b.turn);
+    }
+
+    function timelineTurns() {
+      return timelineItems().map((item) => item.turn);
+    }
+
+    function eventTypeLabel(event) {
+      if (event.type === "policy") return "政策";
+      if (event.type === "milestone") return "長期";
+      if (event.type === "youth") return "若者";
+      if (event.type === "organization") return "組織";
+      return "世界";
+    }
+
+    function eventTypeColor(event) {
+      if (event.type === "policy") return "#16a34a";
+      if (event.type === "milestone") return "#7c3aed";
+      if (event.type === "youth") return "#ca8a04";
+      if (event.type === "organization") return "#2563eb";
+      return "#ef4444";
+    }
+
+    function eventSummary(event) {
+      if (!event) return "";
+      return `${turnToYear(event.turn)} / ${eventTypeLabel(event)}: ${event.name}`;
+    }
+
+    function renderEventTimeline() {
+      if (!eventTimeline || !eventTimelineCurrent) return;
+      const items = timelineItems();
+      const current = pickPrimaryEvent(eventsAtTurn(state.turn).filter(isTimelineEvent));
+      const next = items.find((item) => item.turn > state.turn)?.event || null;
+      eventTimelineCurrent.textContent = current
+        ? `現在: ${eventTypeLabel(current)} / ${current.name}`
+        : next
+          ? `次: ${eventSummary(next)}`
+          : "主要イベント終了";
+
+      if (!items.length) {
+        eventTimeline.innerHTML = `<span class="agent-summary">主要イベントなし</span>`;
+        return;
+      }
+
+      eventTimeline.innerHTML = items.map(({ turn, event, count }) => {
+        const active = turn === state.turn;
+        const extra = count > 1 ? ` +${count - 1}` : "";
+        return `
+          <button type="button" class="timeline-event ${active ? "is-active" : ""}" data-turn="${turn}" title="${escapeHtml(event.description || event.name)}">
+            <span class="timeline-event-type" style="background:${eventTypeColor(event)}"></span>
+            <span class="timeline-event-label">${escapeHtml(turnToYear(turn))} ${escapeHtml(event.name)}${extra}</span>
+          </button>
+        `;
+      }).join("");
     }
 
     function renderEventBurst() {
       const burst = document.getElementById("eventBurst");
       const title = document.getElementById("eventBurstTitle");
       const shape = document.getElementById("eventBurstShape");
-      const activeEvents = eventSchedule.filter((event) => event.turn === state.turn && (
-        state.scenario === "sustain" || event.type !== "policy"
-      ));
-      if (!activeEvents.length) {
+      const event = pickPrimaryEvent(eventsAtTurn(state.turn).filter(isTimelineEvent));
+      if (!event) {
         burst.classList.remove("is-active");
         return;
       }
 
-      const event = activeEvents[activeEvents.length - 1];
       const isPolicy = event.type === "policy";
       const isYouth = event.type === "youth";
       const isOrganization = event.type === "organization";
+      const isMilestone = event.type === "milestone";
       title.textContent = isPolicy
         ? `政策: ${event.name}`
         : isYouth
           ? `若者発: ${event.name}`
           : isOrganization
             ? `組織: ${event.name}`
-            : `世界: ${event.name}`;
+            : isMilestone
+              ? `長期: ${event.name}`
+              : `世界: ${event.name}`;
       const style = eventStyle(event);
       shape.setAttribute("fill", style.fill);
       shape.setAttribute("stroke", style.stroke);
@@ -2369,12 +2875,18 @@
       if (event.type === "organization") {
         return { fill: "#dbeafe", stroke: "#2563eb", left: "50%", top: "50%", scale };
       }
+      if (event.type === "milestone") {
+        return { fill: "#ede9fe", stroke: "#7c3aed", left: "58%", top: "48%", scale };
+      }
       return { fill: "#fee2e2", stroke: "#ef4444", left: "50%", top: "50%", scale };
     }
 
     function renderSignals(rows) {
       const phase = Math.min(4, Math.floor(state.turn / 16));
-      document.getElementById("eventText").textContent = events[state.scenario][phase];
+      const primaryEvent = pickPrimaryEvent(eventsAtTurn(state.turn).filter(isTimelineEvent));
+      document.getElementById("eventText").textContent = primaryEvent
+        ? `${eventTypeLabel(primaryEvent)}: ${primaryEvent.name}`
+        : events[state.scenario][phase];
 
       const targetRows = ["youth", "family", "generation", "auxiliary"].includes(state.agentFilter)
         ? rows.filter((row) => row.group === state.agentFilter)
@@ -2481,11 +2993,11 @@
       const ageText = row.displayAge ? `${row.displayAge}歳` : "年齢不明";
       document.getElementById("agentName").textContent = `${displayName} / ${ageText} / ${row.gender || "性別不明"} / ${category.label}`;
       const exitText = row.socialExitStatus ? ` / ${row.socialExitStatus}` : "";
-      document.getElementById("agentSummary").textContent = `${emotionText}が主状態。信頼 ${row.trust.toFixed(2)}${exitText}。`;
+      document.getElementById("agentSummary").textContent = `${emotionText}が主状態。信頼 ${row.trust.toFixed(2)}、子ども意向 ${Math.round((row.childIntent || 0) * 100)}%${exitText}。`;
       document.getElementById("kvPathway").textContent = row.pathway.toFixed(2);
       document.getElementById("kvSupport").textContent = row.support.toFixed(2);
       document.getElementById("kvIntensity").textContent = row.intensity.toFixed(2);
-      document.getElementById("kvAction").textContent = row.action;
+      document.getElementById("kvChildIntent").textContent = `${Math.round((row.childIntent || 0) * 100)}%`;
 
       const messages = messageTemplates(row);
       const messageList = document.getElementById("messageList");
@@ -2568,7 +3080,7 @@
       if (llmBasis) return llmBasis;
       const category = categoryByKey[row.dominant];
       const actionCategory = row.actionCategory || actionCategoryFor(row.action, row.dominant);
-      return `${category.label}判定。未来経路 ${row.pathway.toFixed(2)}、構造支援 ${row.support.toFixed(2)}、制度信頼 ${row.trust.toFixed(2)}、自己効力感 ${row.agency.toFixed(2)}。次の行動は${actionCategory}寄り。`;
+      return `${category.label}判定。未来経路 ${row.pathway.toFixed(2)}、構造支援 ${row.support.toFixed(2)}、制度信頼 ${row.trust.toFixed(2)}、子ども意向 ${Math.round((row.childIntent || 0) * 100)}%。次の行動は${actionCategory}寄り。`;
     }
 
     function memoryTextFor(row) {
@@ -2688,8 +3200,24 @@
     }
 
     function stepBy(delta) {
-      state.turn = clamp(state.turn + delta, minTurn, maxTurn);
+      jumpToTurn(state.turn + delta);
+    }
+
+    function jumpToTurn(turn) {
+      state.turn = clamp(Number(turn) || minTurn, minTurn, maxTurn);
       render();
+    }
+
+    function jumpBy(delta) {
+      jumpToTurn(state.turn + delta);
+    }
+
+    function stepToEvent(direction) {
+      const turns = timelineTurns();
+      const target = direction > 0
+        ? turns.find((turn) => turn > state.turn)
+        : [...turns].reverse().find((turn) => turn < state.turn);
+      if (target) jumpToTurn(target);
     }
 
     function togglePlay() {
@@ -2719,9 +3247,20 @@
     });
 
     playButton.addEventListener("click", togglePlay);
+    startButton.addEventListener("click", () => jumpToTurn(minTurn));
+    endButton.addEventListener("click", () => jumpToTurn(maxTurn));
+    jumpBackButton.addEventListener("click", () => jumpBy(-12));
+    jumpForwardButton.addEventListener("click", () => jumpBy(12));
+    prevEventButton.addEventListener("click", () => stepToEvent(-1));
+    nextEventButton.addEventListener("click", () => stepToEvent(1));
     prevButton.addEventListener("click", () => stepBy(-1));
     nextButton.addEventListener("click", () => stepBy(1));
     agentSearchInput?.addEventListener("input", () => render());
+    eventTimeline?.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-turn]");
+      if (!button) return;
+      jumpToTurn(button.dataset.turn);
+    });
     agentLayer.addEventListener("click", (event) => {
       const node = event.target.closest(".agent[data-id]");
       if (!node) return;

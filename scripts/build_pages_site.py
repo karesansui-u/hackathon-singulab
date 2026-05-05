@@ -26,10 +26,14 @@ RUN_FILES = (
     "japan_state.tsv",
     "manifest.json",
 )
+OPTIONAL_RUN_FILES_WITH_EMPTY_FALLBACK = {
+    "scheduled_events_used.tsv": "step\tscenario_mode\tevent_id\tevent_type\tevent_name\tstart_step\tend_step\tintensity_0to1\tprobability_0to1\ttarget\tdirection\tdescription\n",
+}
 DOMAIN_DATA_FILES = (
     "youth_agents.tsv",
     "working_agents.tsv",
     "time_schedule.tsv",
+    "world_events.tsv",
 )
 TEXT_SUFFIXES = {".html", ".json", ".md", ".tsv", ".txt", ".yaml", ".yml"}
 
@@ -78,6 +82,13 @@ def build_public_site() -> None:
             if not source.exists():
                 raise SystemExit(f"Missing run file: {source}")
             copy_binary_or_text(source, PUBLIC / "data" / "runs" / run_id / file_name)
+        for file_name, empty_fallback in OPTIONAL_RUN_FILES_WITH_EMPTY_FALLBACK.items():
+            source = run_source / file_name
+            target = PUBLIC / "data" / "runs" / run_id / file_name
+            if source.exists():
+                copy_binary_or_text(source, target)
+            else:
+                write_text(target, empty_fallback)
 
     domain_data_source = ROOT / "domain_packs" / "agi_youth_japan" / "data"
     for file_name in DOMAIN_DATA_FILES:
