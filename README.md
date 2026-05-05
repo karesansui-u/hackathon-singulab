@@ -12,7 +12,7 @@
   -> 次の社会状態へ戻る
 ```
 
-https://github.com/user-attachments/assets/e405f2c3-9518-489d-87c3-c155d7fca38b
+![デモGIF](docs/assets/demo.gif)
 
 このリポジトリはハッカソン配布の2D火災シミュレータをベースに、**物理空間の避難**ではなく **心理・制度空間の反応観測** へ骨格を抽象化したものです。
 
