@@ -889,11 +889,31 @@
       box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
     }
 
+    .map-progress-main {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
     .map-progress-label {
       color: var(--muted);
       font-size: 10px;
       font-weight: 900;
       white-space: nowrap;
+    }
+
+    .map-progress-current {
+      justify-self: center;
+      border: 1px solid rgba(29, 79, 122, 0.18);
+      border-radius: 999px;
+      padding: 3px 9px;
+      background: #ffffff;
+      color: var(--gov-navy);
+      font-size: 11px;
+      line-height: 1;
+      font-weight: 900;
+      white-space: nowrap;
+      box-shadow: inset 0 -2px 0 rgba(183, 121, 31, 0.20);
     }
 
     .map-progress input {
@@ -2662,7 +2682,10 @@
             </div>
             <label class="map-progress" for="stepSlider" aria-label="表示ステップを変更">
               <span class="map-progress-label" id="stepMinLabel">0年</span>
-              <input id="stepSlider" type="range" min="0" max="79" value="0" step="1">
+              <span class="map-progress-main">
+                <output class="map-progress-current" id="stepCurrentLabel" for="stepSlider" aria-live="polite">現在: 1年目1か月想定</output>
+                <input id="stepSlider" type="range" min="0" max="79" value="0" step="1">
+              </span>
               <span class="map-progress-label" id="stepMaxLabel">79</span>
             </label>
         </div>
@@ -3383,6 +3406,7 @@
     const stepSlider = document.getElementById("stepSlider");
     const stepMinLabel = document.getElementById("stepMinLabel");
     const stepMaxLabel = document.getElementById("stepMaxLabel");
+    const stepCurrentLabel = document.getElementById("stepCurrentLabel");
     const agentSearchInput = document.getElementById("agentSearchInput");
     const agentSearchResults = document.getElementById("agentSearchResults");
     const contentLayout = document.getElementById("contentLayout");
@@ -4263,6 +4287,7 @@
       stepSlider.value = String(state.turn);
       if (stepMinLabel) stepMinLabel.textContent = turnToYear(minTurn);
       if (stepMaxLabel) stepMaxLabel.textContent = turnToYear(maxTurn);
+      if (stepCurrentLabel) stepCurrentLabel.textContent = `現在: ${turnToYear(state.turn)}想定`;
     }
 
     function hasLlmForTurn(agentId, turn = state.turn) {
