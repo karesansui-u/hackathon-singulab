@@ -45,7 +45,8 @@
     }
 
     button,
-    input {
+    input,
+    select {
       font: inherit;
     }
 
@@ -116,9 +117,9 @@
 
     .top-metrics {
       display: grid;
-      grid-template-columns: repeat(6, minmax(88px, 1fr));
+      grid-template-columns: repeat(5, minmax(92px, 1fr));
       gap: 8px;
-      width: min(820px, 62vw);
+      width: min(760px, 60vw);
     }
 
     .metric {
@@ -154,32 +155,32 @@
       border-bottom: 1px solid var(--line);
     }
 
-    .segmented {
-      display: inline-grid;
-      grid-template-columns: repeat(4, 1fr);
+    .scenario-picker {
+      display: grid;
+      gap: 4px;
+      min-width: 250px;
+      flex: 0 1 290px;
+    }
+
+    .scenario-select-label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .scenario-select {
+      width: 100%;
+      min-height: 38px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      overflow: hidden;
-      background: var(--surface-alt);
-    }
-
-    .segmented button {
-      min-height: 38px;
       padding: 0 14px;
-      border: 0;
-      background: transparent;
-      color: var(--muted);
+      background: var(--surface-alt);
+      color: var(--ink);
       cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .segmented button[aria-pressed="true"] {
-      background: var(--ink);
-      color: #ffffff;
       font-weight: 700;
     }
 
-    .segmented button:disabled {
+    .scenario-select:disabled {
       cursor: not-allowed;
       opacity: 0.45;
     }
@@ -246,20 +247,6 @@
       min-height: 34px;
       padding: 0 10px;
       font-size: 11px;
-      white-space: nowrap;
-    }
-
-    .data-badge {
-      min-height: 38px;
-      display: inline-flex;
-      align-items: center;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 0 12px;
-      background: var(--surface-alt);
-      color: var(--ink);
-      font-size: 12px;
-      font-weight: 800;
       white-space: nowrap;
     }
 
@@ -675,12 +662,47 @@
       white-space: nowrap;
     }
 
+    .legend-item.is-exit-marker {
+      color: #172033;
+      font-weight: 900;
+    }
+
     .swatch {
       width: 10px;
       height: 10px;
       border-radius: 999px;
       background: var(--neutral);
       border: 1px solid rgba(15, 23, 42, 0.18);
+    }
+
+    .exit-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 2px dashed #334155;
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .map-guide {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px 16px 4px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .map-guide span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px 9px;
+      background: var(--surface-alt);
+      max-width: 100%;
+      white-space: normal;
     }
 
     .map-wrap {
@@ -1016,6 +1038,12 @@
       cursor: pointer;
     }
 
+    .emotion-label-bg.is-exit {
+      fill: rgba(15, 23, 42, 0.92);
+      stroke: rgba(255, 255, 255, 0.92);
+      stroke-width: 1.4;
+    }
+
     .emotion-label {
       fill: #172033;
       font-size: 10px;
@@ -1024,6 +1052,10 @@
       dominant-baseline: central;
       pointer-events: all;
       cursor: pointer;
+    }
+
+    .emotion-label.is-exit {
+      fill: #ffffff;
     }
 
     .map-footer {
@@ -1708,11 +1740,17 @@
     <section class="content">
       <section class="left-column">
         <section class="panel map-panel">
-        <header class="panel-header">
-          <h2 class="panel-title">4分類ルーム</h2>
-      <div class="legend" id="legend"></div>
-        </header>
-        <div class="map-wrap">
+          <header class="panel-header">
+            <h2 class="panel-title">4分類ルーム</h2>
+            <div class="legend" id="legend"></div>
+          </header>
+          <div class="map-guide" aria-label="マップ読解">
+            <span>横軸: 未来経路</span>
+            <span>縦軸: 構造支援</span>
+            <span>点線+離脱: 逃避・不調・反発リスク</span>
+            <span>ラベル: 離脱/年齢/主感情</span>
+          </div>
+          <div class="map-wrap">
           <svg class="map-svg" id="mapSvg" viewBox="0 28 1000 628" role="img" aria-label="future orientation two dimensional map">
             <defs>
               <filter id="agentShadow" x="-40%" y="-40%" width="180%" height="180%">
@@ -1951,14 +1989,6 @@
               "世界イベント、国家圧力、日本社会状態、個人の前回記憶を分け、同じニュースでも本人に刺さる場合だけ反応が大きくなるようにしています。",
               "感情だけでなく、内心、友達との会話、SNS発信、行動カテゴリ、因果、持ち越し懸念を固定スキーマで出すため、後から検証できます。"
             ]
-          },
-          {
-            title: "発表で刺す見方",
-            items: [
-              "これは未来予言ではなく、施策を入れる前の比較対象です。",
-              "介入ありrunが良く見えるかどうかは、この基準線と比べて初めて意味を持ちます。",
-              "不安が増えること自体より、どの制約で人が動けなくなるかを発見するためのrunです。"
-            ]
           }
         ]
       },
@@ -1981,14 +2011,6 @@
               "LLMに『希望を持て』とは言わず、制度、イベント、本人属性、前回の記憶を情報として渡しています。",
               "個人の反応を集約して、生活防衛、制度要求、連帯、撤退圧などの社会フィードバックへ戻す閉ループにしています。",
               "一部の人だけが救われるのではなく、対象外感、地方実装、財政不安、SNS反発の副作用も出るようにしています。"
-            ]
-          },
-          {
-            title: "発表で刺す見方",
-            items: [
-              "資本主義を否定するのではなく、資本主義が評価しづらい『系を持続させる仕事』を報酬化する提案です。",
-              "希望は気分ではなく、住居、役割、ケア、学び直し、制度信頼の束で発生することを見せます。",
-              "このrunは、構造持続理論を制度シミュレーションに接続する中核です。"
             ]
           }
         ]
@@ -2013,14 +2035,6 @@
               "財政持続監査と非強制監査を入れ、金融・インフレ・対象外感で制度が崩れる可能性も観測対象にしています。",
               "結果として、支援があっても『自分に届くか分からない』と不安に吸収されるケースを許容しています。"
             ]
-          },
-          {
-            title: "発表で刺す見方",
-            items: [
-              "このrunの面白さは、給付を入れても希望が増えない場合があることです。",
-              "つまり、このシミュレーターは都合の良い政策宣伝ではなく、副作用や詰まりを発見する装置として機能しています。",
-              "審査員には『なぜ効かなかったのか』を説明できる点を見せると強いです。"
-            ]
           }
         ]
       },
@@ -2044,18 +2058,40 @@
               "LLM出力は毎step保存され、内心、会話、SNS、行動、因果、記憶が残るため、なぜ希望が増えたかを後から説明できます。",
               "デモ表示範囲の40年目では希望5人、良好19人まで確認できます。不安がゼロになったのではなく『不安を抱えたまま動ける』状態として出ています。"
             ]
-          },
-          {
-            title: "発表で刺す見方",
-            items: [
-              "勝ち筋は『お金』だけではなく、通知、予約、着金、伴走、監査という実在感です。",
-              "希望が増えた理由を、具体的な発話と行動rowで示せるため、LLMキャラ遊びではなく制度設計の事前リハーサルとして見せられます。",
-              "このrunは、UIから施策パッケージを追加生成して比較するプロダクト構想にもそのまま接続できます。"
-            ]
           }
         ]
       }
     };
+    const designAppealSections = [
+      {
+        title: "素朴な作り方なら",
+        items: [
+          "若者キャラを何人か置き、AI失業イベントで不安にし、政策を入れたら希望が増える、という一本道のデモになりがちです。",
+          "その場合、見た目は動いても、なぜそうなったか、どの副作用が残ったか、別の施策に転用できるかが説明しにくくなります。",
+          "今回の設計では、都合よく希望を増やすのではなく、希望が増えないrunもそのまま保存し、詰まりを観測対象にしています。"
+        ]
+      },
+      {
+        title: "今回の設計の強さ（6軸）",
+        items: [
+          "問い: 未来を当てるのではなく、施策を入れた時の感情・行動・副作用・波及を事前観測する設計にしています。",
+          "エージェント: 年齢、所得、雇用、住居、奨学金、ケア責任、SNS感受性、制度信頼、自己効力感、人口重みを持つ代表エージェントにしています。",
+          "イベント: 世界圧力、政策介入、社会反応、組織判断、長期評価を分け、何が効いたかを後から読めるようにしています。",
+          "観測: 感情だけでなく、行動、内心、友達との会話、SNS発信、因果、持ち越し記憶を固定rowデータで保存しています。",
+          "創発: LLMには結論を命令せず、状態と文脈を情報として渡し、エージェントが信じる、疑う、使う、怒る、動かない分岐を残します。",
+          "検証: 介入なし、構造持続通貨、構造持続+出産、構造持続+希望を同じ時点で比較し、効いた施策と効かなかった施策を両方説明できます。"
+        ]
+      },
+      {
+        title: "よりリアル・より意味がある理由",
+        items: [
+          "平均値の予測ではなく、どの層がどの制約で動けなくなるかを見るため、制度設計の修正点に変換しやすいです。",
+          "希望、安心、不安、諦念のような心理状態を、制度利用、生活防衛、相談、参加・連帯などの行動に接続しています。",
+          "支援が効いた時だけでなく、制度利用が増えても希望に変換されないケースを出せるため、政策宣伝ではなく事前検証になります。",
+          "rowデータとして保存するため、発表では安定再生しつつ、裏側ではLLMエージェントの創発過程を監査できます。"
+        ]
+      }
+    ];
     const scenarioReports = {
       baseline: {
         title: "介入なし レポート",
@@ -2098,14 +2134,6 @@
               "生活コスト上昇は、子ども意向や住居選択だけでなく、進学・転職・転居の自由度を削る。",
               "医療・介護ショックは、若者にも家族責任や将来負担として届き、自由時間と自己効力感を削る。",
               "SNS悲観は、個人の不安を『みんな詰んでいる』という集団認識へ増幅する。"
-            ]
-          },
-          {
-            title: "発表での見せ方",
-            items: [
-              "介入なしは、希望が0のままでも単なる悲観シナリオではなく、比較実験の基準線として扱う。",
-              "重要なのは『不安になる』ではなく、生活防衛に固定されると制度利用や連帯に向かわない点。",
-              "この基準線があるため、介入ありrunの差分が説明できる。"
             ]
           }
         ]
@@ -2152,14 +2180,6 @@
               "学び直し・移行雇用保証は、危険域への落下を防ぐが、採用や収入の実績が見えるまで希望化しにくい。",
               "住居安定は基礎条件として効くが、ケアや家族形成まで束ねないと未来選択の回復は限定的。"
             ]
-          },
-          {
-            title: "発表での見せ方",
-            items: [
-              "構造持続通貨介入は、いきなり希望を作る魔法ではなく、危険域から落ちないための社会的な床として説明する。",
-              "介入なしとの違いは、危険が注意・中立へ戻ること。構造持続+希望との違いは、具体的な実効サインがまだ不足していること。",
-              "このrunは『構造持続理論を入れると何が変わるか』の中核比較になる。"
-            ]
           }
         ]
       },
@@ -2205,14 +2225,6 @@
               "産後休息・代替ケアは重要だが、地域の空き枠や予約可能性が見えないと実効感が弱い。",
               "財政監査は必要だが、条件変更への恐怖を下げる運用まで見えないと不安が残る。"
             ]
-          },
-          {
-            title: "発表での見せ方",
-            items: [
-              "このrunは失敗ではなく、むしろプロダクト価値が出るrun。政策の副作用や詰まりを実施前に発見している。",
-              "『お金を配れば解決』ではないことを、制度利用増・希望0という対比で示せる。",
-              "次の構造持続+希望介入へつなぐための問題発見runとして使う。"
-            ]
           }
         ]
       },
@@ -2257,14 +2269,6 @@
               "個別資格通知と即時予約は、抽象的な制度を本人の次の一手に変換する。",
               "nat初回着金は、社会を維持する行動が本当に飯の種になるという証拠として効く。",
               "若者メンター、成功ケース共有、家族形成面談は、孤立した制度利用を継続行動へつなぐ。"
-            ]
-          },
-          {
-            title: "発表での見せ方",
-            items: [
-              "勝ち筋は『希望を持て』ではなく、希望が自然に発生する社会条件を渡したこと。",
-              "構造持続+出産では希望0、構造持続+希望では5年後から希望が出る。この差分が一番強い。",
-              "政策を実施する前に、どのイベントが効いたか、どの副作用が残るかを観測できることを強調する。"
             ]
           }
         ]
@@ -3154,7 +3158,11 @@
 
     function renderLegend() {
       const legend = document.getElementById("legend");
-      legend.innerHTML = categories.map((category) => `
+      legend.innerHTML = `
+        <span class="legend-item is-exit-marker">
+          <span class="exit-swatch"></span>離脱リスク
+        </span>
+      ` + categories.map((category) => `
         <span class="legend-item">
           <span class="swatch" style="background:${category.color}"></span>${category.label}
         </span>
@@ -3270,11 +3278,12 @@
       face.circles.forEach((circle) => addCircle(...circle));
       face.paths.forEach((path) => addPath(path));
       face.texts.forEach((text) => addText(...text));
-      const ageEmotionLabel = row.displayAge ? `${row.displayAge}歳 ${emotion}` : emotion;
-      appendEmotionLabel(node, row.x, row.y - size - 13, ageEmotionLabel);
+      const exitLabel = row.socialExitStatus ? "離脱 / " : "";
+      const ageEmotionLabel = row.displayAge ? `${exitLabel}${row.displayAge}歳 ${emotion}` : `${exitLabel}${emotion}`;
+      appendEmotionLabel(node, row.x, row.y - size - 13, ageEmotionLabel, Boolean(row.socialExitStatus));
     }
 
-    function appendEmotionLabel(node, x, y, text) {
+    function appendEmotionLabel(node, x, y, text, isExit = false) {
       const width = Math.max(30, text.length * 10 + 10);
       const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
       rect.setAttribute("x", x - width / 2);
@@ -3282,13 +3291,13 @@
       rect.setAttribute("width", width);
       rect.setAttribute("height", 16);
       rect.setAttribute("rx", "5");
-      rect.setAttribute("class", "emotion-label-bg");
+      rect.setAttribute("class", `emotion-label-bg${isExit ? " is-exit" : ""}`);
       node.appendChild(rect);
 
       const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
       label.setAttribute("x", x);
       label.setAttribute("y", y + 0.5);
-      label.setAttribute("class", "emotion-label");
+      label.setAttribute("class", `emotion-label${isExit ? " is-exit" : ""}`);
       label.textContent = text;
       node.appendChild(label);
     }
@@ -3851,6 +3860,11 @@
         button.disabled = !loaded;
         button.setAttribute("aria-pressed", String(loaded && button.dataset.scenario === state.scenario));
       });
+      updateScenarioPolicyStatus();
+      renderScenarioBrief();
+    }
+
+    function updateScenarioPolicyStatus() {
       const policyStatus = document.getElementById("birthGrantPolicyStatus");
       if (policyStatus) {
         policyStatus.textContent = runDataByScenario.has("birthGrant") ? "再生可能" : "生成中";
@@ -3859,7 +3873,6 @@
       if (hopeFamilyStatus) {
         hopeFamilyStatus.textContent = runDataByScenario.has("hopeFamily") ? "再生可能" : "生成待ち";
       }
-      renderScenarioBrief();
     }
 
     function renderScenarioBrief() {
@@ -3881,7 +3894,7 @@
       if (kicker) kicker.textContent = "シナリオ設計の詳細";
       title.textContent = description.title;
       lead.textContent = description.lead;
-      sections.innerHTML = description.sections.map((section) => `
+      sections.innerHTML = [...description.sections, ...designAppealSections].map((section) => `
         <section class="modal-section">
           <h3 class="modal-section-title">${escapeHtml(section.title)}</h3>
           <ul class="modal-list">
