@@ -16,6 +16,30 @@
 
 このリポジトリはハッカソン配布の2D火災シミュレータをベースに、**物理空間の避難**ではなく **心理・制度空間の反応観測** へ骨格を抽象化したものです。
 
+## システム構成図
+
+```mermaid
+flowchart TD
+  U[制度・施策・未来イベントを入力] --> P[文明OSシミュレーション基盤]
+
+  subgraph P[文明OSシミュレーション基盤]
+    D[Domain Pack<br/>人口属性・価値観・過去経験]
+    S[Scenario<br/>介入条件・時間軸・外部ショック]
+    L[LLM Agent Runner<br/>国家・組織・個人の反応生成]
+    R[Row Data Store<br/>感情・会話・行動・社会フィードバック]
+    F[Feedback Loop<br/>次ステップの社会状態へ反映]
+
+    D --> L
+    S --> L
+    L --> R
+    R --> F
+    F --> L
+  end
+
+  R --> V[Viewer<br/>感情マップ・比較UI]
+  V --> G[GitHub Pages Demo]
+```
+
 ## 公開デモ
 
 GitHub Pagesで公開しています。
