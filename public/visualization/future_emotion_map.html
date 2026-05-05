@@ -3166,9 +3166,7 @@
         const loadedRuns = await loadRunDataByScenario(worldTimelineEvents);
         runDataByScenario = loadedRuns.runDataByScenario;
         agents = mergeLlmOnlyAgents(agents, loadedRuns.allLlmRows);
-        if (!runDataByScenario.has(state.scenario)) {
-          state.scenario = runDataByScenario.has("sustain") ? "sustain" : runDataByScenario.keys().next().value || state.scenario;
-        }
+        if (!runConfigs[state.scenario]) state.scenario = "sustain";
         applyRunDataForScenario(state.scenario);
         const defaultAgent = state.agentFilter === "llm"
           ? agents.find((agent) => llmAgentIds.has(agent.id))
@@ -3235,9 +3233,15 @@
     function applyRunDataForScenario(scenario) {
       const runData = runDataByScenario.get(scenario);
       if (!runData) {
-        state.agentFilter = "all";
+        llmTurnsByKey = new Map();
+        llmAgentIds = new Set();
+        countryTurnsByStep = new Map();
+        countryMaxStep = 0;
+        eventSchedule = fallbackScheduleForScenario(scenario);
+        if (state.agentFilter === "llm") state.agentFilter = "all";
         minTurn = timeScheduleMaxStep ? 1 : 0;
         maxTurn = Math.min(timeScheduleMaxStep || demoMaxTurn, demoMaxTurn);
+        state.turn = clamp(state.turn || minTurn, minTurn, maxTurn);
         return;
       }
       llmTurnsByKey = runData.llmTurnsByKey;
@@ -3249,6 +3253,13 @@
       maxTurn = Math.min(runData.llmMaxStep || timeScheduleMaxStep || demoMaxTurn, demoMaxTurn);
       state.agentFilter = llmAgentIds.size ? "llm" : "all";
       state.turn = clamp(state.turn || minTurn, minTurn, maxTurn);
+    }
+
+    function fallbackScheduleForScenario(scenario) {
+      const baseEvents = fallbackEventSchedule.filter((event) => (
+        hasPolicyEventsScenario(scenario) || event.type !== "policy"
+      ));
+      return baseEvents;
     }
 
     async function loadTsvRows(path) {
@@ -5058,11 +5069,6 @@
       if (!container) return;
       if (label) label.textContent = state.scenario === "baseline" ? "介入なし / 同時点" : "同時点比較";
       const baselineRunData = runDataByScenario.get("baseline");
-      if (!baselineRunData) {
-        container.innerHTML = `<div class="agent-summary">介入なしデータ未接続</div>`;
-        return;
-      }
-
       const baselineRows = rowsForSameAgentsAtTurn(rows, "baseline", state.turn, baselineRunData);
       const currentStats = summaryStatsForRows(rows);
       const baselineStats = summaryStatsForRows(baselineRows);
@@ -5468,7 +5474,7 @@
     }
 
     function setScenario(scenario) {
-      if (!runConfigs[scenario] || !runDataByScenario.has(scenario)) {
+      if (!runConfigs[scenario]) {
         syncScenarioSelect();
         return;
       }
@@ -5483,10 +5489,10 @@
       const select = document.getElementById("scenarioSelect");
       if (select) {
         Array.from(select.options).forEach((option) => {
-          option.disabled = !runDataByScenario.has(option.value);
+          option.disabled = !runConfigs[option.value];
         });
         select.value = state.scenario;
-        select.disabled = !runDataByScenario.size;
+        select.disabled = false;
       }
       renderScenarioBrief();
     }
