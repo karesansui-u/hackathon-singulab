@@ -190,6 +190,61 @@ def active_events(events: List[Dict[str, str]], step: int) -> List[Dict[str, str
     return active
 
 
+def event_prompt_rank(event: Dict[str, str], step: int) -> tuple[int, float, str]:
+    try:
+        start_step = int(event.get("開始ステップ", "0"))
+    except ValueError:
+        start_step = 0
+    try:
+        intensity = float(event.get("強度_0to1", "0"))
+    except ValueError:
+        intensity = 0.0
+    freshness = 1 if start_step and step - start_step <= 2 else 0
+    return freshness, intensity, event.get("イベントID", "")
+
+
+def active_events_for_prompt(
+    events: List[Dict[str, str]],
+    step: int,
+    max_policy_events: int = 12,
+) -> List[Dict[str, str]]:
+    active = active_events(events, step)
+    policy_events = [event for event in active if event.get("区分") == "政策"]
+    if len(policy_events) <= max_policy_events:
+        return active
+
+    selected_policy_events = sorted(
+        policy_events,
+        key=lambda event: event_prompt_rank(event, step),
+        reverse=True,
+    )[:max_policy_events]
+    omitted_policy_events = [event for event in policy_events if event not in selected_policy_events]
+    omitted_names = "、".join(event.get("イベント名", "") for event in omitted_policy_events[:6] if event.get("イベント名"))
+    summary_event = {
+        "イベントID": "POLICY_SUMMARY",
+        "区分": "政策要約",
+        "イベント名": f"その他の継続施策 {len(omitted_policy_events)}件",
+        "開始ステップ": str(step),
+        "終了ステップ": str(step),
+        "強度_0to1": "",
+        "発生確率_0to1": "",
+        "対象": "複数対象",
+        "主な影響方向": "施策量↑ 実装負荷↑ 対象外反発/政策疲労の監査が必要",
+        "説明": (
+            "比較公平性のため、同時に本人へ見せる政策イベント数を制限している。"
+            f"省略された継続施策例: {omitted_names or '複数の既存施策'}。"
+            "施策が多いこと自体は、情報過多、申請疲れ、対象外感、実装負荷として知覚され得る。"
+        ),
+    }
+    selected_ids = {event.get("イベントID", "") for event in selected_policy_events}
+    selected_in_original_order = [
+        event
+        for event in active
+        if event.get("区分") != "政策" or event.get("イベントID", "") in selected_ids
+    ]
+    return [*selected_in_original_order, summary_event]
+
+
 def scheduled_event_usage_rows(
     events: List[Dict[str, str]],
     start_step: int,
@@ -217,12 +272,157 @@ def scheduled_event_usage_rows(
 
 
 def scenario_context_for_mode(scenario_mode: str, step: int) -> Dict[str, Any]:
-    if scenario_mode != "structure_hope_family_package":
-        return {}
     context: Dict[str, Any] = {
         "scenario_mode": scenario_mode,
         "note": "これは希望や行動を指定する命令ではなく、この比較シナリオで本人が知覚しやすい社会状況の補足情報です。",
+        "available_policy_channels": [],
+        "delivery_channels": [],
+        "known_constraints": [],
+        "what_is_not_available": [],
+        "side_effect_watchpoints": [
+            "対象外感",
+            "政策疲労",
+            "財政不安",
+            "手続き負担",
+            "地域差",
+            "所得差",
+            "制度を使える人だけが有利になる分断",
+        ],
     }
+    if scenario_mode == "no_intervention":
+        context.update({
+            "available_policy_channels": ["既存制度の範囲内"],
+            "delivery_channels": ["ニュース", "SNS", "学校/職場の一般情報"],
+            "known_constraints": [
+                "新しい制度介入は置かれない",
+                "生活コスト、AI雇用不安、ケア負担、地政学不安は緩衝されにくい",
+            ],
+            "what_is_not_available": [
+                "構造持続通貨",
+                "社会持続活動への報酬",
+                "追加の出生・家族形成パッケージ",
+                "個別資格通知や即時予約",
+            ],
+        })
+    elif scenario_mode == "birth_grant_only":
+        context.update({
+            "available_policy_channels": [
+                "出産・初期育児費用の緩衝",
+                "産後休息",
+                "代替ケア",
+                "復帰キャリア支援",
+                "非強制監査",
+            ],
+            "delivery_channels": ["自治体/職場/医療・保育窓口", "一般広報", "対象者向け通知"],
+            "known_constraints": [
+                "構造持続通貨や社会維持活動の報酬化はない",
+                "仕事・住居・学び直し・地域役割の再設計は弱い",
+                "非対象者は不公平感や『産ませたいだけ』という強制感を持ち得る",
+            ],
+            "what_is_not_available": [
+                "nat報酬",
+                "地域更新やケアの役割報酬",
+                "若者全体の役割再設計",
+                "構造持続の長期財源説明",
+            ],
+        })
+    elif scenario_mode == "structure_intervention":
+        context.update({
+            "available_policy_channels": [
+                "住居安定",
+                "学び直し・移行雇用",
+                "ケア支援",
+                "地域更新",
+                "社会持続活動へのnat報酬",
+                "財政・副作用監査",
+            ],
+            "delivery_channels": ["学校", "職場", "自治体", "地域プロジェクト", "制度窓口"],
+            "known_constraints": [
+                "直接の出産一時金や家族形成パッケージは置かれない",
+                "制度名だけでは希望化せず、本人が使える経路や実績が必要",
+                "制度利用が増えるほど情報過多や窓口負荷が出得る",
+            ],
+            "what_is_not_available": [
+                "出産・初期育児の大型一時金",
+                "家族形成の個別面談・即時予約",
+                "出生支援を中心にした直接介入",
+            ],
+        })
+    elif scenario_mode == "structure_birth_grant_package":
+        context.update({
+            "available_policy_channels": [
+                "構造持続通貨",
+                "住居・学び直し・ケア・地域更新",
+                "出産・初期育児費用の緩衝",
+                "産後休息",
+                "代替ケア",
+                "復帰キャリア支援",
+                "財政・非強制監査",
+            ],
+            "delivery_channels": ["学校", "職場", "自治体", "医療・保育窓口", "地域プロジェクト"],
+            "known_constraints": [
+                "支援が存在しても、本人に届く/予約できる/使い切れるとは限らない",
+                "対象外反発、財政不安、申請疲れ、企業実装負荷は観測対象に残る",
+                "子どもを迎える/迎えない/待つ自由を残す必要がある",
+            ],
+            "what_is_not_available": [
+                "希望を直接増やす命令",
+                "全員に同じ反応を求める設計",
+            ],
+        })
+    elif scenario_mode == "structure_hope_family_package":
+        context.update({
+            "available_policy_channels": [
+                "構造持続通貨",
+                "個別資格通知",
+                "即時予約",
+                "nat初回着金",
+                "若者メンター",
+                "地域成功ケース共有",
+                "家族形成面談",
+                "異議申立・副作用監査",
+            ],
+            "delivery_channels": ["スマホ通知", "学校", "職場", "自治体窓口", "地域の伴走者"],
+            "known_constraints": [
+                "本人に届く情報が増えるほど、情報過多・申請疲れ・期待外れも起こり得る",
+                "希望が増えても、非対象者や制度不信層の反発が同時に出る可能性がある",
+                "制度が止まる不安、財政不安、地域差は残る",
+            ],
+            "what_is_not_available": [
+                "希望感情の直接命令",
+                "出生や家族形成の強制",
+                "副作用の無視",
+            ],
+        })
+    elif scenario_mode in {"policy_search_no_sustain", "policy_search_with_sustain"}:
+        has_sustain = scenario_mode == "policy_search_with_sustain"
+        context.update({
+            "available_policy_channels": [
+                "LLM政策プランナーが予算・実装制約内で提案した施策",
+                *(
+                    ["構造持続通貨", "社会維持活動への報酬化"]
+                    if has_sustain
+                    else ["既存の財政・補助金・規制・説明施策"]
+                ),
+            ],
+            "delivery_channels": ["政策発表", "自治体/企業の運用", "対象者通知", "相談窓口"],
+            "known_constraints": [
+                "施策を増やすほど政策疲労、対象外反発、実装負荷が増え得る",
+                "悪化集団を見て、修正、一時停止、説明強化、補完策を選ぶ必要がある",
+            ],
+            "what_is_not_available": [] if has_sustain else ["構造持続通貨", "nat報酬", "社会維持活動を制度上の価値として扱う探索空間"],
+        })
+    else:
+        context.update({
+            "available_policy_channels": ["シナリオ定義に含まれる政策イベント"],
+            "delivery_channels": ["ニュース", "SNS", "学校/職場", "自治体/企業窓口"],
+            "known_constraints": ["比較シナリオの範囲外の制度は勝手に補わない"],
+            "what_is_not_available": [],
+        })
+
+    if scenario_mode != "structure_hope_family_package":
+        return context
+
     if step >= 18:
         context["direct_notice_condition"] = (
             "個別資格通知、即時予約、初職・復帰の先行契約枠は、対象者本人のスマホ、学校、職場、自治体窓口に届くため、"
@@ -634,6 +834,10 @@ def build_prompt(
             "action_detail": previous.get("action_detail", ""),
             "memory_update": previous.get("memory_update", ""),
             "carryover_concern": previous.get("carryover_concern", ""),
+            "side_effect": previous.get("side_effect", ""),
+            "adjustment_request": previous.get("adjustment_request", ""),
+            "fairness_perception": previous.get("fairness_perception", ""),
+            "policy_fatigue": previous.get("policy_fatigue", ""),
         })
 
     japan_state_by_step = {
@@ -662,7 +866,7 @@ def build_prompt(
                     "direction": event["主な影響方向"],
                     "description": event["説明"],
                 }
-                for event in active_events(events, step)
+                for event in active_events_for_prompt(events, step)
             ],
             "world_state": compact_japan_state(japan_state_by_step.get(step, {})),
             "auto_events": [
@@ -713,10 +917,12 @@ def build_prompt(
 - 注意: 不安・怒り
 - 危険: 裏切られ感・喪失感・絶望・諦念
 
-分類の目安:
-- 未来経路と構造支援がどちらも高く、本人が具体的な次の一手を確認できている場合は、社会リスクが残っていても良好（安心・希望・連帯感）になり得ます。
-- 不安が少し残るだけで自動的に注意へ固定しないでください。本人の主感情が「それでも動ける」「自分にも経路がある」「一人ではない」に近い場合は希望・安心・連帯感を選べます。
-- 逆に、経路や支援が高く見えても、本人が対象外感、遅延、不信、ケア拘束を強く感じる場合は注意や危険のままで構いません。
+	分類の目安:
+	- 未来経路と構造支援がどちらも高く、本人が具体的な次の一手を確認できている場合は、社会リスクが残っていても良好（安心・希望・連帯感）になり得ます。
+	- 不安が少し残るだけで自動的に注意へ固定しないでください。本人の主感情が「それでも動ける」「自分にも経路がある」「一人ではない」に近い場合は希望・安心・連帯感を選べます。
+	- 逆に、経路や支援が高く見えても、本人が対象外感、遅延、不信、ケア拘束を強く感じる場合は注意や危険のままで構いません。
+	- 具体的な支援や経路が存在しても、本人が知らない、対象外だと思う、手続きが重い、過去の制度不信が強い、家族ケアや住居制約で動けない、財政不安で持続しないと感じる場合は、評価や行動は大きく改善しなくて構いません。
+	- 施策が多い場合は、それ自体が情報過多、申請疲れ、対象外反発、実装負荷、期待外れとして知覚される可能性があります。平均的な良化だけでなく、悪化する層や二極化も観測してください。
 
 行動カテゴリ語彙:
 静観/情報収集/相談/生活防衛/回避・縮小/学習・就活/制度利用/参加・連帯/抗議・発信/ケア継続/撤退
@@ -735,22 +941,28 @@ def build_prompt(
 - private_talk: 友達や近い人との会話。砕けた口調で、弱音・相談・共感が出る
 - social_post: SNS発信。短く、社会向け・見られる前提の言い方にする
 - perceived_situation: 本人がこのステップで実際に知覚した状況。届かなかった情報は無理に含めない
-- reasoning_basis: その反応になった根拠。属性、生活制約、記憶、知覚した情報を短く結ぶ
-- memory_update: 次ステップに残る記憶
-- carryover_concern: 次ステップへ持ち越す懸念
+	- reasoning_basis: その反応になった根拠。属性、生活制約、記憶、知覚した情報を短く結ぶ
+	- memory_update: 次ステップに残る記憶
+	- carryover_concern: 次ステップへ持ち越す懸念
+	- side_effect: 対象外感/監視疲れ/財政不安/強制感/手続き疲れ/政策疲労/実装不信/なし のどれか
+	- adjustment_request: 対象条件の説明/手続き簡素化/地域枠追加/財源説明/一時停止/補完支援/非強制説明/なし のどれか
+	- fairness_perception: 本人から見た公平感 0-100
+	- policy_fatigue: 本人から見た政策・申請・情報疲れ 0-100
 
 観測原則:
 - 望ましい発表ストーリーに合わせる必要はありません。
 - 全員が同じ方向に動くとは限りません。
 - 大きな事件が起きても、本人に届かなければ反応は小さくてよいです。
 - 逆に小さな出来事でも、その人の生活制約に刺されば大きく反応してよいです。
-- 希望・安心・連帯感は、社会リスクがゼロになった時だけの感情ではありません。本人に具体的な経路、即時支援、実績、成功経験、共同体の受け皿が届いた場合は、リスクが残っていても自然な反応として選んでよいです。
-- 逆に、具体的な条件が届いているのに常に不安へ固定する必要もありません。本人の属性と知覚情報に照らして、良好/中立/注意/危険を分岐させます。
-- 数値は前ステップから大きく変わってもよいですが、reasoning_basis と矛盾しない範囲にします。
+	- 希望・安心・連帯感は、社会リスクがゼロになった時だけの感情ではありません。本人に具体的な経路、即時支援、実績、成功経験、共同体の受け皿が届いた場合は、リスクが残っていても自然な反応として選んでよいです。
+	- 逆に、具体的な条件が届いているのに常に不安へ固定する必要もありません。本人の属性と知覚情報に照らして、良好/中立/注意/危険を分岐させます。
+	- 支援が届いた層と届かない層、使える層と使えない層が分かれる場合は、平均値だけに寄せず、二極化や対象外反発を自然に出してください。
+	- 出産・家族形成支援は、子どもを持つことへの命令ではありません。望まない人、今は選ばない人、対象外の人が強制感や反発を持つことも自然なら出してください。
+	- 数値は前ステップから大きく変わってもよいですが、reasoning_basis と矛盾しない範囲にします。
 - thought/private_talk/social_post は、それぞれ異なる文脈の発話として観測します。
 - 発言はきれいに整理しすぎず、現実の人が言いそうな迷い・矛盾・言い切れなさを残します。
-- thought は90字以内、private_talk は80字以内、social_post は60字以内にします。
-- action_detail、perceived_situation、reasoning_basis、memory_update、carryover_concern は各80字以内にします。
+	- thought は90字以内、private_talk は80字以内、social_post は60字以内にします。
+	- action_detail、perceived_situation、reasoning_basis、memory_update、carryover_concern、side_effect、adjustment_request は各80字以内にします。
 - JSON以外の説明文は一切出力しないでください。
 
 対象エージェント:
@@ -787,11 +999,15 @@ JSON形式:
           "thought": "...",
           "private_talk": "...",
           "social_post": "...",
-          "perceived_situation": "...",
-          "reasoning_basis": "...",
-          "memory_update": "...",
-          "carryover_concern": "..."
-        }}
+	          "perceived_situation": "...",
+	          "reasoning_basis": "...",
+	          "memory_update": "...",
+	          "carryover_concern": "...",
+	          "side_effect": "対象外感",
+	          "adjustment_request": "対象条件の説明",
+	          "fairness_perception": 42,
+	          "policy_fatigue": 58
+	        }}
       ]
     }}
   ]
@@ -996,8 +1212,21 @@ def flatten_turns(
                 "reasoning_basis": item.get("reasoning_basis", ""),
                 "memory_update": item.get("memory_update", ""),
                 "carryover_concern": item.get("carryover_concern", ""),
+                "side_effect": normalize_side_effect(item.get("side_effect", "")),
+                "adjustment_request": normalize_adjustment_request(item.get("adjustment_request", "")),
+                "fairness_perception": optional_score(item.get("fairness_perception", "")),
+                "policy_fatigue": optional_score(item.get("policy_fatigue", "")),
             }
     return [deduped[key] for key in order]
+
+
+def optional_score(value: Any) -> str:
+    if value in {None, ""}:
+        return ""
+    try:
+        return str(round(clamp(float(value)), 1))
+    except (TypeError, ValueError):
+        return ""
 
 
 def normalize_evaluation(value: str) -> str:
@@ -1033,6 +1262,34 @@ def normalize_action_category(value: str, action: str) -> str:
     if value in ACTION_CATEGORIES:
         return value
     return infer_action_category(action)
+
+
+def normalize_side_effect(value: str) -> str:
+    allowed = {
+        "対象外感",
+        "監視疲れ",
+        "財政不安",
+        "強制感",
+        "手続き疲れ",
+        "政策疲労",
+        "実装不信",
+        "なし",
+    }
+    return value if value in allowed else (str(value)[:40] if value else "")
+
+
+def normalize_adjustment_request(value: str) -> str:
+    allowed = {
+        "対象条件の説明",
+        "手続き簡素化",
+        "地域枠追加",
+        "財源説明",
+        "一時停止",
+        "補完支援",
+        "非強制説明",
+        "なし",
+    }
+    return value if value in allowed else (str(value)[:40] if value else "")
 
 
 def infer_action_category(action: str) -> str:
@@ -1353,6 +1610,10 @@ def main() -> None:
             "reasoning_basis",
             "memory_update",
             "carryover_concern",
+            "side_effect",
+            "adjustment_request",
+            "fairness_perception",
+            "policy_fatigue",
         ],
     )
     scheduled_events_used_path = args.output_dir / "scheduled_events_used.tsv"
