@@ -5540,21 +5540,26 @@
         ["エネルギー", energyAverage]
       ].sort((a, b) => b[1] - a[1]).slice(0, 2);
       const riskPrefix = warRows.length
-        ? `限定戦争 ${warRows.map((row) => row.country_name).slice(0, 2).join("・")}`
+        ? "長期地政学ストレス"
         : proxyRows.length
           ? `間接衝突 ${proxyRows.map((row) => row.country_name).slice(0, 2).join("・")}`
           : "圧力観測";
       const topText = `${riskPrefix} / ${topPressures.map(([label, score]) => `${label}${Math.round(score)}`).join(" ")} / 緩衝${Math.round(bufferAverage)}`;
       value.textContent = topText;
 
+      const warStressTitle = warRows
+        .map((row) => `${row.risk_stage} ${row.country_name}: ${row.japan_impact_summary || ""}`)
+        .join("\n");
+      const warChipCount = warRows.length ? 1 : 0;
+      const proxyChipLimit = warRows.length ? 2 : 3;
       const chipRows = [
-        ...warRows.map((row) => ({ row, className: "pressure-chip-war", label: `限定戦争 ${row.country_name}` })),
-        ...proxyRows.slice(0, 3).map((row) => ({ row, className: "pressure-chip-proxy", label: `間接衝突 ${row.country_name}` })),
-        ...borderRows.slice(0, Math.max(0, 4 - warRows.length - Math.min(proxyRows.length, 3))).map((row) => ({ row, className: "pressure-chip-border", label: `境界 ${row.country_name}` }))
+        ...(warRows.length ? [{ className: "pressure-chip-war", label: "保守的前提: 長期戦残存", title: warStressTitle }] : []),
+        ...proxyRows.slice(0, proxyChipLimit).map((row) => ({ row, className: "pressure-chip-proxy", label: `間接衝突 ${row.country_name}` })),
+        ...borderRows.slice(0, Math.max(0, 4 - warChipCount - Math.min(proxyRows.length, proxyChipLimit))).map((row) => ({ row, className: "pressure-chip-border", label: `境界 ${row.country_name}` }))
       ].slice(0, 5);
 
       chips.innerHTML = chipRows.map((item) => `
-        <span class="pressure-chip ${item.className}" title="${item.row.japan_impact_summary || ""}">${item.label}</span>
+        <span class="pressure-chip ${item.className}" title="${escapeHtml(item.title || item.row?.japan_impact_summary || "")}">${escapeHtml(item.label)}</span>
       `).join("");
     }
 
