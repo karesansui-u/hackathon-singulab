@@ -3716,6 +3716,264 @@
       }).join("");
     }
 
+    function renderAdjustmentDiagnostics(rows) {
+      const container = document.getElementById("adjustmentDiagnostics");
+      if (!container) return;
+      const diagnostics = sideEffectDiagnostics(rows);
+      const meterItems = [
+        ["二極化", diagnostics.polarizationRisk],
+        ["対象外反発", diagnostics.exclusionBacklash],
+        ["政策疲労", diagnostics.policyFatigue],
+        ["強制感", diagnostics.coercionFeeling],
+        ["財政不安", diagnostics.fiscalAnxiety],
+        ["実装負荷", diagnostics.implementationLoad]
+      ];
+      container.innerHTML = `
+        <div class="adjustment-meter-grid">
+          ${meterItems.map(([label, value]) => {
+            const level = riskLevel(value);
+            return `
+              <div class="adjustment-meter">
+                <div class="adjustment-meter-head">
+                  <span>${escapeHtml(label)}</span>
+                  <span class="adjustment-meter-value">${level.label} ${Math.round(value * 100)}%</span>
+                </div>
+                <div class="adjustment-meter-track">
+                  <div class="adjustment-meter-fill" style="width:${Math.round(value * 100)}%;background:${level.color}"></div>
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+        <div class="adjustment-summary">
+          <div class="adjustment-summary-block">
+            <div class="adjustment-summary-label">悪化しやすい層</div>
+            <div class="adjustment-summary-value">${escapeHtml(diagnostics.worstSegments.join(" / ") || "目立つ偏りなし")}</div>
+          </div>
+          <div class="adjustment-summary-block">
+            <div class="adjustment-summary-label">調整余地</div>
+            <div class="adjustment-summary-value">${escapeHtml(riskLevel(1 - diagnostics.adjustabilityScore).label)} / ${Math.round(diagnostics.adjustabilityScore * 100)}%</div>
+          </div>
+        </div>
+        <div class="adjustment-actions">
+          ${diagnostics.adjustmentActions.map((action) => `<span class="adjustment-action">${escapeHtml(action)}</span>`).join("")}
+        </div>
+      `;
+    }
+
+    function sideEffectDiagnostics(rows) {
+      const total = rows.length || 1;
+      const avg = (selector) => rows.reduce((sum, row) => sum + selector(row), 0) / total;
+      const { counts } = summarize(rows);
+      const goodRatio = counts.good / total;
+      const neutralRatio = counts.neutral / total;
+      const cautionRatio = counts.caution / total;
+      const dangerRatio = counts.danger / total;
+      const negativeRatio = dangerRatio + cautionRatio * 0.56;
+      const positiveRatio = goodRatio + neutralRatio * 0.38;
+      const groupGap = groupedScoreGap(rows);
+      const vulnerableSegmentGap = vulnerableGap(rows);
+      const policyLoad = recentPolicyPressure();
+      const policyUseRatio = rows.filter((row) => ["制度利用", "情報収集", "相談"].includes(row.actionCategory)).length / total;
+      const angerRatio = rows.filter((row) => ["怒り", "裏切られ感"].includes(row.emotion) || row.actionCategory === "抗議・発信").length / total;
+      const birthPolicy = ["birthOnly", "birthGrant", "hopeFamily"].includes(state.scenario);
+      const nonTargetRiskRatio = rows.filter((row) => {
+        const age = Number(row.displayAge);
+        const target = Number.isFinite(age) && age >= 23 && age <= 49;
+        return !target && ["caution", "danger"].includes(row.dominant);
+      }).length / total;
+      const fatigueAverage = avg((row) => Number(row.policyFatigue) || 0);
+      const fairnessAverage = avg((row) => Number(row.fairnessPerception) || 0.5);
+      const countryRows = countryRowsForCurrentTurn();
+      const fiscalPressure = countryRows.length ? averageCountryPressure(countryRows, "fiscal_pressure") / 100 : 0;
+      const policyEventNames = eventsAtTurn(state.turn).map((event) => `${event.name || ""} ${event.direction || ""} ${event.description || ""}`).join(" ");
+      const fiscalTextPressure = /財政|増税|インフレ|負担|逆選択/.test(policyEventNames) ? 0.24 : 0;
+      const implementationTextPressure = /窓口|予約|申請|面談|監査|通知|枠/.test(policyEventNames) ? 0.18 : 0;
+      const coercionTextPressure = /出産|出生|子ども|家族形成/.test(policyEventNames) && birthPolicy ? 0.24 : 0;
+
+      const polarizationRisk = clamp(
+        groupGap * 0.70 +
+        vulnerableSegmentGap * 0.50 +
+        Math.min(positiveRatio, negativeRatio) * 0.50 +
+        dangerRatio * 0.24,
+        0,
+        1
+      );
+      const exclusionBacklash = clamp(
+        angerRatio * 0.62 +
+        nonTargetRiskRatio * (birthPolicy ? 0.44 : 0.18) +
+        (1 - fairnessAverage) * 0.24,
+        0,
+        1
+      );
+      const policyFatigue = clamp(
+        fatigueAverage * 0.55 +
+        policyUseRatio * 0.30 +
+        policyLoad * 0.26,
+        0,
+        1
+      );
+      const coercionFeeling = clamp(
+        (birthPolicy ? nonTargetRiskRatio * 0.35 : 0) +
+        coercionTextPressure +
+        rows.filter((row) => row.sideEffect === "強制感").length / total * 0.45,
+        0,
+        1
+      );
+      const fiscalAnxiety = clamp(
+        fiscalPressure * 0.50 +
+        fiscalTextPressure +
+        (1 - fairnessAverage) * 0.18 +
+        (birthPolicy ? 0.10 : 0),
+        0,
+        1
+      );
+      const implementationLoad = clamp(
+        policyLoad * 0.46 +
+        policyUseRatio * 0.26 +
+        implementationTextPressure +
+        rows.filter((row) => ["手続き疲れ", "政策疲労", "実装不信"].includes(row.sideEffect)).length / total * 0.32,
+        0,
+        1
+      );
+      const adjustabilityScore = clamp(
+        avg((row) => row.support || 0.5) * 0.34 +
+        avg((row) => row.trust || 0.5) * 0.26 +
+        (1 - polarizationRisk) * 0.18 +
+        (1 - policyFatigue) * 0.12 +
+        (1 - exclusionBacklash) * 0.10,
+        0,
+        1
+      );
+
+      const adjustmentActions = adjustmentActionsFor({
+        polarizationRisk,
+        exclusionBacklash,
+        policyFatigue,
+        coercionFeeling,
+        fiscalAnxiety,
+        implementationLoad,
+        adjustabilityScore
+      });
+
+      return {
+        polarizationRisk,
+        exclusionBacklash,
+        policyFatigue,
+        coercionFeeling,
+        fiscalAnxiety,
+        implementationLoad,
+        adjustabilityScore,
+        worstSegments: worstSegments(rows),
+        adjustmentActions
+      };
+    }
+
+    function groupedScoreGap(rows) {
+      const groupsByKey = new Map();
+      rows.forEach((row) => {
+        const key = row.group || "unknown";
+        if (!groupsByKey.has(key)) groupsByKey.set(key, []);
+        groupsByKey.get(key).push(row);
+      });
+      const scores = [...groupsByKey.values()]
+        .filter((items) => items.length >= 2)
+        .map((items) => items.reduce((sum, row) => sum + rowWellbeingScore(row), 0) / items.length);
+      if (scores.length < 2) return 0;
+      return clamp(Math.max(...scores) - Math.min(...scores), 0, 1);
+    }
+
+    function vulnerableGap(rows) {
+      const segments = segmentGroups(rows);
+      const scores = [...segments.values()]
+        .filter((items) => items.length >= 2)
+        .map((items) => items.reduce((sum, row) => sum + rowRiskScore(row), 0) / items.length);
+      if (scores.length < 2) return 0;
+      return clamp(Math.max(...scores) - Math.min(...scores), 0, 1);
+    }
+
+    function rowWellbeingScore(row) {
+      const categoryBonus = row.dominant === "good" ? 0.14 : row.dominant === "neutral" ? 0.06 : row.dominant === "danger" ? -0.12 : -0.04;
+      return clamp((row.pathway || 0.5) * 0.30 + (row.support || 0.5) * 0.28 + (row.trust || 0.5) * 0.18 + (row.childIntent || 0.3) * 0.12 + (1 - (row.policyFatigue || 0)) * 0.12 + categoryBonus, 0, 1);
+    }
+
+    function rowRiskScore(row) {
+      return clamp(
+        (row.dominant === "danger" ? 0.42 : row.dominant === "caution" ? 0.24 : 0) +
+        (1 - (row.trust || 0.5)) * 0.22 +
+        (row.policyFatigue || 0) * 0.20 +
+        (row.socialExitStatus ? 0.18 : 0),
+        0,
+        1
+      );
+    }
+
+    function segmentGroups(rows) {
+      const bySegment = new Map();
+      rows.forEach((row) => {
+        segmentLabels(row).forEach((label) => {
+          if (!bySegment.has(label)) bySegment.set(label, []);
+          bySegment.get(label).push(row);
+        });
+      });
+      return bySegment;
+    }
+
+    function segmentLabels(row) {
+      const labels = [];
+      if (row.region) labels.push(row.region);
+      if (row.careLoad > 0.40 || row.careLabel === "軽度" || row.careLabel === "重度") labels.push("ケア責任あり");
+      if (row.employmentStability < 0.36 || row.employmentStabilityLabel === "低") labels.push("雇用不安定");
+      if (/第1|第2/.test(row.income || "")) labels.push("低中所得");
+      const age = Number(row.displayAge);
+      if (Number.isFinite(age) && !(age >= 23 && age <= 49)) labels.push("家族形成支援の周辺層");
+      if (row.group) labels.push(groupLabelByKey[row.group] || row.group);
+      return labels.length ? labels : ["全体"];
+    }
+
+    function worstSegments(rows) {
+      return [...segmentGroups(rows).entries()]
+        .filter(([, items]) => items.length >= 2)
+        .map(([label, items]) => ({
+          label,
+          score: items.reduce((sum, row) => sum + rowRiskScore(row), 0) / items.length,
+          count: items.length
+        }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3)
+        .map((item) => `${item.label}${Math.round(item.score * 100)}%`);
+    }
+
+    function recentPolicyPressure() {
+      const windowStart = Math.max(minTurn, state.turn - 5);
+      const recentPolicyEvents = eventSchedule.filter((event) => (
+        event.type === "policy" &&
+        event.turn >= windowStart &&
+        event.turn <= state.turn
+      ));
+      const weighted = recentPolicyEvents.reduce((sum, event) => sum + clamp(event.strength || 0.5, 0, 1), 0);
+      return clamp(weighted / 8, 0, 1);
+    }
+
+    function adjustmentActionsFor(values) {
+      const actions = [];
+      if (values.polarizationRisk > 0.52) actions.push("属性別に枠を分ける");
+      if (values.exclusionBacklash > 0.48) actions.push("対象外説明と補完策");
+      if (values.policyFatigue > 0.50) actions.push("申請を減らし自動化");
+      if (values.coercionFeeling > 0.42) actions.push("選ばない自由を明示");
+      if (values.fiscalAnxiety > 0.46) actions.push("財源と上限を先に説明");
+      if (values.implementationLoad > 0.50) actions.push("段階導入と窓口増強");
+      if (!actions.length) actions.push("現状維持し継続観測");
+      if (values.adjustabilityScore > 0.62) actions.push("小さく修正して再観測");
+      return actions.slice(0, 5);
+    }
+
+    function riskLevel(value) {
+      if (value >= 0.68) return { label: "高", color: "#e11d48" };
+      if (value >= 0.42) return { label: "中", color: "#f59e0b" };
+      return { label: "低", color: "#16a34a" };
+    }
+
     function renderRadar(rows) {
       const grid = document.getElementById("radarGrid");
       const data = document.getElementById("radarData");
@@ -3795,6 +4053,7 @@
       const rows = currentSummaryRows();
       const { counts, total } = summarize(rows);
       const childIntent = averageChildIntentForFamilyFormation(rows);
+      const diagnostics = sideEffectDiagnostics(rows);
       const categoryCards = [
         ["希望", counts.good],
         ["中立", counts.neutral],
@@ -3806,7 +4065,10 @@
       }));
       return [
         ...categoryCards,
-        { label: "子ども希望指数", value: `${Math.round(childIntent * 100)}%` }
+        { label: "子ども希望指数", value: `${Math.round(childIntent * 100)}%` },
+        { label: "二極化リスク", value: `${riskLevel(diagnostics.polarizationRisk).label} / ${Math.round(diagnostics.polarizationRisk * 100)}%` },
+        { label: "政策疲労", value: `${riskLevel(diagnostics.policyFatigue).label} / ${Math.round(diagnostics.policyFatigue * 100)}%` },
+        { label: "調整余地", value: `${Math.round(diagnostics.adjustabilityScore * 100)}%` }
       ];
     }
 
@@ -3820,9 +4082,12 @@
       const childIntent = averageChildIntentForFamilyFormation(rows);
       const exitCount = rows.filter((row) => row.socialExitStatus).length;
       const hopeEmotionCount = rows.filter((row) => row.emotion === "希望").length;
+      const diagnostics = sideEffectDiagnostics(rows);
       return [
         `${turnToYear(state.turn)}時点では${top.label}が最多です（${top.count}/${total || 0}人）。`,
         `子ども希望指数は${Math.round(childIntent * 100)}%（家族形成対象年齢${familyRows.length}人）。希望感情は${hopeEmotionCount}人です。`,
+        `二極化リスクは${riskLevel(diagnostics.polarizationRisk).label}、政策疲労は${riskLevel(diagnostics.policyFatigue).label}。悪化しやすい層は${diagnostics.worstSegments.join(" / ") || "目立つ偏りなし"}です。`,
+        `調整候補は${diagnostics.adjustmentActions.join("、")}。調整余地は${Math.round(diagnostics.adjustabilityScore * 100)}%です。`,
         exitCount
           ? `離脱リスクは${exitCount}人。点線と「離脱」ラベルで確認できます。`
           : "離脱リスクはこの時点では目立っていません。"
@@ -4374,6 +4639,13 @@
         text: basisTextFor(row)
       });
       messages.push({
+        kind: "side",
+        mark: "副",
+        title: "副作用・調整",
+        tone: row.sideEffect && row.sideEffect !== "なし" ? row.sideEffect : "監査",
+        text: sideEffectTextFor(row)
+      });
+      messages.push({
         kind: "memory",
         mark: "記",
         title: "次へ残る記憶",
@@ -4381,6 +4653,12 @@
         text: memoryTextFor(row)
       });
       return messages;
+    }
+
+    function sideEffectTextFor(row) {
+      const sideEffect = row.sideEffect && row.sideEffect !== "なし" ? row.sideEffect : "大きな副作用は未検出";
+      const adjustment = row.adjustmentRequest && row.adjustmentRequest !== "なし" ? row.adjustmentRequest : "継続観測";
+      return `${sideEffect}。公平感 ${Math.round((row.fairnessPerception ?? 0.5) * 100)}%、政策疲労 ${Math.round((row.policyFatigue ?? 0) * 100)}%。調整候補: ${adjustment}。`;
     }
 
     function basisTextFor(row) {
