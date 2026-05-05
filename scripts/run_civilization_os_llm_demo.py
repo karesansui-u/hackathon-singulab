@@ -238,6 +238,28 @@ def current_age_for_step(base_age: str, step: int, schedule_by_step: Dict[int, D
     return str(int(age + relative_year_for_step(step, schedule_by_step)))
 
 
+def representative_age_from_text(value: str) -> str:
+    numbers = [float(item) for item in re.findall(r"\d+(?:\.\d+)?", value or "")]
+    if not numbers:
+        return ""
+    return str(int(sum(numbers) / len(numbers) + 0.5))
+
+
+def current_age_for_agent(
+    agent: Dict[str, str],
+    step: int,
+    schedule_by_step: Dict[int, Dict[str, str]],
+) -> str:
+    inflow_age = agent.get("流入時代表年齢", "")
+    inflow_year = agent.get("流入時相対年", "")
+    if inflow_age and inflow_year:
+        age = to_float(inflow_age, -1.0)
+        year = to_float(inflow_year, 0.0)
+        if age >= 0:
+            return str(int(age + relative_year_for_step(step, schedule_by_step) - year))
+    return current_age_for_step(agent.get("年齢", ""), step, schedule_by_step)
+
+
 def compact_child_cohorts(
     child_rows: List[Dict[str, str]] | None,
     inflow_rows: List[Dict[str, str]] | None,
@@ -284,6 +306,9 @@ def compact_child_cohorts(
             "trigger_step": row.get("発火ステップ", ""),
             "relative_year": row.get("相対年", ""),
             "inflow_age_band": row.get("流入時年齢帯", ""),
+            "representative_inflow_age": row.get("流入時代表年齢", ""),
+            "inflow_relative_year": row.get("流入時相対年", ""),
+            "generation_lineage": row.get("世代系統", ""),
             "target_layer": row.get("流入先レイヤー", ""),
             "display_policy": row.get("表示名方針", ""),
             "emotion_initialization": row.get("初期感情初期化", ""),
@@ -341,6 +366,13 @@ def build_generation_agents(
         hope = round(clamp(46 + hope_inheritance * 26 - distrust_inheritance * 12))
         child_intent = round(clamp(24 + hope_inheritance * 18 + solidarity_inheritance * 10 - distrust_inheritance * 10))
         evaluation, emotion = evaluation_from_scores(pathway, support, trust)
+        inflow_age = (
+            template.get("流入時代表年齢", "")
+            or representative_age_from_text(template.get("流入時年齢帯", ""))
+            or cohort.get("代表初期年齢")
+            or midpoint_age(cohort.get("初期年齢下限", "0"), cohort.get("初期年齢上限", "0"))
+        )
+        inflow_year = template.get("流入時相対年", "") or template.get("相対年", "")
 
         agents.append({
             "代表初期年齢": cohort.get("代表初期年齢", ""),
@@ -348,10 +380,7 @@ def build_generation_agents(
             "氏名": template.get("表示名方針") or cohort.get("表示名", ""),
             "分類コード": "次世代コホート",
             "ペルソナ名": template.get("表示名方針") or cohort.get("表示名", ""),
-            "年齢": cohort.get("代表初期年齢") or midpoint_age(
-                cohort.get("初期年齢下限", "0"),
-                cohort.get("初期年齢上限", "0"),
-            ),
+            "年齢": inflow_age,
             "性別": "世代代表",
             "地域区分": "全国",
             "世帯所得階層": "混合",
@@ -390,6 +419,9 @@ def build_generation_agents(
             "流入元コホートID": cohort.get("コホートID", ""),
             "流入テンプレートID": template.get("テンプレートID", ""),
             "流入発火ステップ": str(trigger_step),
+            "流入時代表年齢": inflow_age,
+            "流入時相対年": inflow_year,
+            "世代系統": template.get("世代系統", ""),
         })
     return [agent for agent in agents if agent.get("エージェントID")]
 
@@ -406,11 +438,13 @@ def agent_layer(agent_id: str) -> str:
 
 def agent_layer_for_age(agent_id: str, age_value: str) -> str:
     age = to_float(age_value, -1.0)
+    if 0 <= age < 15:
+        return "次世代コホート"
     if 15 <= age <= 22:
         return "若者"
     if 23 <= age <= 40:
         return "家族形成"
-    if 41 <= age <= 64:
+    if age >= 41:
         return "補助観測"
     if agent_id.startswith("YG_"):
         return "次世代コホート"
@@ -475,9 +509,9 @@ def build_prompt(
     )
     compact_agents = []
     for row in agents:
-        current_age = current_age_for_step(row["年齢"], start_step, schedule_by_step)
+        current_age = current_age_for_agent(row, start_step, schedule_by_step)
         age_by_step = {
-            str(step): current_age_for_step(row["年齢"], step, schedule_by_step)
+            str(step): current_age_for_agent(row, step, schedule_by_step)
             for step in range(start_step, start_step + steps)
         }
         compact_agents.append({
@@ -513,6 +547,9 @@ def build_prompt(
             "generation_representative": row.get("世代代表フラグ", "0"),
             "source_child_cohort": row.get("流入元コホートID", ""),
             "inflow_template": row.get("流入テンプレートID", ""),
+            "inflow_age": row.get("流入時代表年齢", ""),
+            "inflow_relative_year": row.get("流入時相対年", ""),
+            "generation_lineage": row.get("世代系統", ""),
         })
 
     compact_previous = []
@@ -585,6 +622,11 @@ def build_prompt(
 あなたは社会シミュレーションの観測器です。
 日本語だけで考え、出力はJSONだけにしてください。コードブロックは禁止です。
 
+このプロンプトのレイヤー:
+- 出力契約: JSON形式、観測項目、分類語彙、短さは実装上の制約として固定する。
+- 世界条件: エージェント属性、世界状態、日本社会状態、制度シナリオ、前ステップ記憶は観測条件として固定する。
+- 人間反応: その条件で本人がどう知覚し、どう感じ、どう動くかは固定しない。
+
 この実行で行うこと:
 エージェント本人へ命令するのではなく、固定属性・現在状態・世界状態・日本社会状態・情報環境を観測条件として渡します。
 その条件に置かれた人物モデルが、次のステップで自然にどう知覚し、どう感じ、どう考え、どう動いたかをrowデータとして記録します。
@@ -594,7 +636,7 @@ def build_prompt(
 - event.direction は「こう変化させろ」という指示ではなく、社会状態の説明ラベルです。
 - previous_agent_state は、前ステップから残っている本人の記憶・状態です。これも命令ではありません。
 - age/current_age は開始ステップ時点の年齢です。base_age は開始時点の年齢です。複数ステップを観測する場合は age_by_step を優先してください。
-- 10年後、20年後の判断では、現在年齢に応じて進学・就職・家族形成・ケア責任・子ども意向の現実性を変えてください。
+- 10年後、20年後の判断では、現在年齢に応じて進学・就職・家族形成・ケア責任・子ども意向の現実性が変わります。
 - child_cohort_context は0-14歳の次世代コホート設計です。子ども本人の内心やSNS発信を生成する命令ではありません。15歳以上に到達したステップ以降、若者/家族形成層へ入る初期条件として扱ってください。
 - 対象エージェントに `YG_` で始まるIDが含まれる場合、それは個人名を持たない世代代表rowです。子ども本人ではなく、15歳以上に到達した世代代表として、同世代の集合的な知覚・感情・行動を1rowで観測してください。
 - その人が情報を見ない、見ても反応しない、別の生活課題を優先する、矛盾した反応をすることも自然なら許容します。
@@ -629,11 +671,11 @@ def build_prompt(
 
 観測原則:
 - 望ましい発表ストーリーに合わせる必要はありません。
-- 全員を同じ方向に動かさないでください。
+- 全員が同じ方向に動くとは限りません。
 - 大きな事件が起きても、本人に届かなければ反応は小さくてよいです。
 - 逆に小さな出来事でも、その人の生活制約に刺されば大きく反応してよいです。
 - 数値は前ステップから大きく変わってもよいですが、reasoning_basis と矛盾しない範囲にします。
-- thought/private_talk/social_post は同じ内容の言い換えにしないでください。
+- thought/private_talk/social_post は、それぞれ異なる文脈の発話として観測します。
 - 発言はきれいに整理しすぎず、現実の人が言いそうな迷い・矛盾・言い切れなさを残します。
 - thought は90字以内、private_talk は80字以内、social_post は60字以内にします。
 - action_detail、perceived_situation、reasoning_basis、memory_update、carryover_concern は各80字以内にします。
@@ -686,11 +728,22 @@ def extract_json_from_text(text: str) -> Dict[str, Any]:
     text = str(text).strip()
     try:
         return json.loads(text)
-    except json.JSONDecodeError:
-        match = re.search(r"\{.*\}", text, flags=re.S)
-        if not match:
-            raise
-        return json.loads(match.group(0))
+    except json.JSONDecodeError as original_error:
+        decoder = json.JSONDecoder()
+        candidates = [text]
+        candidates.extend(
+            match.group(1).strip()
+            for match in re.finditer(r"```(?:json)?\s*(.*?)```", text, flags=re.S | re.I)
+        )
+        for candidate in candidates:
+            for start in [0, *[match.start() for match in re.finditer(r"\{", candidate)]]:
+                try:
+                    parsed, _ = decoder.raw_decode(candidate[start:].strip())
+                except json.JSONDecodeError:
+                    continue
+                if isinstance(parsed, dict):
+                    return parsed
+        raise original_error
 
 
 def extract_json_from_claude(stdout: str) -> Dict[str, Any]:
@@ -795,15 +848,28 @@ def run_claude(prompt: str, model: str, budget: float, timeout: int) -> Dict[str
 
 
 def combine_payloads_by_step(payloads_by_agent: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
-    turns_by_step: Dict[int, List[Dict[str, Any]]] = {}
-    for payload in payloads_by_agent.values():
+    turns_by_step: Dict[int, Dict[str, Dict[str, Any]]] = {}
+    for expected_agent_id, payload in payloads_by_agent.items():
+        found_expected_agent = False
         for turn in payload.get("turns", []):
             step = int(turn["step"])
-            turns_by_step.setdefault(step, [])
-            turns_by_step[step].extend(turn.get("agents", []))
+            turns_by_step.setdefault(step, {})
+            for agent_row in turn.get("agents", []):
+                if agent_row.get("agent_id") != expected_agent_id:
+                    continue
+                found_expected_agent = True
+                # Single-agent prompts can occasionally echo the same row twice.
+                # Keep the final row deterministically so downstream feedback is
+                # counted once per agent per step.
+                turns_by_step[step][expected_agent_id] = agent_row
+        if not found_expected_agent:
+            raise RuntimeError(f"Missing expected agent row in LLM output: {expected_agent_id}")
     return {
         "turns": [
-            {"step": step, "agents": sorted(turns_by_step[step], key=lambda item: item.get("agent_id", ""))}
+            {
+                "step": step,
+                "agents": sorted(turns_by_step[step].values(), key=lambda item: item.get("agent_id", "")),
+            }
             for step in sorted(turns_by_step)
         ],
         "raw_by_agent": payloads_by_agent,
@@ -817,16 +883,24 @@ def flatten_turns(
 ) -> List[Dict[str, Any]]:
     schedule_by_step = build_time_schedule_by_step(time_schedule_rows or [])
     rows: List[Dict[str, Any]] = []
+    deduped: Dict[tuple[int, str], Dict[str, Any]] = {}
+    order: List[tuple[int, str]] = []
     for turn in payload.get("turns", []):
         step = int(turn["step"])
         for item in turn.get("agents", []):
-            agent = agents_by_id.get(item["agent_id"], {})
-            current_age = current_age_for_step(agent.get("年齢", ""), step, schedule_by_step)
-            rows.append({
+            agent_id = item.get("agent_id", "")
+            if agent_id not in agents_by_id:
+                continue
+            agent = agents_by_id[agent_id]
+            current_age = current_age_for_agent(agent, step, schedule_by_step)
+            key = (step, agent_id)
+            if key not in deduped:
+                order.append(key)
+            deduped[key] = {
                 "step": step,
-                "agent_id": item["agent_id"],
+                "agent_id": agent_id,
                 "name": agent.get("氏名", ""),
-                "layer": agent_layer_for_age(item["agent_id"], current_age or agent.get("年齢", "")),
+                "layer": agent_layer_for_age(agent_id, current_age or agent.get("年齢", "")),
                 "base_age": agent.get("年齢", ""),
                 "current_age": current_age or agent.get("年齢", ""),
                 "evaluation": normalize_evaluation(item.get("evaluation", "")),
@@ -847,8 +921,8 @@ def flatten_turns(
                 "reasoning_basis": item.get("reasoning_basis", ""),
                 "memory_update": item.get("memory_update", ""),
                 "carryover_concern": item.get("carryover_concern", ""),
-            })
-    return rows
+            }
+    return [deduped[key] for key in order]
 
 
 def normalize_evaluation(value: str) -> str:

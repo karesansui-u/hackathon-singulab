@@ -19,7 +19,7 @@
 - `data/country_agents.tsv`: 世界国家30エージェント
 - `data/organization_agents.tsv`: 企業・自治体・教育機関などの組織15エージェント
 - `data/demo_panel_48.tsv`: 本番デモ用48枠パネルと層内代表重み
-- `data/time_schedule.tsv`: 本番デモ用71ステップの時間設計
+- `data/time_schedule.tsv`: 本番デモ用83ステップの時間設計
 - `data/age_observation_policy.tsv`: 年齢帯ごとの個人LLM/コホート観測/非表示の運用方針
 - `data/child_cohorts.tsv`: 0-14歳を名前付き個人ではなく次世代コホートとして扱う定義
 - `data/family_formation_cohort_definitions.tsv`: 今の家族形成世代、今の若者、今の子どもを10年/20年単位で見るためのコホート定義
@@ -40,7 +40,7 @@
 - `data/structure_stress_test_run_policy.tsv`: 通常ステップでは2-3体、重要イベント時は8体を回す軽量運用方針
 - `data/country_objective_weights.tsv`: 国家ごとの目的関数重み
 - `data/country_to_japan_channels.tsv`: 国家出力から日本社会状態への波及チャンネル
-- `data/world_events.tsv`: 71ステップ分の世界イベント入力
+- `data/world_events.tsv`: 83ステップ分の世界イベント入力
 
 年齢・世代の扱い:
 
@@ -55,6 +55,10 @@
 - ステップ1-60: 直近5年を月次で観測
 - ステップ61-65: 次の5年を年次で観測
 - ステップ66-71: 15年目から40年目までを5年単位で観測
+- ステップ72-83: 45年目から100年目までを5年単位で観測
+
+100年観測パートは、精密予測ではなく発表最後の示唆として扱う。
+主張したいことは「100年後を当てた」ではなく、観測のパラダイムが変われば、単年度KPIだけでなく、制度記憶が次世代以降の希望経路として残るかまで事前に試せる、ということである。
 
 比較run:
 

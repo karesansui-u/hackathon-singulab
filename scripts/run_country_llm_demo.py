@@ -201,12 +201,18 @@ def build_prompt(
             **{field: previous.get(field, "") for field in PRESSURE_FIELDS},
         })
     events = build_events(start_step, steps, world_events_by_step or {})
+    sample_country_code = countries[0]["国家コード"] if countries else "COUNTRY_CODE"
     return f"""
-あなたは国家モデルのLLM推論器です。
+あなたは国家行動シミュレーションの観測器です。
 日本語だけで考え、出力はJSONだけにしてください。コードブロックは禁止です。
 
-目的:
-AGI時代の世界国家が、日本社会と若者の未来感情へ与える世界圧力を、小さなデモとして生成する。
+このプロンプトのレイヤー:
+- 出力契約: JSON形式、観測項目、短さは実装上の制約として固定する。
+- 世界条件: AGI時代、世界イベント、国家属性、前ステップ状態は観測条件として固定する。
+- 国家反応: その条件で国家がどう判断し、日本へどんな圧力を生むかは固定しない。
+
+観測したいこと:
+AGI時代の世界国家が、日本社会と若者の未来感情へ与える世界圧力を、国家属性と制度制約から観測する。
 
 国家エージェントの第一目的関数:
 - 第一目的は「国家構造の存続」。
@@ -222,7 +228,7 @@ AGI時代の世界国家が、日本社会と若者の未来感情へ与える�
 - 間接衝突
 - 限定戦争
 
-各ステップで各国家について、次を生成してください。
+各ステップで各国家について、次を観測rowとして記録する。
 - risk_stage: 上記リスク段階から1つ
 - stance: 国家判断。25字以内
 - foreign_action: 外交・安全保障・経済行動。45字以内
@@ -238,12 +244,13 @@ AGI時代の世界国家が、日本社会と若者の未来感情へ与える�
 - japan_policy_buffer: 日本の緩衝政策余力 0-100
 - japan_impact_summary: 日本の若者にどう効くか。55字以内
 
-重要:
+観測プロトコル:
 - 国家を一人の人間のように美化しない。制度制約、国内世論、同盟、資源、戦争圧力を踏まえる。
 - すべてを悪化させない。緩衝政策、外交、資源余力がある国は圧力を下げてもよい。
-- 米国とイランは「完全終戦」ではなく、停戦中・再燃リスクありとして扱う。
-- 日本の若者への影響を必ず意識する。
+- 米国とイランは「完全終戦」ではなく、停戦中・再燃リスクありという世界条件に置かれている。
+- 日本の若者への影響は観測対象であり、影響が小さい場合は小さいと記録する。
 - 説明文は短く、デモ画面で読みやすくする。
+- 対象国家以外のcountry rowを混ぜない。例示行は出力対象ではない。
 
 対象国家:
 {json.dumps(compact_countries, ensure_ascii=False, indent=2)}
@@ -261,7 +268,7 @@ JSON形式:
       "step": {start_step},
       "countries": [
         {{
-          "country_code": "JPN",
+          "country_code": "{sample_country_code}",
           "risk_stage": "圧力上昇",
           "stance": "生活支援と安全保障の両立",
           "foreign_action": "米国と協議しエネルギー調達先を分散する",
@@ -288,11 +295,22 @@ def extract_json_from_text(text: str) -> Dict[str, Any]:
     text = str(text).strip()
     try:
         return json.loads(text)
-    except json.JSONDecodeError:
-        match = re.search(r"\{.*\}", text, flags=re.S)
-        if not match:
-            raise
-        return json.loads(match.group(0))
+    except json.JSONDecodeError as original_error:
+        decoder = json.JSONDecoder()
+        candidates = [text]
+        candidates.extend(
+            match.group(1).strip()
+            for match in re.finditer(r"```(?:json)?\s*(.*?)```", text, flags=re.S | re.I)
+        )
+        for candidate in candidates:
+            for start in [0, *[match.start() for match in re.finditer(r"\{", candidate)]]:
+                try:
+                    parsed, _ = decoder.raw_decode(candidate[start:].strip())
+                except json.JSONDecodeError:
+                    continue
+                if isinstance(parsed, dict):
+                    return parsed
+        raise original_error
 
 
 def extract_json_from_claude(stdout: str) -> Dict[str, Any]:
@@ -385,11 +403,17 @@ def run_claude(prompt: str, model: str, budget: float, timeout: int) -> Dict[str
 
 def combine_payloads_by_step(payloads_by_country: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
     turns_by_step: Dict[int, List[Dict[str, Any]]] = {}
-    for payload in payloads_by_country.values():
+    for expected_code, payload in payloads_by_country.items():
         for turn in payload.get("turns", []):
             step = int(turn["step"])
+            countries = [
+                item for item in turn.get("countries", [])
+                if item.get("country_code", "") == expected_code
+            ]
+            if not countries:
+                raise ValueError(f"Country payload for {expected_code} did not include its own country_code")
             turns_by_step.setdefault(step, [])
-            turns_by_step[step].extend(turn.get("countries", []))
+            turns_by_step[step].append(countries[0])
     return {
         "turns": [
             {"step": step, "countries": sorted(turns_by_step[step], key=lambda item: item.get("country_code", ""))}
@@ -405,10 +429,17 @@ def normalize_stage(value: str) -> str:
 
 def flatten_turns(payload: Dict[str, Any], countries_by_code: Dict[str, Dict[str, str]]) -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
+    seen: set[tuple[int, str]] = set()
     for turn in payload.get("turns", []):
         step = int(turn["step"])
         for item in turn.get("countries", []):
             code = item.get("country_code", "")
+            if code not in countries_by_code:
+                continue
+            key = (step, code)
+            if key in seen:
+                continue
+            seen.add(key)
             country = countries_by_code.get(code, {})
             row = {
                 "step": step,

@@ -219,10 +219,15 @@ def build_prompt(
 あなたは日本の組織運営シミュレーションの観測器です。
 日本語だけで考え、出力はJSONだけにしてください。コードブロックは禁止です。
 
-目的:
+このプロンプトのレイヤー:
+- 出力契約: JSON形式、観測項目、短さは実装上の制約として固定する。
+- 世界条件: 組織属性、世界状態、日本社会状態、前ステップ記憶は観測条件として固定する。
+- 組織反応: その条件で組織がどう判断し、若者・現役世代へどう効くかは固定しない。
+
+観測したいこと:
 AGI・生成AI・汎用ロボティクス普及下で、企業・自治体・教育機関が、採用・若手育成・AI導入・ロボ導入・雇用維持・事業転換をどう判断するかを観測する。
 
-重要:
+観測プロトコル:
 - 組織に命令しない。組織属性、制約、世界状態、前ステップ記憶を情報として扱う。
 - 日本型雇用の制約を考える。新卒一括採用、長期雇用、OJT、非正規調整、稟議、現場抵抗、地域責任。
 - 利益最大化だけでなく、採用市場、若手育成、地域雇用、ケア、制度信頼、構造持続投資を考慮する。
@@ -281,11 +286,22 @@ def extract_json_from_text(text: str) -> Dict[str, Any]:
     text = str(text).strip()
     try:
         return json.loads(text)
-    except json.JSONDecodeError:
-        match = re.search(r"\{.*\}", text, flags=re.S)
-        if not match:
-            raise
-        return json.loads(match.group(0))
+    except json.JSONDecodeError as original_error:
+        decoder = json.JSONDecoder()
+        candidates = [text]
+        candidates.extend(
+            match.group(1).strip()
+            for match in re.finditer(r"```(?:json)?\s*(.*?)```", text, flags=re.S | re.I)
+        )
+        for candidate in candidates:
+            for start in [0, *[match.start() for match in re.finditer(r"\{", candidate)]]:
+                try:
+                    parsed, _ = decoder.raw_decode(candidate[start:].strip())
+                except json.JSONDecodeError:
+                    continue
+                if isinstance(parsed, dict):
+                    return parsed
+        raise original_error
 
 
 def extract_json_from_claude(stdout: str) -> Dict[str, Any]:

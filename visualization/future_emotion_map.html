@@ -1129,6 +1129,7 @@
         <button type="button" data-agent-filter="youth" aria-pressed="false">若者</button>
         <button type="button" data-agent-filter="family" aria-pressed="false">家族形成</button>
         <button type="button" data-agent-filter="generation" aria-pressed="false">次世代</button>
+        <button type="button" data-agent-filter="auxiliary" aria-pressed="false">補助観測</button>
       </div>
     </section>
 
@@ -1314,16 +1315,23 @@
     const youthTsvPath = "../domain_packs/agi_youth_japan/data/youth_agents.tsv";
     const workingTsvPath = "../domain_packs/agi_youth_japan/data/working_agents.tsv";
     const timeScheduleTsvPath = "../domain_packs/agi_youth_japan/data/time_schedule.tsv";
-    const llmTurnsTsvPath = "../outputs/runs/closed_loop_40panel_step1_smoke/agent_turns.tsv";
+    const llmTurnsTsvPaths = [
+      "../outputs/runs/structure_intervention_100years_panel48_midprompt/agent_turns.tsv",
+      "../outputs/runs/structure_intervention_71steps_panel48_midprompt_20260505_031850/agent_turns.tsv",
+      "../outputs/runs/closed_loop_40panel_step1_smoke/agent_turns.tsv"
+    ];
     const llmTurnsOverlayPaths = [
-      "../outputs/runs/generation_cohort_step66_70_smoke/turns.tsv"
     ];
     const countryTurnsTsvPaths = [
+      "../outputs/runs/structure_intervention_100years_panel48_midprompt/country_turns.tsv",
+      "../outputs/runs/structure_intervention_71steps_panel48_midprompt_20260505_031850/country_turns.tsv",
       "../outputs/runs/closed_loop_40panel_step1_smoke/country_turns.tsv",
       "../outputs/runs/closed_loop_llm_24steps_light/country_turns.tsv",
       "../outputs/runs/country_llm_smoke/turns.tsv"
     ];
     const autoEventTsvPaths = [
+      "../outputs/runs/structure_intervention_100years_panel48_midprompt/auto_events_with_feedback.tsv",
+      "../outputs/runs/structure_intervention_71steps_panel48_midprompt_20260505_031850/auto_events_with_feedback.tsv",
       "../outputs/runs/closed_loop_40panel_step1_smoke/auto_events_with_organization.tsv",
       "../outputs/runs/closed_loop_40panel_step1_smoke/auto_events_with_feedback.tsv",
       "../outputs/runs/closed_loop_llm_24steps_light/auto_events_with_feedback.tsv"
@@ -1337,7 +1345,8 @@
     const groups = [
       { key: "youth", label: "若者", count: 12 },
       { key: "family", label: "家族形成", count: 8 },
-      { key: "generation", label: "次世代", count: 8 }
+      { key: "generation", label: "次世代", count: 8 },
+      { key: "auxiliary", label: "補助観測", count: 0 }
     ];
     const groupLabelByKey = Object.fromEntries(groups.map((group) => [group.key, group.label]));
 
@@ -1418,7 +1427,7 @@
           console.warn("Time schedule was not loaded; using generated max step.", timeScheduleError);
         }
         try {
-          const baseLlmRows = await loadTsvRows(llmTurnsTsvPath);
+          const baseLlmRows = await loadFirstAvailableTsv(llmTurnsTsvPaths);
           const overlayRows = [];
           for (const path of llmTurnsOverlayPaths) {
             try {
@@ -1630,15 +1639,17 @@
     }
 
     function groupKeyFromLayerOrAge(layer, ageValue, fallback = "youth") {
+      const age = Number(ageValue);
+      if (Number.isFinite(age)) {
+        if (age < 15) return "generation";
+        if (age >= 15 && age <= 22) return "youth";
+        if (age >= 23 && age <= 40) return "family";
+        if (age >= 41) return "auxiliary";
+      }
+      if ((layer || "").includes("補助") || (layer || "").includes("現役外") || (layer || "").includes("高齢")) return "auxiliary";
       if ((layer || "").includes("次世代")) return "generation";
       if ((layer || "").includes("家族形成")) return "family";
       if ((layer || "").includes("若者")) return "youth";
-      const age = Number(ageValue);
-      if (Number.isFinite(age)) {
-        if (age >= 15 && age <= 22) return "youth";
-        if (age >= 23 && age <= 40) return "family";
-        if (age < 15) return "generation";
-      }
       return fallback;
     }
 
@@ -2000,6 +2011,7 @@
       if (state.agentFilter === "youth") return activeRows.filter((row) => row.group === "youth");
       if (state.agentFilter === "family") return activeRows.filter((row) => row.group === "family");
       if (state.agentFilter === "generation") return activeRows.filter((row) => row.group === "generation");
+      if (state.agentFilter === "auxiliary") return activeRows.filter((row) => row.group === "auxiliary");
       if (state.agentFilter === "llm") {
         const currentLlmRows = activeRows.filter((row) => hasLlmForTurn(row.id));
         if (currentLlmRows.length) return currentLlmRows;
@@ -2348,7 +2360,7 @@
       const phase = Math.min(4, Math.floor(state.turn / 16));
       document.getElementById("eventText").textContent = events[state.scenario][phase];
 
-      const targetRows = ["youth", "family", "generation"].includes(state.agentFilter)
+      const targetRows = ["youth", "family", "generation", "auxiliary"].includes(state.agentFilter)
         ? rows.filter((row) => row.group === state.agentFilter)
         : rows;
       const signalRows = targetRows.length ? targetRows : rows;
@@ -2358,11 +2370,13 @@
         ? "家族形成の支配状態"
         : state.agentFilter === "generation"
           ? "次世代の支配状態"
-          : state.agentFilter === "youth"
-            ? "若者の支配状態"
-            : state.agentFilter === "all"
-              ? "全体の支配状態"
-              : "LLM対象の支配状態";
+          : state.agentFilter === "auxiliary"
+            ? "補助観測の支配状態"
+            : state.agentFilter === "youth"
+              ? "若者の支配状態"
+              : state.agentFilter === "all"
+                ? "全体の支配状態"
+                : "LLM対象の支配状態";
       document.getElementById("dominantSignalLabel").textContent = signalLabel;
       document.getElementById("youthSignal").textContent = `${categoryByKey[signalTop].label}が中心`;
 
