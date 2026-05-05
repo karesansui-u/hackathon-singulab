@@ -697,29 +697,68 @@
     }
 
     .event-timeline-track {
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      padding-bottom: 2px;
-      scrollbar-width: thin;
+      position: relative;
+      min-height: 76px;
+      overflow: visible;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0 18px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+
+    .event-timeline-track::before {
+      content: "";
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      top: 31px;
+      height: 4px;
+      border-radius: 999px;
+      background: #e2e8f0;
+    }
+
+    .timeline-progress {
+      position: absolute;
+      left: 18px;
+      top: 31px;
+      height: 4px;
+      border-radius: 999px;
+      background: #172033;
+      transition: width 240ms ease;
+    }
+
+    .timeline-now {
+      position: absolute;
+      top: 19px;
+      width: 2px;
+      height: 28px;
+      border-radius: 999px;
+      background: #172033;
+      box-shadow: 0 0 0 5px rgba(23, 32, 51, 0.10);
+      transform: translateX(-1px);
+      transition: left 240ms ease;
     }
 
     .timeline-event {
-      flex: 0 0 auto;
-      max-width: 190px;
-      min-height: 30px;
+      position: absolute;
+      top: 18px;
+      width: 30px;
+      height: 30px;
       border: 1px solid var(--line);
       border-radius: 999px;
-      padding: 5px 9px;
+      padding: 0;
       background: var(--surface);
       color: var(--ink);
       cursor: pointer;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 800;
       white-space: nowrap;
+      transform: translateX(-50%);
+      transition: transform 180ms ease, background 180ms ease, color 180ms ease, border-color 180ms ease;
     }
 
     .timeline-event:hover,
@@ -727,19 +766,62 @@
       border-color: #172033;
       background: #172033;
       color: #ffffff;
+      transform: translateX(-50%) translateY(-2px) scale(1.08);
+      z-index: 2;
+    }
+
+    .timeline-event.is-active {
+      animation: timeline-pulse 1400ms ease-in-out infinite;
+    }
+
+    .timeline-event.is-past {
+      border-color: #172033;
+    }
+
+    @keyframes timeline-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(23, 32, 51, 0.22); }
+      50% { box-shadow: 0 0 0 8px rgba(23, 32, 51, 0.02); }
     }
 
     .timeline-event-type {
       flex: 0 0 auto;
-      width: 8px;
-      height: 8px;
+      width: 10px;
+      height: 10px;
       border-radius: 999px;
       background: var(--muted);
     }
 
-    .timeline-event-label {
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .timeline-event-count {
+      font-size: 9px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .timeline-event-tooltip {
+      position: absolute;
+      left: 50%;
+      bottom: 36px;
+      width: max-content;
+      max-width: 230px;
+      transform: translateX(-50%) translateY(4px);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 8px;
+      background: #ffffff;
+      color: var(--ink);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+      opacity: 0;
+      pointer-events: none;
+      white-space: normal;
+      font-size: 11px;
+      line-height: 1.35;
+      transition: opacity 140ms ease, transform 140ms ease;
+    }
+
+    .timeline-event:hover .timeline-event-tooltip,
+    .timeline-event.is-active .timeline-event-tooltip {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
     }
 
     .map-svg {
@@ -3385,6 +3467,11 @@
       return `${turnToYear(event.turn)} / ${eventTypeLabel(event)}: ${event.name}`;
     }
 
+    function timelinePercent(turn) {
+      if (maxTurn <= minTurn) return 0;
+      return clamp(((Number(turn) - minTurn) / (maxTurn - minTurn)) * 100, 0, 100);
+    }
+
     function renderEventTimeline() {
       if (!eventTimeline || !eventTimelineCurrent) return;
       const items = timelineItems();
@@ -3393,7 +3480,7 @@
       eventTimelineCurrent.textContent = current
         ? `現在: ${eventTypeLabel(current)} / ${current.name}`
         : next
-          ? `次: ${eventSummary(next)}`
+          ? `${turnToYear(state.turn)} / 次: ${eventSummary(next)}`
           : "主要イベント終了";
 
       if (!items.length) {
@@ -3401,16 +3488,25 @@
         return;
       }
 
-      eventTimeline.innerHTML = items.map(({ turn, event, count }) => {
-        const active = turn === state.turn;
-        const extra = count > 1 ? ` +${count - 1}` : "";
-        return `
-          <button type="button" class="timeline-event ${active ? "is-active" : ""}" data-turn="${turn}" title="${escapeHtml(event.description || event.name)}">
-            <span class="timeline-event-type" style="background:${eventTypeColor(event)}"></span>
-            <span class="timeline-event-label">${escapeHtml(turnToYear(turn))} ${escapeHtml(event.name)}${extra}</span>
-          </button>
-        `;
-      }).join("");
+      const progress = timelinePercent(state.turn).toFixed(2);
+      eventTimeline.innerHTML = `
+        <div class="timeline-progress" style="width:${progress}%"></div>
+        <div class="timeline-now" style="left:clamp(18px, ${progress}%, calc(100% - 18px))"></div>
+        ${items.map(({ turn, event, count }) => {
+          const active = turn === state.turn;
+          const past = turn < state.turn;
+          const pos = timelinePercent(turn).toFixed(2);
+          const extra = count > 1 ? `+${count - 1}` : "";
+          const tooltip = `${turnToYear(turn)} ${eventTypeLabel(event)} / ${event.name}${count > 1 ? ` 他${count - 1}件` : ""}`;
+          return `
+            <button type="button" class="timeline-event ${past ? "is-past" : ""} ${active ? "is-active" : ""}" data-turn="${turn}" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(tooltip)}" style="left:clamp(18px, ${pos}%, calc(100% - 18px))">
+              <span class="timeline-event-type" style="background:${eventTypeColor(event)}"></span>
+              ${extra ? `<span class="timeline-event-count">${escapeHtml(extra)}</span>` : ""}
+              <span class="timeline-event-tooltip">${escapeHtml(tooltip)}</span>
+            </button>
+          `;
+        }).join("")}
+      `;
     }
 
     function renderEventBurst() {
