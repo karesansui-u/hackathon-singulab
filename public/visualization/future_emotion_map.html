@@ -464,19 +464,19 @@
 
     .content {
       display: grid;
-      grid-template-columns: minmax(380px, 0.78fr) minmax(0, 1.45fr);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(320px, 0.82fr);
+      grid-template-areas:
+        "map map map"
+        "trace diff detail"
+        "summary summary detail";
+      align-items: start;
       gap: 16px;
       padding: 16px 24px 24px;
       min-height: 0;
     }
 
     .left-column {
-      grid-column: 2;
-      grid-row: 1;
-      display: grid;
-      grid-template-rows: auto auto;
-      gap: 12px;
-      min-width: 0;
+      display: contents;
     }
 
     .panel {
@@ -489,9 +489,10 @@
     }
 
     .map-panel {
+      grid-area: map;
       display: grid;
-      grid-template-rows: auto 1fr auto;
-      min-height: 660px;
+      grid-template-rows: auto auto minmax(540px, 1fr) auto auto auto;
+      min-height: 760px;
     }
 
     .panel-header {
@@ -588,15 +589,11 @@
       justify-content: center;
       align-items: center;
       gap: 8px;
-      padding: 0;
-      border-top: 0;
-      background: transparent;
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 18px;
+      padding: 10px 16px 6px;
+      border-top: 1px solid var(--line);
+      background: #ffffff;
+      position: relative;
       z-index: 5;
-      pointer-events: none;
     }
 
     .map-control-bar {
@@ -608,7 +605,6 @@
       border-radius: 8px;
       background: #ffffff;
       box-shadow: 0 8px 22px rgba(15, 23, 42, 0.14);
-      pointer-events: auto;
       flex-wrap: wrap;
       justify-content: center;
     }
@@ -649,7 +645,6 @@
       padding: 6px 10px;
       background: rgba(255, 255, 255, 0.94);
       box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
-      pointer-events: auto;
     }
 
     .map-progress-label {
@@ -830,7 +825,7 @@
       display: block;
       width: 100%;
       height: 100%;
-      min-height: 520px;
+      min-height: 540px;
       border-radius: 8px;
       background: #fbfdff;
       border: 1px solid var(--line);
@@ -1113,6 +1108,7 @@
     }
 
     .left-summary-grid {
+      grid-area: summary;
       display: grid;
       grid-template-columns: minmax(240px, 0.9fr) minmax(280px, 1.1fr);
       gap: 12px;
@@ -1120,12 +1116,104 @@
     }
 
     .side {
-      grid-column: 1;
-      grid-row: 1;
+      grid-area: detail;
       display: grid;
       grid-template-rows: 1fr;
       gap: 16px;
       min-width: 0;
+    }
+
+    .emergence-panel {
+      grid-area: trace;
+    }
+
+    .counterfactual-panel {
+      grid-area: diff;
+    }
+
+    .cockpit-body {
+      padding: 14px 16px 16px;
+      display: grid;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .trace-row,
+    .diff-row {
+      display: grid;
+      gap: 5px;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 11px;
+      background: #ffffff;
+    }
+
+    .trace-row {
+      grid-template-columns: 96px minmax(0, 1fr);
+      align-items: start;
+    }
+
+    .trace-label,
+    .diff-label {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+      font-weight: 900;
+    }
+
+    .trace-value,
+    .diff-value {
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 800;
+      min-width: 0;
+    }
+
+    .trace-chips,
+    .diff-list {
+      display: grid;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .trace-chip {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      max-width: 100%;
+      min-height: 24px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: var(--surface-alt);
+      color: var(--ink);
+      font-size: 11px;
+      line-height: 1.35;
+      font-weight: 800;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .diff-row {
+      grid-template-columns: 72px minmax(76px, auto) minmax(0, 1fr);
+      align-items: center;
+    }
+
+    .diff-value {
+      font-size: 18px;
+      line-height: 1.15;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .diff-base {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+      font-weight: 800;
+      text-align: right;
     }
 
     .radar-panel,
@@ -1227,6 +1315,109 @@
 
     .left-summary-grid .bar-track {
       height: 8px;
+    }
+
+    .adjustment-panel {
+      grid-column: 1 / -1;
+    }
+
+    .adjustment-body {
+      padding: 10px 12px 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .adjustment-meter-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .adjustment-meter {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px;
+      background: #fbfdff;
+    }
+
+    .adjustment-meter-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: baseline;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .adjustment-meter-value {
+      color: var(--ink);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .adjustment-meter-track {
+      height: 8px;
+      margin-top: 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-alt);
+      overflow: hidden;
+    }
+
+    .adjustment-meter-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: #64748b;
+    }
+
+    .adjustment-summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .adjustment-summary-block {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 9px;
+      background: var(--surface-alt);
+    }
+
+    .adjustment-summary-label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .adjustment-summary-value {
+      margin-top: 4px;
+      color: var(--ink);
+      font-size: 12px;
+      line-height: 1.45;
+      font-weight: 800;
+    }
+
+    .adjustment-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .adjustment-action {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: #ffffff;
+      color: #334155;
+      font-size: 10px;
+      font-weight: 900;
     }
 
     .detail-body {
@@ -1487,6 +1678,16 @@
       color: #334155;
     }
 
+    .message-side {
+      border-left-color: #dc2626;
+      background: #fff7ed;
+    }
+
+    .message-side .message-mark {
+      background: #fed7aa;
+      color: #9a3412;
+    }
+
     .shape-key {
       display: flex;
       align-items: center;
@@ -1514,12 +1715,17 @@
 
       .content {
         grid-template-columns: 1fr;
+        grid-template-areas:
+          "map"
+          "trace"
+          "diff"
+          "summary"
+          "detail";
       }
 
       .left-column,
       .side {
-        grid-column: auto;
-        grid-row: auto;
+        grid-area: auto;
       }
 
       .side {
@@ -1533,6 +1739,10 @@
 
       .left-summary-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .side {
+        grid-area: detail;
       }
     }
 
@@ -1569,16 +1779,28 @@
       .top-metrics,
       .map-footer,
       .left-summary-grid,
+      .adjustment-meter-grid,
+      .adjustment-summary,
       .side {
         grid-template-columns: 1fr;
       }
 
       .map-panel {
-        min-height: 560px;
+        min-height: 600px;
+        grid-template-rows: auto auto minmax(420px, 1fr) auto auto auto;
       }
 
       .map-svg {
         min-height: 430px;
+      }
+
+      .trace-row,
+      .diff-row {
+        grid-template-columns: 1fr;
+      }
+
+      .diff-base {
+        text-align: left;
       }
     }
   </style>
@@ -1719,7 +1941,8 @@
               <text id="eventBurstTitle" x="250" y="86" class="event-burst-title">EVENT</text>
             </svg>
           </div>
-          <div class="map-controls">
+        </div>
+        <div class="map-controls">
             <div class="map-control-bar">
               <button type="button" class="map-control-button is-wide" id="startButton" title="最初へ" aria-label="first step">始</button>
               <button type="button" class="map-control-button is-wide" id="prevEventButton" title="前の主要イベントへ" aria-label="previous major event">前イベント</button>
@@ -1734,7 +1957,6 @@
               <input id="stepSlider" type="range" min="0" max="79" value="0" step="1">
               <span class="map-progress-label" id="stepMaxLabel">79</span>
             </label>
-          </div>
         </div>
         <div class="event-timeline" aria-label="主要イベントタイムライン">
           <div class="event-timeline-head">
@@ -1766,6 +1988,28 @@
         </footer>
         </section>
 
+        <section class="panel emergence-panel">
+          <header class="panel-header">
+            <h2 class="panel-title">創発トレース</h2>
+            <span class="panel-title-sub" id="emergenceTurnLabel">同時点観測</span>
+          </header>
+          <div class="cockpit-body" id="emergenceTrace">
+            <div class="agent-summary">読み込み中</div>
+          </div>
+        </section>
+
+        <section class="panel counterfactual-panel">
+          <header class="panel-header">
+            <h2 class="panel-title">介入なしとの差分</h2>
+            <span class="panel-title-sub" id="counterfactualLabel">同時点比較</span>
+          </header>
+          <div class="cockpit-body">
+            <div class="diff-list" id="counterfactualDiff">
+              <div class="agent-summary">読み込み中</div>
+            </div>
+          </div>
+        </section>
+
         <section class="left-summary-grid">
           <section class="panel radar-panel">
           <header class="panel-header">
@@ -1791,6 +2035,13 @@
             <h2 class="panel-title">分布</h2>
           </header>
           <div class="distribution" id="distribution"></div>
+        </section>
+
+          <section class="panel adjustment-panel">
+          <header class="panel-header">
+            <h2 class="panel-title">副作用・調整</h2>
+          </header>
+          <div class="adjustment-body" id="adjustmentDiagnostics"></div>
         </section>
 
         </section>
@@ -2273,6 +2524,20 @@
         "学校・会社・地域の役割再設計",
         "修復活動と技能継承が報酬化",
         "希望経路と世代継承意欲が回復"
+      ],
+      birthGrant: [
+        "構造持続と出産支援を同時観測",
+        "住居・ケア・復帰キャリアを束ねる",
+        "制度利用と対象外反発を同時に見る",
+        "財政監査と非強制説明を確認",
+        "家族形成条件の詰まりを抽出"
+      ],
+      hopeFamily: [
+        "個別通知と即時予約を投入",
+        "nat着金と伴走者を観測",
+        "希望化と政策疲労を同時に見る",
+        "地域成功例と対象外反発を比較",
+        "制度記憶と次世代継承を確認"
       ]
     };
     const fallbackEventSchedule = [
@@ -2542,8 +2807,8 @@
             turn,
             type,
             strength: Number(row.intensity_0to1) || 0.50,
-            name: row.event_name,
-            direction: row.direction || "",
+            name: normalizedEventName(eventId, row.event_name),
+            direction: normalizedEventDirection(eventId, row.direction || ""),
             description: row.description || "",
             category,
             source: "予定イベント",
@@ -2551,6 +2816,16 @@
           };
         })
         .filter(Boolean);
+    }
+
+    function normalizedEventName(eventId, name) {
+      if (eventId === "HP07") return "希望不足時の条件監査";
+      return name || "";
+    }
+
+    function normalizedEventDirection(eventId, direction) {
+      if (eventId === "HP07") return "説明可能性↑ 副作用監査↑ 調整候補↑";
+      return direction || "";
     }
 
     function buildWorldTimelineSchedule(rows) {
@@ -2601,6 +2876,12 @@
           age: row.base_age || row.current_age || "",
           activeFromTurn: isGeneration ? firstStepByAgent.get(id) || Number(row.step) || 0 : 0,
           gender: isGeneration ? "世代代表" : "不明",
+          region: "",
+          income: "",
+          workSchool: "",
+          employmentStabilityLabel: "",
+          housing: "",
+          careLabel: "",
           classificationCode: isGeneration ? "次世代コホート" : "LLM生成",
           persona: row.name || row.layer || "LLM生成エージェント",
           initialEvaluation: evaluationKeyByLabel[row.evaluation] || "neutral",
@@ -2633,6 +2914,12 @@
           drift: seeded(index * 23 + seedOffset + 116),
           age: row["年齢"] || "",
           gender: row["性別"] || "不明",
+          region: row["地域区分"] || "",
+          income: row["世帯所得階層"] || "",
+          workSchool: row["在学就業区分"] || "",
+          employmentStabilityLabel: row["雇用安定度"] || "",
+          housing: row["住居形態"] || "",
+          careLabel: row["ケア責任"] || "",
           classificationCode: row["分類コード"],
           persona: row["ペルソナ名"],
           initialEvaluation: evaluationKeyByLabel[row["初期評価分類"]] || "neutral",
@@ -2867,6 +3154,34 @@
       const position = roomPosition(positionedAgent, dominant, turn);
       const x = position.x;
       const y = position.y;
+      const socialExit = socialExitStatus({
+        ...agent,
+        displayAge,
+        dominant,
+        intensity,
+        emotion,
+        action,
+        actionCategory,
+        pathway,
+        support,
+        agency
+      });
+      const sideEffectProfile = individualSideEffectProfile({
+        ...agent,
+        displayAge,
+        dominant,
+        intensity,
+        emotion,
+        action,
+        actionCategory,
+        pathway,
+        support,
+        trust,
+        agency,
+        childIntent,
+        scenario,
+        socialExitStatus: socialExit
+      });
 
       return {
         ...agent,
@@ -2896,18 +3211,11 @@
         memoryUpdate: llmTurn?.memory_update || "",
         carryoverConcern: llmTurn?.carryover_concern || "",
         isLlmGenerated: Boolean(llmTurn),
-        socialExitStatus: socialExitStatus({
-          ...agent,
-          displayAge,
-          dominant,
-          intensity,
-          emotion,
-          action,
-          actionCategory,
-          pathway,
-          support,
-          agency
-        })
+        socialExitStatus: socialExit,
+        sideEffect: llmTurn?.side_effect || sideEffectProfile.sideEffect,
+        adjustmentRequest: llmTurn?.adjustment_request || sideEffectProfile.adjustmentRequest,
+        fairnessPerception: llmTurn?.fairness_perception !== undefined && llmTurn?.fairness_perception !== "" ? parsePercent(llmTurn.fairness_perception, sideEffectProfile.fairnessPerception) : sideEffectProfile.fairnessPerception,
+        policyFatigue: llmTurn?.policy_fatigue !== undefined && llmTurn?.policy_fatigue !== "" ? parsePercent(llmTurn.policy_fatigue, sideEffectProfile.policyFatigue) : sideEffectProfile.policyFatigue
       };
     }
 
@@ -2984,6 +3292,58 @@
       if (angerExitRisk) return "反発・離脱リスク";
       if (row.dominant === "danger" && row.intensity > 0.70) return "孤立リスク";
       return "";
+    }
+
+    function individualSideEffectProfile(row) {
+      const age = Number(row.displayAge);
+      const isFamilyFormationAge = Number.isFinite(age) && age >= 23 && age <= 49;
+      const isBirthPolicyScenario = ["birthOnly", "birthGrant", "hopeFamily"].includes(row.scenario);
+      const actionCategory = row.actionCategory || actionCategoryFor(row.action, row.dominant);
+      const distrust = clamp(1 - (row.trust || 0.5), 0, 1);
+      const lowReach = clamp(1 - ((row.support || 0.5) * 0.55 + (row.pathway || 0.5) * 0.45), 0, 1);
+      const highLoadAction = ["情報収集", "制度利用", "相談"].includes(actionCategory);
+      const protestAction = ["抗議・発信", "撤退", "回避・縮小"].includes(actionCategory);
+      const fairnessPerception = clamp((row.trust || 0.5) * 0.42 + (row.support || 0.5) * 0.32 + (row.pathway || 0.5) * 0.16 - (row.dominant === "danger" ? 0.12 : 0), 0, 1);
+      const policyFatigue = clamp(
+        (highLoadAction ? 0.34 : 0) +
+        lowReach * 0.28 +
+        distrust * 0.22 +
+        (row.intensity || 0) * 0.16 +
+        (hasPolicyEventsScenario(row.scenario) ? 0.08 : 0),
+        0,
+        1
+      );
+
+      let sideEffect = "なし";
+      let adjustmentRequest = "なし";
+      if (isBirthPolicyScenario && !isFamilyFormationAge && ["caution", "danger"].includes(row.dominant)) {
+        sideEffect = "対象外感";
+        adjustmentRequest = "対象条件の説明";
+      } else if (isBirthPolicyScenario && isFamilyFormationAge && row.childIntent < 0.35 && ["caution", "danger"].includes(row.dominant)) {
+        sideEffect = "強制感";
+        adjustmentRequest = "非強制説明";
+      } else if (policyFatigue > 0.68 && highLoadAction) {
+        sideEffect = actionCategory === "制度利用" ? "手続き疲れ" : "政策疲労";
+        adjustmentRequest = "手続き簡素化";
+      } else if (distrust > 0.68 && hasPolicyEventsScenario(row.scenario)) {
+        sideEffect = "財政不安";
+        adjustmentRequest = "財源説明";
+      } else if (protestAction && fairnessPerception < 0.42) {
+        sideEffect = "実装不信";
+        adjustmentRequest = "補完支援";
+      }
+
+      if (row.socialExitStatus && sideEffect === "なし") {
+        sideEffect = "実装不信";
+        adjustmentRequest = "補完支援";
+      }
+
+      return {
+        sideEffect,
+        adjustmentRequest,
+        fairnessPerception,
+        policyFatigue
+      };
     }
 
     function roomPosition(agent, category, turn = 0) {
@@ -3073,9 +3433,12 @@
       renderLegend();
       renderAgents(rows);
       renderDistribution(rows);
+      renderAdjustmentDiagnostics(rows);
       renderRadar(rows);
       renderMetrics(rows);
       renderSignals(rows);
+      renderEmergenceTrace(rows);
+      renderCounterfactualDiff(rows);
       renderWorldPressure();
       renderDetail(selected);
       renderAgentSearch(rows);
@@ -3660,6 +4023,201 @@
           ? state.turn < 18 ? "実証準備" : state.turn < 44 ? "制度更新中" : "報酬経路が定着"
           : state.turn < 22 ? "未発動" : state.turn < 52 ? "遅延対応" : "最低限の抑制";
       document.getElementById("institutionSignal").textContent = institutionText;
+    }
+
+    function renderEmergenceTrace(rows) {
+      const container = document.getElementById("emergenceTrace");
+      const label = document.getElementById("emergenceTurnLabel");
+      if (!container) return;
+      if (label) label.textContent = turnToYear(state.turn);
+      if (!rows.length) {
+        container.innerHTML = `<div class="agent-summary">表示データなし</div>`;
+        return;
+      }
+
+      const event = pickPrimaryEvent(eventsAtTurn(state.turn).filter(isTimelineEvent));
+      const previousTurn = Math.max(minTurn, state.turn - 1);
+      const previousRows = previousTurn === state.turn
+        ? rows
+        : rowsForSameAgentsAtTurn(rows, state.scenario, previousTurn, runDataByScenario.get(state.scenario));
+      const variableChips = topVariableChanges(rows, previousRows);
+      const groupChips = topGroupReactions(rows, previousRows);
+      const actionChips = topActionCategories(rows);
+
+      container.innerHTML = `
+        <div class="trace-row">
+          <div class="trace-label">主要イベント</div>
+          <div class="trace-value">${escapeHtml(event ? `${eventTypeLabel(event)}: ${event.name}` : "主要イベントなし")}</div>
+        </div>
+        <div class="trace-row">
+          <div class="trace-label">影響方向</div>
+          <div class="trace-value">${escapeHtml(event?.direction || "状態推移を継続観測")}</div>
+        </div>
+        <div class="trace-row">
+          <div class="trace-label">変数変化</div>
+          <div class="trace-chips">${renderTraceChips(variableChips)}</div>
+        </div>
+        <div class="trace-row">
+          <div class="trace-label">反応した層</div>
+          <div class="trace-chips">${renderTraceChips(groupChips)}</div>
+        </div>
+        <div class="trace-row">
+          <div class="trace-label">創発行動</div>
+          <div class="trace-chips">${renderTraceChips(actionChips)}</div>
+        </div>
+      `;
+    }
+
+    function renderCounterfactualDiff(rows) {
+      const container = document.getElementById("counterfactualDiff");
+      const label = document.getElementById("counterfactualLabel");
+      if (!container) return;
+      if (label) label.textContent = state.scenario === "baseline" ? "介入なし / 同時点" : "同時点比較";
+      const baselineRunData = runDataByScenario.get("baseline");
+      if (!baselineRunData) {
+        container.innerHTML = `<div class="agent-summary">介入なしデータ未接続</div>`;
+        return;
+      }
+
+      const baselineRows = rowsForSameAgentsAtTurn(rows, "baseline", state.turn, baselineRunData);
+      const currentStats = summaryStatsForRows(rows);
+      const baselineStats = summaryStatsForRows(baselineRows);
+      const items = [
+        ...categories.map((category) => ({
+          label: category.label,
+          value: signedCount((currentStats.counts[category.key] || 0) - (baselineStats.counts[category.key] || 0)),
+          base: `現在${currentStats.counts[category.key] || 0} / 基準${baselineStats.counts[category.key] || 0}`
+        })),
+        {
+          label: "子ども希望",
+          value: signedPoint(currentStats.childIntent - baselineStats.childIntent),
+          base: `現在${Math.round(currentStats.childIntent * 100)}% / 基準${Math.round(baselineStats.childIntent * 100)}%`
+        }
+      ];
+
+      container.innerHTML = items.map((item) => `
+        <div class="diff-row">
+          <div class="diff-label">${escapeHtml(item.label)}</div>
+          <div class="diff-value">${escapeHtml(item.value)}</div>
+          <div class="diff-base">${escapeHtml(item.base)}</div>
+        </div>
+      `).join("");
+    }
+
+    function rowsForSameAgentsAtTurn(sourceRows, scenario, turn, runData) {
+      const agentById = new Map(agents.map((agent) => [agent.id, agent]));
+      return sourceRows
+        .map((row) => {
+          const agent = agentById.get(row.id) || row;
+          return agent ? agentStateForRunData(agent, scenario, turn, runData) : null;
+        })
+        .filter(Boolean)
+        .filter((row) => !row.activeFromTurn || turn >= row.activeFromTurn)
+        .filter((row) => isInMapObservationAge(row));
+    }
+
+    function agentStateForRunData(agent, scenario, turn, runData) {
+      if (!runData) return agentState(agent, scenario, turn);
+      const previousLlmTurnsByKey = llmTurnsByKey;
+      try {
+        llmTurnsByKey = runData.llmTurnsByKey || new Map();
+        return agentState(agent, scenario, turn);
+      } finally {
+        llmTurnsByKey = previousLlmTurnsByKey;
+      }
+    }
+
+    function summaryStatsForRows(rows) {
+      const { counts, total } = summarize(rows);
+      return {
+        counts,
+        total,
+        childIntent: averageChildIntentForFamilyFormation(rows)
+      };
+    }
+
+    function topVariableChanges(rows, previousRows) {
+      const variables = [
+        ["pathway", "未来経路"],
+        ["support", "構造支援"],
+        ["trust", "制度信頼"],
+        ["risk", "リスク"],
+        ["childIntent", "子ども希望"]
+      ];
+      return variables
+        .map(([key, label]) => ({
+          label,
+          delta: averageNumeric(rows, key) - averageNumeric(previousRows, key)
+        }))
+        .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+        .slice(0, 3)
+        .map((item) => `${item.label} ${signedPoint(item.delta)}`);
+    }
+
+    function topGroupReactions(rows, previousRows) {
+      const previousById = new Map(previousRows.map((row) => [row.id, row]));
+      const rowsByGroup = new Map();
+      rows.forEach((row) => {
+        const key = row.group || "auxiliary";
+        if (!rowsByGroup.has(key)) rowsByGroup.set(key, []);
+        rowsByGroup.get(key).push(row);
+      });
+      return [...rowsByGroup.entries()]
+        .map(([group, groupRows]) => {
+          const previousGroupRows = groupRows.map((row) => previousById.get(row.id)).filter(Boolean);
+          const currentSummary = summarize(groupRows);
+          const previousSummary = summarize(previousGroupRows);
+          const currentTop = categories
+            .map((category) => ({ ...category, count: currentSummary.counts[category.key] || 0 }))
+            .sort((a, b) => b.count - a.count)[0] || categories[1];
+          const riskDelta = (currentSummary.counts.caution + currentSummary.counts.danger) -
+            (previousSummary.counts.caution + previousSummary.counts.danger);
+          const hopeDelta = currentSummary.counts.good - previousSummary.counts.good;
+          const movement = Math.abs(riskDelta) >= Math.abs(hopeDelta)
+            ? `注意・危険 ${signedCount(riskDelta)}`
+            : `希望 ${signedCount(hopeDelta)}`;
+          return {
+            score: Math.max(Math.abs(riskDelta), Math.abs(hopeDelta), currentTop.count),
+            text: `${groupLabelByKey[group] || "観測層"}: ${currentTop.label}が最多 / ${movement}`
+          };
+        })
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3)
+        .map((item) => item.text);
+    }
+
+    function topActionCategories(rows) {
+      const counts = new Map();
+      rows.forEach((row) => {
+        const label = row.actionCategory || actionCategoryFor(row.action, row.dominant);
+        counts.set(label, (counts.get(label) || 0) + 1);
+      });
+      return [...counts.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([label, count]) => `${label} ${count}人`);
+    }
+
+    function renderTraceChips(items) {
+      const safeItems = items.length ? items : ["観測なし"];
+      return safeItems.map((item) => `<span class="trace-chip">${escapeHtml(item)}</span>`).join("");
+    }
+
+    function averageNumeric(rows, key) {
+      const values = rows.map((row) => Number(row[key])).filter(Number.isFinite);
+      return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+    }
+
+    function signedCount(value) {
+      const rounded = Math.round(value);
+      if (rounded === 0) return "±0人";
+      return `${rounded > 0 ? "+" : ""}${rounded}人`;
+    }
+
+    function signedPoint(value) {
+      const rounded = Math.round(value * 100);
+      if (rounded === 0) return "±0pt";
+      return `${rounded > 0 ? "+" : ""}${rounded}pt`;
     }
 
     function countryStepForTurn() {
