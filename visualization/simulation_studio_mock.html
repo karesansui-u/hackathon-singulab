@@ -717,7 +717,7 @@
         <div class="panel-head">
           <div>
             <h2 class="panel-title">検証設計</h2>
-            <div class="panel-sub">同じ設定は同じrun_requestで再現</div>
+            <div class="panel-sub">同じ設定は同じ実行条件で再現</div>
           </div>
         </div>
         <div class="panel-body">
@@ -892,7 +892,7 @@
           <div class="panel-head">
             <div>
               <h2 class="panel-title">再現用リクエスト</h2>
-              <div class="panel-sub">run_request.json</div>
+              <div class="panel-sub">実行条件JSON</div>
             </div>
             <button class="button" type="button" id="validateButton">検証</button>
           </div>
@@ -920,8 +920,8 @@
               </div>
             </div>
             <pre class="preview-box" id="apiPreview">{
-  "schema_version": "simulation_run_request_v1",
-  "run_id": "custom_hope_family_20260505_001",
+  "schema_version": "simulation_request_v1",
+  "simulation_id": "custom_hope_family_20260505_001",
   "domain_pack_id": "agi_youth_japan",
   "draft_id": "draft_20260505_001",
   "scenario_file": "outputs/api_drafts/draft_20260505_001/scenario.yaml",
@@ -931,7 +931,7 @@
     "backend": "openai_api",
     "name": "gpt-5.2"
   },
-  "output_dir": "outputs/runs/custom_hope_family_20260505_001"
+  "output_dir": "outputs/simulations/custom_hope_family_20260505_001"
 }</pre>
           </div>
         </section>
@@ -988,7 +988,7 @@
               </thead>
               <tbody id="resultRows"></tbody>
             </table>
-            <div class="footnote">このMVPはブラウザ内のrule-based生成。API接続時は同じrun_requestをバックエンドへ送り、LLM観測rowへ差し替える。</div>
+            <div class="footnote">このMVPはブラウザ内の簡易ルール生成。API接続時は同じ実行条件をバックエンドへ送り、LLM観測データへ差し替える。</div>
           </div>
         </section>
       </section>
@@ -1340,8 +1340,8 @@
       const safeSeed = input.reproducibilitySeed.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 32) || "seed";
       const runId = `hr_policy_${input.policyType}_${kind}_${safeSeed}`;
       return {
-        schema_version: "hr_policy_run_request_v1",
-        run_id: runId,
+        schema_version: "hr_policy_simulation_request_v1",
+        simulation_id: runId,
         domain_pack_id: "enterprise_hr_policy_change",
         draft_id: "draft_hr_browser_mvp",
         scenario_id: kind,
@@ -1366,7 +1366,7 @@
         ],
         model: { backend: "browser_rule_based", name: "studio-mvp-v0" },
         privacy_mode: "synthetic_segments_only",
-        output_dir: `outputs/runs/${runId}`
+        output_dir: `outputs/simulations/${runId}`
       };
     }
 
@@ -1530,7 +1530,7 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${payload.run_request?.run_id || "hr_policy_simulation"}.json`;
+      link.download = `${payload.run_request?.simulation_id || "hr_policy_simulation"}.json`;
       link.click();
       URL.revokeObjectURL(url);
     }

@@ -1767,31 +1767,31 @@
     const runConfigs = {
       baseline: {
         label: "介入なし",
-        agentTurnsPaths: ["../outputs/runs/no_intervention_71steps_panel48/agent_turns.tsv"],
-        countryTurnsPaths: ["../outputs/runs/no_intervention_71steps_panel48/country_turns.tsv"],
-        autoEventPaths: ["../outputs/runs/no_intervention_71steps_panel48/auto_events_with_feedback.tsv"],
-        scheduledEventPaths: ["../outputs/runs/no_intervention_71steps_panel48/scheduled_events_used.tsv"]
+        agentTurnsPaths: ["../data/runs/no_intervention_71steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../data/runs/no_intervention_71steps_panel48/country_turns.tsv"],
+        autoEventPaths: ["../data/runs/no_intervention_71steps_panel48/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../data/runs/no_intervention_71steps_panel48/scheduled_events_used.tsv"]
       },
       sustain: {
         label: "構造持続通貨 介入",
-        agentTurnsPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/agent_turns.tsv"],
-        countryTurnsPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/country_turns.tsv"],
-        autoEventPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/auto_events_with_feedback.tsv"],
-        scheduledEventPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/scheduled_events_used.tsv"]
+        agentTurnsPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/agent_turns.tsv"],
+        countryTurnsPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/country_turns.tsv"],
+        autoEventPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/scheduled_events_used.tsv"]
       },
       birthGrant: {
         label: "構造持続+出産 介入",
-        agentTurnsPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/agent_turns.tsv"],
-        countryTurnsPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/country_turns.tsv"],
-        autoEventPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/auto_events_with_feedback.tsv"],
-        scheduledEventPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/scheduled_events_used.tsv"]
+        agentTurnsPaths: ["../data/runs/structure_birth_grant_package_83steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../data/runs/structure_birth_grant_package_83steps_panel48/country_turns.tsv"],
+        autoEventPaths: ["../data/runs/structure_birth_grant_package_83steps_panel48/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../data/runs/structure_birth_grant_package_83steps_panel48/scheduled_events_used.tsv"]
       },
       hopeFamily: {
         label: "構造持続+希望 介入",
-        agentTurnsPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/agent_turns.tsv"],
-        countryTurnsPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/country_turns.tsv"],
-        autoEventPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/auto_events_with_feedback.tsv"],
-        scheduledEventPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/scheduled_events_used.tsv"]
+        agentTurnsPaths: ["../data/runs/structure_hope_family_package_83steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../data/runs/structure_hope_family_package_83steps_panel48/country_turns.tsv"],
+        autoEventPaths: ["../data/runs/structure_hope_family_package_83steps_panel48/auto_events_with_feedback.tsv"],
+        scheduledEventPaths: ["../data/runs/structure_hope_family_package_83steps_panel48/scheduled_events_used.tsv"]
       }
     };
     const scenarioDescriptions = {
@@ -1894,7 +1894,7 @@
         items: [
           "若者キャラを何人か置き、AI失業イベントで不安にし、政策を入れたら希望が増える、という一本道のデモになりがちです。",
           "その場合、見た目は動いても、なぜそうなったか、どの副作用が残ったか、別の施策に転用できるかが説明しにくくなります。",
-          "今回の設計では、都合よく希望を増やすのではなく、希望が増えないrunもそのまま保存し、詰まりを観測対象にしています。"
+          "今回の設計では、都合よく希望を増やすのではなく、希望が増えない実行結果もそのまま保存し、詰まりを観測対象にしています。"
         ]
       },
       {

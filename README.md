@@ -24,7 +24,7 @@ https://karesansui-u.github.io/hackathon-singulab/visualization/future_emotion_m
 
 https://karesansui-u.github.io/hackathon-singulab/visualization/simulation_studio_mock.html
 
-UIでは、介入なしrun、構造持続介入run、構造持続+出産支援run、希望+家族形成runを切り替えながら、AGI/シンギュラリティ時代の社会イベントに対して、若者・家族形成世代・次世代コホートがどう感じ、どう行動するかを4部屋マップで再生できます。
+UIでは、介入なし、構造持続介入、構造持続+出産支援、希望+家族形成の各シミュレーションを切り替えながら、AGI/シンギュラリティ時代の社会イベントに対して、若者・家族形成世代・次世代コホートがどう感じ、どう行動するかを4部屋マップで再生できます。
 
 ## ドキュメントの入口
 
@@ -94,7 +94,7 @@ python3 scripts/run_closed_loop_llm_demo.py \
 
 同じ `--output-dir` で再実行すると、完了済みの国家step/組織step/エージェントstepはスキップして途中から再開します。
 
-### 介入なし／介入あり比較run
+### 介入なし／介入あり比較シミュレーション
 
 ```bash
 python3 scripts/run_closed_loop_llm_demo.py \
@@ -156,7 +156,7 @@ python3 scripts/run_closed_loop_llm_demo.py \
 | `agent_turns.tsv` | 若者・現役世代の感情・内心・会話・SNS・行動 |
 | `agent_feedback.tsv` | 集団反応として集約した社会フィードバック |
 | `japan_state.tsv` | 国家出力から変換した日本社会状態 |
-| `manifest.json` | run メタデータ |
+| `manifest.json` | 実行メタデータ |
 | `run_log.tsv` | 各 phase のコマンド・所要秒・status |
 | `raw/` | 各 step の生レスポンス（監査用） |
 
