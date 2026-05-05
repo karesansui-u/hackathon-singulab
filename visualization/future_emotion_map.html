@@ -355,30 +355,29 @@
       margin-top: 4px;
     }
 
-    .report-summary-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 9px;
+    .report-summary-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
     }
 
-    .report-card {
+    .report-summary-item {
+      min-height: 30px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 10px 11px;
+      border-radius: 999px;
+      padding: 4px 10px;
       background: #fbfdff;
-      min-width: 0;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
     }
 
-    .report-card-label {
+    .report-summary-item-label {
       color: var(--muted);
       font-size: 10px;
-      font-weight: 900;
-    }
-
-    .report-card-value {
-      margin-top: 4px;
-      font-size: 17px;
-      line-height: 1.2;
       font-weight: 900;
     }
 
@@ -1468,7 +1467,6 @@
       }
 
       .top-metrics,
-      .report-summary-grid,
       .map-footer,
       .left-summary-grid,
       .side {
@@ -3253,12 +3251,17 @@
         ["危険", counts.danger]
       ].map(([label, count]) => ({
         label,
-        value: total ? `${count}人 / ${Math.round((count / total) * 100)}%` : "0人 / 0%"
+        value: total ? `${count}人/${Math.round((count / total) * 100)}%` : "0人/0%"
       }));
       return [
         ...categoryCards,
         { label: "子ども希望指数", value: `${Math.round(childIntent * 100)}%` }
       ];
+    }
+
+    function compactReportLead(text) {
+      const firstSentence = String(text || "").split("。")[0];
+      return firstSentence ? `${firstSentence}。` : "";
     }
 
     function eventsAtTurn(turn) {
@@ -3757,17 +3760,17 @@
       if (!modal || !title || !lead || !sections) return;
       if (kicker) kicker.textContent = "SUMMARY / 詳細分析";
       title.textContent = report.title;
-      lead.textContent = report.lead;
+      lead.textContent = compactReportLead(report.lead);
       const summaryCards = currentSummaryCards();
       sections.innerHTML = `
         <section class="modal-section">
           <h3 class="modal-section-title">SUMMARY</h3>
-          <div class="report-summary-grid">
+          <div class="report-summary-line">
             ${summaryCards.map((card) => `
-              <div class="report-card">
-                <div class="report-card-label">${escapeHtml(card.label)}</div>
-                <div class="report-card-value">${escapeHtml(card.value)}</div>
-              </div>
+              <span class="report-summary-item">
+                <span class="report-summary-item-label">${escapeHtml(card.label)}</span>
+                <span>${escapeHtml(card.value)}</span>
+              </span>
             `).join("")}
           </div>
         </section>
