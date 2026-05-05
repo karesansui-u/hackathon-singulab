@@ -91,9 +91,10 @@ def build_public_site() -> None:
     if studio_html.exists():
         copy_text(studio_html, PUBLIC / "visualization" / "simulation_studio_mock.html")
 
-    map_backgrounds = ROOT / "visualization" / "assets" / "map_backgrounds"
-    if map_backgrounds.exists():
-        shutil.copytree(map_backgrounds, PUBLIC / "visualization" / "assets" / "map_backgrounds", dirs_exist_ok=True)
+    for asset_dir_name in ("map_backgrounds", "avatars"):
+        asset_source = ROOT / "visualization" / "assets" / asset_dir_name
+        if asset_source.exists():
+            shutil.copytree(asset_source, PUBLIC / "visualization" / "assets" / asset_dir_name, dirs_exist_ok=True)
 
     published_run_ids = []
     for run_id in [*REQUIRED_RUN_IDS, *OPTIONAL_RUN_IDS]:
