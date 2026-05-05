@@ -1320,9 +1320,11 @@
       grid-row: 1;
       border: 0;
       border-radius: 21px 21px 6px 21px;
-      background: var(--voice-accent, #172033);
-      color: #ffffff;
-      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.56)),
+        var(--voice-tint, #eef2f7);
+      color: var(--ink);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.11);
     }
 
     .voice-row.is-right .voice-bubble::before {
@@ -1330,19 +1332,19 @@
       right: -5px;
       border-left: 0;
       border-right: 0;
-      background: var(--voice-accent, #172033);
+      background: #ffffff;
       transform: rotate(-45deg);
     }
 
     .voice-row.is-right .voice-name,
     .voice-row.is-right .voice-text {
-      color: #ffffff;
+      color: var(--ink);
     }
 
     .voice-row.is-right .voice-state,
     .voice-row.is-right .voice-reaction {
-      background: rgba(255, 255, 255, 0.18);
-      color: rgba(255, 255, 255, 0.92);
+      background: rgba(255, 255, 255, 0.62);
+      color: var(--muted);
     }
 
     @keyframes voice-pop {
