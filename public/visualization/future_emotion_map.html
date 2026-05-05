@@ -1523,7 +1523,7 @@
     <section class="controls" aria-label="simulation controls">
       <label class="scenario-picker" for="scenarioSelect">
         <span class="scenario-select-label">シミュレーション</span>
-        <select class="scenario-select" id="scenarioSelect">
+        <select class="scenario-select" id="scenarioSelect" disabled>
           <option value="baseline">介入なし</option>
           <option value="sustain" selected>構造持続通貨 介入</option>
           <option value="birthGrant">構造持続+出産 介入</option>
@@ -3693,8 +3693,10 @@
     }
 
     function setScenario(scenario) {
-      if (!runConfigs[scenario]) return;
-      if (!runDataByScenario.has(scenario)) return;
+      if (!runConfigs[scenario] || !runDataByScenario.has(scenario)) {
+        syncScenarioSelect();
+        return;
+      }
       state.scenario = scenario;
       applyRunDataForScenario(scenario);
       syncScenarioSelect();
