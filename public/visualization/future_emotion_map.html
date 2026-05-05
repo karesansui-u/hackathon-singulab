@@ -1082,6 +1082,13 @@
       pointer-events: none;
     }
 
+    .agent-hit-target {
+      fill: transparent;
+      stroke: transparent;
+      pointer-events: all;
+      cursor: pointer;
+    }
+
     .agent-icon-text {
       pointer-events: none;
       font-weight: 900;
@@ -2514,10 +2521,6 @@
             <h2 class="panel-title">選択エージェント<span class="panel-title-sub" id="agentCountBadge"></span></h2>
           </header>
           <div class="detail-body">
-            <div class="agent-search">
-              <input id="agentSearchInput" type="search" placeholder="ID・氏名で検索（表示中のLLM対象）">
-              <div class="agent-search-results" id="agentSearchResults"></div>
-            </div>
             <div class="selected-emotion-card" id="selectedEmotionCard">
               <div class="selected-emotion-label">主感情</div>
               <div class="selected-emotion-main" id="selectedEmotionMain">平静</div>
@@ -2550,6 +2553,10 @@
                 <div class="kv-label">子ども希望指数</div>
                 <div class="kv-value" id="kvChildIntent">0%</div>
               </div>
+            </div>
+            <div class="agent-search">
+              <input id="agentSearchInput" type="search" placeholder="ID・氏名で検索（表示中のLLM対象）">
+              <div class="agent-search-results" id="agentSearchResults"></div>
             </div>
           </div>
         </section>
@@ -4125,6 +4132,9 @@
             : "";
         node.setAttribute("class", `agent${exitClass}`);
         node.setAttribute("data-id", row.id);
+        node.setAttribute("role", "button");
+        node.setAttribute("tabindex", "0");
+        node.setAttribute("aria-label", `${row.label || row.name || row.id}を選択`);
         node.setAttribute("filter", "url(#agentShadow)");
         const idleSeed = idNumber(row.id) || 1;
         const idleX = (Math.sin(idleSeed * 1.7) * 2.4).toFixed(2);
@@ -4141,6 +4151,13 @@
     }
 
     function appendAgentIcon(node, row, size, cohort, gender, categoryColor, selected) {
+      const hitTarget = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      hitTarget.setAttribute("cx", row.x);
+      hitTarget.setAttribute("cy", row.y);
+      hitTarget.setAttribute("r", Math.max(20, size + 16));
+      hitTarget.setAttribute("class", "agent-hit-target");
+      node.appendChild(hitTarget);
+
       if (selected) {
         const glow = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         glow.setAttribute("cx", row.x);
@@ -5694,6 +5711,13 @@
     agentLayer.addEventListener("click", (event) => {
       const node = event.target.closest(".agent[data-id]");
       if (!node) return;
+      selectAgent(node.getAttribute("data-id"));
+    });
+    agentLayer.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      const node = event.target.closest(".agent[data-id]");
+      if (!node) return;
+      event.preventDefault();
       selectAgent(node.getAttribute("data-id"));
     });
     agentSearchResults?.addEventListener("click", (event) => {
