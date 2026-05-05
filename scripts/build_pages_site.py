@@ -33,6 +33,10 @@ RUN_FILES = (
 OPTIONAL_RUN_FILES_WITH_EMPTY_FALLBACK = {
     "scheduled_events_used.tsv": "step\tscenario_mode\tevent_id\tevent_type\tevent_name\tstart_step\tend_step\tintensity_0to1\tprobability_0to1\ttarget\tdirection\tdescription\n",
 }
+OPTIONAL_RUN_FILE_MAPPINGS = {
+    "interesting_observations.md": "interesting_observations.md",
+    "logs/outcome_summary.tsv": "outcome_summary.tsv",
+}
 DOMAIN_DATA_FILES = (
     "youth_agents.tsv",
     "working_agents.tsv",
@@ -100,6 +104,10 @@ def build_public_site() -> None:
                 copy_binary_or_text(source, target)
             else:
                 write_text(target, empty_fallback)
+        for source_name, target_name in OPTIONAL_RUN_FILE_MAPPINGS.items():
+            source = run_source / source_name
+            if source.exists():
+                copy_binary_or_text(source, PUBLIC / "data" / "runs" / run_id / target_name)
         published_run_ids.append(run_id)
 
     domain_data_source = ROOT / "domain_packs" / "agi_youth_japan" / "data"
