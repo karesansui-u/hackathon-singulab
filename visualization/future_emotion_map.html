@@ -1335,6 +1335,7 @@
       </div>
       <nav class="view-nav" aria-label="デモ画面">
         <a href="./future_emotion_map.html" aria-current="page">未来感情</a>
+        <a href="./simulation_studio_mock.html">作成スタジオ</a>
       </nav>
       <section class="top-metrics" aria-label="summary metrics">
         <div class="metric">
@@ -1406,7 +1407,7 @@
           <article class="policy-card is-future">
             <div class="policy-status" id="hopeFamilyPolicyStatus">生成待ち</div>
             <div class="policy-name">希望+家族形成強化</div>
-            <div class="policy-detail">希望3体以上、子ども意向、非強制監査を組み合わせ検証</div>
+            <div class="policy-detail">nat着金・希望ケース拡張・若者メンター・家族形成利用で希望3体以上を検証</div>
           </article>
         </div>
       </section>
@@ -1650,6 +1651,7 @@
       { key: "auxiliary", label: "補助観測", count: 0 }
     ];
     const groupLabelByKey = Object.fromEntries(groups.map((group) => [group.key, group.label]));
+    const mapObservationMaxAge = 64;
 
     const events = {
       baseline: [
@@ -2457,7 +2459,9 @@
     }
 
     function visibleRowsFor(rows) {
-      const activeRows = rows.filter((row) => !row.activeFromTurn || state.turn >= row.activeFromTurn);
+      const activeRows = rows
+        .filter((row) => !row.activeFromTurn || state.turn >= row.activeFromTurn)
+        .filter((row) => isInMapObservationAge(row));
       if (state.agentFilter === "youth") return activeRows.filter((row) => row.group === "youth");
       if (state.agentFilter === "family") return activeRows.filter((row) => row.group === "family");
       if (state.agentFilter === "generation") return activeRows.filter((row) => row.group === "generation");
@@ -2469,6 +2473,12 @@
         return historicalLlmRows.length ? historicalLlmRows : activeRows;
       }
       return activeRows;
+    }
+
+    function isInMapObservationAge(row) {
+      const age = Number(row.displayAge);
+      if (!Number.isFinite(age)) return true;
+      return age <= mapObservationMaxAge;
     }
 
     function packRowsInRooms(rows) {

@@ -204,6 +204,31 @@ def scheduled_event_usage_rows(
     return rows
 
 
+def scenario_context_for_mode(scenario_mode: str, step: int) -> Dict[str, Any]:
+    if scenario_mode != "structure_hope_family_package":
+        return {}
+    context: Dict[str, Any] = {
+        "scenario_mode": scenario_mode,
+        "note": "これは希望や行動を指定する命令ではなく、この比較シナリオで本人が知覚しやすい社会状況の補足情報です。",
+    }
+    if step >= 18:
+        context["direct_notice_condition"] = (
+            "個別資格通知、即時予約、初職・復帰の先行契約枠は、対象者本人のスマホ、学校、職場、自治体窓口に届くため、"
+            "単なるニュースより本人が知覚しやすい。本人は使う/使わない/疑う/相談する/安心するなど自然に反応する。"
+        )
+    if step >= 20:
+        context["experienced_effect_condition"] = (
+            "SNS希望反転、財政持続監査の初回クリア、nat報酬の初回着金は、制度が実際に動いたという社会的事実として観測される。"
+            "ただし全員が信じる必要はなく、所得、ケア責任、制度信頼、過去記憶に応じて反応は分岐する。"
+        )
+    if step >= 22:
+        context["family_formation_condition"] = (
+            "家族形成シミュレーション結果通知は、子どもを迎えたい人に対して、自分の場合の可能条件と不足条件を可視化する。"
+            "出生を促す命令ではなく、望む/望まない/まだ無理/条件付きで考えるなどの判断材料として扱う。"
+        )
+    return context
+
+
 def build_time_schedule_by_step(rows: List[Dict[str, str]]) -> Dict[int, Dict[str, str]]:
     schedule: Dict[int, Dict[str, str]] = {}
     for row in rows:
@@ -523,6 +548,7 @@ def build_prompt(
     time_schedule_rows: List[Dict[str, str]] | None = None,
     child_cohort_rows: List[Dict[str, str]] | None = None,
     generation_inflow_rows: List[Dict[str, str]] | None = None,
+    scenario_mode: str = "",
 ) -> str:
     schedule_by_step = build_time_schedule_by_step(time_schedule_rows or [])
     child_cohort_context = compact_child_cohorts(
@@ -642,6 +668,7 @@ def build_prompt(
                 for event in auto_events_by_step.get(step, [])
             ],
         })
+    scenario_context = scenario_context_for_mode(scenario_mode, start_step)
 
     return f"""
 あなたは社会シミュレーションの観測器です。
@@ -660,6 +687,7 @@ def build_prompt(
 - world_state、scheduled_events、auto_events は、本人が置かれている社会状況です。本人への命令ではありません。
 - event.direction は「こう変化させろ」という指示ではなく、社会状態の説明ラベルです。
 - previous_agent_state は、前ステップから残っている本人の記憶・状態です。これも命令ではありません。
+- scenario_context は、この比較シナリオで本人が知覚しやすい追加の社会状況です。これも命令ではありません。
 - age/current_age は開始ステップ時点の年齢です。base_age は開始時点の年齢です。複数ステップを観測する場合は age_by_step を優先してください。
 - 10年後、20年後の判断では、現在年齢に応じて進学・就職・家族形成・ケア責任・子ども意向の現実性が変わります。
 - child_cohort_context は0-14歳の次世代コホート設計です。子ども本人の内心やSNS発信を生成する命令ではありません。15歳以上に到達したステップ以降、若者/家族形成層へ入る初期条件として扱ってください。
@@ -672,6 +700,11 @@ def build_prompt(
 - 中立: 平静
 - 注意: 不安・怒り
 - 危険: 裏切られ感・喪失感・絶望・諦念
+
+分類の目安:
+- 未来経路と構造支援がどちらも高く、本人が具体的な次の一手を確認できている場合は、社会リスクが残っていても良好（安心・希望・連帯感）になり得ます。
+- 不安が少し残るだけで自動的に注意へ固定しないでください。本人の主感情が「それでも動ける」「自分にも経路がある」「一人ではない」に近い場合は希望・安心・連帯感を選べます。
+- 逆に、経路や支援が高く見えても、本人が対象外感、遅延、不信、ケア拘束を強く感じる場合は注意や危険のままで構いません。
 
 行動カテゴリ語彙:
 静観/情報収集/相談/生活防衛/回避・縮小/学習・就活/制度利用/参加・連帯/抗議・発信/ケア継続/撤退
@@ -699,6 +732,8 @@ def build_prompt(
 - 全員が同じ方向に動くとは限りません。
 - 大きな事件が起きても、本人に届かなければ反応は小さくてよいです。
 - 逆に小さな出来事でも、その人の生活制約に刺されば大きく反応してよいです。
+- 希望・安心・連帯感は、社会リスクがゼロになった時だけの感情ではありません。本人に具体的な経路、即時支援、実績、成功経験、共同体の受け皿が届いた場合は、リスクが残っていても自然な反応として選んでよいです。
+- 逆に、具体的な条件が届いているのに常に不安へ固定する必要もありません。本人の属性と知覚情報に照らして、良好/中立/注意/危険を分岐させます。
 - 数値は前ステップから大きく変わってもよいですが、reasoning_basis と矛盾しない範囲にします。
 - thought/private_talk/social_post は、それぞれ異なる文脈の発話として観測します。
 - 発言はきれいに整理しすぎず、現実の人が言いそうな迷い・矛盾・言い切れなさを残します。
@@ -714,6 +749,9 @@ def build_prompt(
 
 前ステップから残っている状態:
 {json.dumps(compact_previous, ensure_ascii=False, indent=2)}
+
+シナリオ補足:
+{json.dumps(scenario_context, ensure_ascii=False, indent=2)}
 
 ステップ別の観測条件:
 {json.dumps(compact_events, ensure_ascii=False, indent=2)}
@@ -1043,6 +1081,7 @@ def run_stateful_generation(
     timeout: int,
     parallel_by_agent: bool,
     workers: int,
+    scenario_mode: str,
 ) -> Dict[str, Any]:
     previous_states: Dict[str, Dict[str, Any]] = dict(initial_previous_states)
     all_turns: List[Dict[str, Any]] = []
@@ -1070,6 +1109,7 @@ def run_stateful_generation(
                             time_schedule_rows,
                             child_cohort_rows,
                             generation_inflow_rows,
+                            scenario_mode,
                         ),
                         model,
                         budget,
@@ -1094,6 +1134,7 @@ def run_stateful_generation(
                 time_schedule_rows,
                 child_cohort_rows,
                 generation_inflow_rows,
+                scenario_mode,
             )
             step_payload = run_claude(prompt, model, budget, timeout)
             print(f"Finished step {step}", flush=True)
@@ -1219,6 +1260,7 @@ def main() -> None:
             args.timeout,
             args.parallel_by_agent,
             args.workers,
+            args.scenario_mode,
         )
     elif args.parallel_by_agent:
         payloads_by_agent: Dict[str, Dict[str, Any]] = {}
@@ -1237,6 +1279,7 @@ def main() -> None:
                         time_schedule_rows,
                         child_cohort_rows,
                         generation_inflow_rows,
+                        args.scenario_mode,
                     ),
                     args.model,
                     args.budget,
@@ -1261,6 +1304,7 @@ def main() -> None:
             time_schedule_rows,
             child_cohort_rows,
             generation_inflow_rows,
+            args.scenario_mode,
         )
         payload = run_claude(prompt, args.model, args.budget, args.timeout)
     rows = flatten_turns(payload, agents_by_id, time_schedule_rows)

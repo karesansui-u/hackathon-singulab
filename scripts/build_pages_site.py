@@ -81,6 +81,10 @@ def build_public_site() -> None:
     html = html.replace("../outputs/runs/", "../data/runs/")
     write_text(PUBLIC / "visualization" / "future_emotion_map.html", html)
 
+    studio_html = ROOT / "visualization" / "simulation_studio_mock.html"
+    if studio_html.exists():
+        copy_text(studio_html, PUBLIC / "visualization" / "simulation_studio_mock.html")
+
     published_run_ids = []
     for run_id in [*REQUIRED_RUN_IDS, *OPTIONAL_RUN_IDS]:
         run_source = ROOT / "outputs" / "runs" / run_id
@@ -130,6 +134,7 @@ def build_public_site() -> None:
 </head>
 <body>
   <p><a href="visualization/future_emotion_map.html">文明OSシミュレーション デモ</a></p>
+  <p><a href="visualization/simulation_studio_mock.html">シミュレーション作成スタジオ モック</a></p>
 </body>
 </html>
 """,
@@ -142,6 +147,7 @@ GitHub Pages公開用の静的サイトです。
 
 - Demo URL: `https://karesansui-u.github.io/hackathon-singulab/visualization/future_emotion_map.html`
 - Main UI: `visualization/future_emotion_map.html`
+- Studio mock: `visualization/simulation_studio_mock.html`
 - Run data: {", ".join(f"`data/runs/{run_id}/`" for run_id in published_run_ids)}
 - Domain data: `domain_packs/agi_youth_japan/data/`
 
