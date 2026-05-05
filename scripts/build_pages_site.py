@@ -86,6 +86,10 @@ def build_public_site() -> None:
     if studio_html.exists():
         copy_text(studio_html, PUBLIC / "visualization" / "simulation_studio_mock.html")
 
+    map_backgrounds = ROOT / "visualization" / "assets" / "map_backgrounds"
+    if map_backgrounds.exists():
+        shutil.copytree(map_backgrounds, PUBLIC / "visualization" / "assets" / "map_backgrounds", dirs_exist_ok=True)
+
     published_run_ids = []
     for run_id in [*REQUIRED_RUN_IDS, *OPTIONAL_RUN_IDS]:
         run_source = ROOT / "outputs" / "runs" / run_id

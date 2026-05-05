@@ -835,6 +835,20 @@
       border: 1px solid var(--line);
     }
 
+    .room-image {
+      opacity: 0.26;
+      pointer-events: none;
+    }
+
+    .room-tone {
+      pointer-events: none;
+    }
+
+    .map-grid-overlay {
+      opacity: 0.38;
+      pointer-events: none;
+    }
+
     .event-burst {
       position: absolute;
       left: var(--burst-left, 50%);
@@ -1913,13 +1927,30 @@
               <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
                 <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#e2e8f0" stroke-width="1"></path>
               </pattern>
+              <clipPath id="cautionRoomClip">
+                <rect x="55" y="56" width="445" height="292"></rect>
+              </clipPath>
+              <clipPath id="goodRoomClip">
+                <rect x="500" y="56" width="445" height="292"></rect>
+              </clipPath>
+              <clipPath id="dangerRoomClip">
+                <rect x="55" y="348" width="445" height="292"></rect>
+              </clipPath>
+              <clipPath id="neutralRoomClip">
+                <rect x="500" y="348" width="445" height="292"></rect>
+              </clipPath>
             </defs>
 
-            <rect x="0" y="0" width="1000" height="680" fill="url(#grid)"></rect>
-            <rect x="55" y="56" width="445" height="292" fill="var(--caution-soft)" opacity="0.94"></rect>
-            <rect x="500" y="56" width="445" height="292" fill="var(--good-soft)" opacity="0.94"></rect>
-            <rect x="55" y="348" width="445" height="292" fill="var(--danger-soft)" opacity="0.94"></rect>
-            <rect x="500" y="348" width="445" height="292" fill="var(--neutral-soft)" opacity="0.96"></rect>
+            <rect x="0" y="0" width="1000" height="680" fill="#fbfdff"></rect>
+            <image class="room-image" href="./assets/map_backgrounds/caution.png" x="55" y="56" width="445" height="292" preserveAspectRatio="xMidYMid slice" clip-path="url(#cautionRoomClip)"></image>
+            <image class="room-image" href="./assets/map_backgrounds/abundant.png" x="500" y="56" width="445" height="292" preserveAspectRatio="xMidYMid slice" clip-path="url(#goodRoomClip)"></image>
+            <image class="room-image" href="./assets/map_backgrounds/despair.png" x="55" y="348" width="445" height="292" preserveAspectRatio="xMidYMid slice" clip-path="url(#dangerRoomClip)"></image>
+            <image class="room-image" href="./assets/map_backgrounds/neutral.png" x="500" y="348" width="445" height="292" preserveAspectRatio="xMidYMid slice" clip-path="url(#neutralRoomClip)"></image>
+            <rect class="room-tone" x="55" y="56" width="445" height="292" fill="var(--caution-soft)" opacity="0.76"></rect>
+            <rect class="room-tone" x="500" y="56" width="445" height="292" fill="var(--good-soft)" opacity="0.74"></rect>
+            <rect class="room-tone" x="55" y="348" width="445" height="292" fill="var(--danger-soft)" opacity="0.78"></rect>
+            <rect class="room-tone" x="500" y="348" width="445" height="292" fill="var(--neutral-soft)" opacity="0.80"></rect>
+            <rect class="map-grid-overlay" x="0" y="0" width="1000" height="680" fill="url(#grid)"></rect>
             <rect x="55" y="56" width="890" height="584" fill="none" stroke="#334155" stroke-width="2"></rect>
             <line x1="500" y1="56" x2="500" y2="640" stroke="#334155" stroke-width="2"></line>
             <line x1="55" y1="348" x2="945" y2="348" stroke="#334155" stroke-width="2"></line>
