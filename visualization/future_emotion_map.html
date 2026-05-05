@@ -836,8 +836,9 @@
     }
 
     .room-image {
-      opacity: 0.26;
+      opacity: 0.44;
       pointer-events: none;
+      filter: saturate(0.88) contrast(0.94);
     }
 
     .room-tone {
@@ -845,7 +846,7 @@
     }
 
     .map-grid-overlay {
-      opacity: 0.38;
+      opacity: 0.28;
       pointer-events: none;
     }
 
@@ -1946,10 +1947,10 @@
             <image class="room-image" href="./assets/map_backgrounds/abundant.png" x="500" y="56" width="445" height="292" preserveAspectRatio="xMidYMid slice" clip-path="url(#goodRoomClip)"></image>
             <image class="room-image" href="./assets/map_backgrounds/despair.png" x="55" y="348" width="445" height="292" preserveAspectRatio="xMidYMid slice" clip-path="url(#dangerRoomClip)"></image>
             <image class="room-image" href="./assets/map_backgrounds/neutral.png" x="500" y="348" width="445" height="292" preserveAspectRatio="xMidYMid slice" clip-path="url(#neutralRoomClip)"></image>
-            <rect class="room-tone" x="55" y="56" width="445" height="292" fill="var(--caution-soft)" opacity="0.76"></rect>
-            <rect class="room-tone" x="500" y="56" width="445" height="292" fill="var(--good-soft)" opacity="0.74"></rect>
-            <rect class="room-tone" x="55" y="348" width="445" height="292" fill="var(--danger-soft)" opacity="0.78"></rect>
-            <rect class="room-tone" x="500" y="348" width="445" height="292" fill="var(--neutral-soft)" opacity="0.80"></rect>
+            <rect class="room-tone" x="55" y="56" width="445" height="292" fill="var(--caution-soft)" opacity="0.58"></rect>
+            <rect class="room-tone" x="500" y="56" width="445" height="292" fill="var(--good-soft)" opacity="0.56"></rect>
+            <rect class="room-tone" x="55" y="348" width="445" height="292" fill="var(--danger-soft)" opacity="0.60"></rect>
+            <rect class="room-tone" x="500" y="348" width="445" height="292" fill="var(--neutral-soft)" opacity="0.62"></rect>
             <rect class="map-grid-overlay" x="0" y="0" width="1000" height="680" fill="url(#grid)"></rect>
             <rect x="55" y="56" width="890" height="584" fill="none" stroke="#334155" stroke-width="2"></rect>
             <line x1="500" y1="56" x2="500" y2="640" stroke="#334155" stroke-width="2"></line>
