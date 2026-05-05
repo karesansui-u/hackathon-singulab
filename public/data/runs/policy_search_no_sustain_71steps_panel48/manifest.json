@@ -1,7 +1,7 @@
 {
   "kind": "closed_loop_llm_demo",
   "start_step": 1,
-  "steps": 12,
+  "steps": 71,
   "model": "gpt-5.2",
   "scenario_mode": "policy_search_no_sustain",
   "country_codes": "USA,CHN,JPN,TWN,KOR,PRK,RUS,UKR,IRN,ISR,SAU,EU",
