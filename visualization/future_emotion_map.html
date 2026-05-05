@@ -71,10 +71,10 @@
       justify-content: space-between;
       gap: 20px;
       padding: 18px 24px 14px;
-      border-bottom: 1px solid var(--line);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.16);
       background:
-        linear-gradient(110deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 251, 253, 0.94) 58%, rgba(255, 252, 246, 0.94) 100%),
-        rgba(255, 255, 255, 0.90);
+        repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.052) 0 1px, transparent 1px 13px),
+        linear-gradient(90deg, #102033 0%, #17395a 58%, #0f766e 100%);
       backdrop-filter: blur(14px);
       position: sticky;
       top: 0;
@@ -91,8 +91,8 @@
       width: min(540px, 42vw);
       height: 96px;
       background:
-        repeating-linear-gradient(115deg, rgba(29, 79, 122, 0.08) 0 1px, transparent 1px 11px),
-        linear-gradient(90deg, transparent, rgba(15, 118, 110, 0.06));
+        repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.10) 0 1px, transparent 1px 11px),
+        linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08));
       transform: skewX(-18deg);
       transform-origin: top right;
       pointer-events: none;
@@ -106,8 +106,8 @@
       bottom: -2px;
       height: 3px;
       border-radius: 999px;
-      background: linear-gradient(90deg, var(--gov-navy), var(--gov-blue) 45%, var(--gov-teal) 78%, var(--gov-gold));
-      opacity: 0.72;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.32), var(--gov-gold) 36%, rgba(255, 255, 255, 0.50) 70%, rgba(255, 255, 255, 0.18));
+      opacity: 0.86;
     }
 
     .topbar > * {
@@ -128,12 +128,12 @@
       grid-row: 1 / span 2;
       width: 38px;
       height: 38px;
-      border: 1px solid rgba(16, 32, 51, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.34);
       border-radius: 8px;
       background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.34)),
-        linear-gradient(135deg, var(--gov-navy) 0 45%, var(--gov-teal) 45% 72%, var(--gov-gold) 72% 100%);
-      box-shadow: inset 0 0 0 5px rgba(255, 255, 255, 0.62), 0 10px 22px rgba(16, 32, 51, 0.12);
+        linear-gradient(135deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.05)),
+        linear-gradient(135deg, #ffffff 0 32%, var(--gov-teal) 32% 67%, var(--gov-gold) 67% 100%);
+      box-shadow: inset 0 0 0 5px rgba(16, 32, 51, 0.18), 0 10px 22px rgba(0, 0, 0, 0.18);
     }
 
     .brand-title {
@@ -142,11 +142,12 @@
       line-height: 1.2;
       font-weight: 900;
       min-width: 0;
+      color: #ffffff;
     }
 
     .brand-subtitle {
       margin: 0;
-      color: var(--muted);
+      color: rgba(255, 255, 255, 0.74);
       font-size: 12px;
       line-height: 1.4;
       min-width: 0;
@@ -154,12 +155,12 @@
 
     .view-nav {
       display: inline-flex;
-      border: 1px solid rgba(16, 32, 51, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.22);
       border-radius: 8px;
       overflow: hidden;
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.10);
       flex: none;
-      box-shadow: inset 0 -2px 0 rgba(183, 121, 31, 0.26), 0 8px 18px rgba(16, 32, 51, 0.06);
+      box-shadow: inset 0 0 0 1px rgba(16, 32, 51, 0.12), 0 8px 18px rgba(0, 0, 0, 0.16);
     }
 
     .view-nav a {
@@ -167,7 +168,7 @@
       display: inline-flex;
       align-items: center;
       padding: 0 12px;
-      color: var(--muted);
+      color: rgba(255, 255, 255, 0.74);
       text-decoration: none;
       font-size: 12px;
       font-weight: 800;
@@ -175,8 +176,8 @@
     }
 
     .view-nav a[aria-current="page"] {
-      background: #16202a;
-      color: #ffffff;
+      background: #ffffff;
+      color: var(--gov-navy);
       box-shadow: inset 0 -3px 0 var(--gov-gold);
     }
 
@@ -188,8 +189,8 @@
     }
 
     .metric {
-      border: 1px solid var(--line);
-      background: var(--surface);
+      border: 1px solid rgba(255, 255, 255, 0.38);
+      background: rgba(255, 255, 255, 0.94);
       border-radius: 8px;
       padding: 8px 10px;
       min-width: 0;
@@ -2366,19 +2367,23 @@
       <label class="scenario-picker" for="scenarioSelect">
         <span class="scenario-select-label">シミュレーション</span>
         <select class="scenario-select" id="scenarioSelect" disabled>
-          <option value="baseline">介入なし</option>
-          <option value="birthOnly">出産支援のみ</option>
-          <option value="sustain" selected>構造持続通貨 介入</option>
-          <option value="birthGrant">構造持続+出産 介入</option>
-          <option value="hopeFamily">構造持続+希望 介入</option>
-          <option value="policyNoSustain">政策設計AI介入（新通貨なし）</option>
-          <option value="policyWithSustain">政策設計AI介入（新通貨あり）</option>
+          <optgroup label="新通貨制度なし">
+            <option value="baseline">介入なし</option>
+            <option value="birthOnly">出産支援のみ</option>
+            <option value="policyNoSustain">政策設計AI介入（新通貨なし）</option>
+          </optgroup>
+          <optgroup label="新通貨制度あり（構造持続論ベース）">
+            <option value="sustain" selected>構造持続通貨のみ</option>
+            <option value="birthGrant">構造持続通貨 + 出産支援</option>
+            <option value="hopeFamily">構造持続通貨 + 希望形成</option>
+            <option value="policyWithSustain">政策設計AI介入（新通貨あり）</option>
+          </optgroup>
         </select>
       </label>
       <section class="scenario-brief" aria-label="選択中のシミュレーション概要">
         <div class="scenario-brief-main">
           <div class="scenario-brief-kicker">選択中のシミュレーション</div>
-          <div class="scenario-brief-title" id="scenarioBriefTitle">構造持続通貨 介入</div>
+          <div class="scenario-brief-title" id="scenarioBriefTitle">構造持続通貨のみ</div>
           <div class="scenario-brief-summary" id="scenarioBriefSummary">住居、学び直し、ケア、社会持続活動への報酬が、若者と家族形成世代の未来感情をどう変えるかを観測します。</div>
         </div>
         <div class="scenario-brief-actions">
@@ -2393,7 +2398,7 @@
         <header class="modal-head">
           <div>
             <div class="modal-kicker">シナリオ設計の詳細</div>
-            <h2 class="modal-title" id="scenarioModalTitle">構造持続通貨 介入</h2>
+            <h2 class="modal-title" id="scenarioModalTitle">構造持続通貨のみ</h2>
           </div>
           <button type="button" class="modal-close" id="scenarioModalClose" aria-label="閉じる">×</button>
         </header>
@@ -2720,7 +2725,7 @@
         scheduledEventPaths: ["../outputs/runs/policy_search_with_sustain_12steps_panel48/scheduled_events_used.tsv"]
       },
       sustain: {
-        label: "構造持続通貨 介入",
+        label: "構造持続通貨のみ",
         agentTurnsPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/agent_turns.tsv"],
         countryTurnsPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/country_turns.tsv"],
         autoEventPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/auto_events_with_feedback.tsv"],
@@ -2728,14 +2733,14 @@
         scheduledEventFilter: (row) => (row.event_id || "") !== "P04"
       },
       birthGrant: {
-        label: "構造持続+出産 介入",
+        label: "構造持続通貨 + 出産支援",
         agentTurnsPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/agent_turns.tsv"],
         countryTurnsPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/country_turns.tsv"],
         autoEventPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/auto_events_with_feedback.tsv"],
         scheduledEventPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/scheduled_events_used.tsv"]
       },
       hopeFamily: {
-        label: "構造持続+希望 介入",
+        label: "構造持続通貨 + 希望形成",
         agentTurnsPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/agent_turns.tsv"],
         countryTurnsPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/country_turns.tsv"],
         autoEventPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/auto_events_with_feedback.tsv"],
@@ -2836,7 +2841,7 @@
         ]
       },
       sustain: {
-        title: "構造持続通貨 介入",
+        title: "構造持続通貨のみ",
         summary: "住居、学び直し、ケア、地域更新、社会持続活動への報酬を入れたシミュレーションです。経済成長だけでなく、社会を維持・修復する行動が役割と所得になると、人の未来感情と行動がどう変わるかを見ます。",
         lead: "構造持続理論を社会制度に落とす最初の介入です。資源や給付額だけでなく、本人が『直す・変える・続ける経路』を持てるか、社会を維持する活動が飯の種になるかを観測します。",
         sections: [
@@ -2859,7 +2864,7 @@
         ]
       },
       birthGrant: {
-        title: "構造持続+出産 介入",
+        title: "構造持続通貨 + 出産支援",
         summary: "出産一時金を単体給付にせず、住居、産後休息、代替ケア、教育費、復帰キャリア、財政監査へ接続したシミュレーションです。『お金を増やせば子ども希望指数が戻るのか』ではなく、条件の束として効くかを検証します。",
         lead: "このシミュレーションは、子どもを産ませる制度ではありません。望む人が子どもを迎えられる条件に支払うと、家族形成世代や若者の認識がどう変わるか、また給付があっても希望に変換されない詰まりがどこにあるかを観測します。",
         sections: [
@@ -2882,7 +2887,7 @@
         ]
       },
       hopeFamily: {
-        title: "構造持続+希望 介入",
+        title: "構造持続通貨 + 希望形成",
         summary: "給付や制度名だけでなく、個別資格通知、即時予約、nat着金、若者メンター、地域の成功ケース、家族形成面談を追加したシミュレーションです。不安が高い社会でも、具体的な次の一手が届くと希望が立ち上がるかを検証します。",
         lead: "このシミュレーションは、希望を直接命令していません。『本人に届く通知』『予約できる枠』『初回着金』『伴走者』『監査の継続性』という社会的事実を追加し、エージェントがそれを信じる、疑う、使う、相談する、まだ不安に留まるなどの分岐を観測しています。",
         sections: [
@@ -2982,7 +2987,7 @@
         ]
       },
       sustain: {
-        title: "構造持続通貨 介入 レポート",
+        title: "構造持続通貨のみ レポート",
         lead: "住居、学び直し、ケア、地域更新、社会持続活動へのnat報酬を入れたシミュレーションです。資本主義の外側に逃げるのではなく、社会を維持・修復する活動を役割と所得に変えた時、危険域から戻れるかを見ます。",
         summaryCards: [
           { label: "40年後の主状態", value: "注意22 / 中立6" },
@@ -3027,7 +3032,7 @@
         ]
       },
       birthGrant: {
-        title: "構造持続+出産 介入 レポート",
+        title: "構造持続通貨 + 出産支援 レポート",
         lead: "出産一時金を単独給付にせず、住居、休息、代替ケア、教育費、復帰キャリア、財政監査へ接続したシミュレーションです。結論として、制度利用は増えるが希望は0のままで、支援が『届く実感』へ変換されない詰まりが見えます。",
         summaryCards: [
           { label: "40年後の主状態", value: "注意28 / 希望0" },
@@ -3072,7 +3077,7 @@
         ]
       },
       hopeFamily: {
-        title: "構造持続+希望 介入 レポート",
+        title: "構造持続通貨 + 希望形成 レポート",
         lead: "構造持続通貨と家族形成支援に加え、個別資格通知、即時予約、nat初回着金、若者メンター、地域の成功ケース、家族形成面談を入れたシミュレーションです。不安を消すのではなく、不安を抱えたまま動ける条件を作れるかを見ます。",
         summaryCards: [
           { label: "5年後", value: "希望12 / 希望感情4" },
