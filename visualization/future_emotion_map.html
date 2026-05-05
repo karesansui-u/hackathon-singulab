@@ -1000,7 +1000,9 @@
 
     .agent-icon-base,
     .agent-icon-core,
-    .agent-icon-dot {
+    .agent-icon-dot,
+    .agent-icon-head,
+    .agent-icon-body {
       pointer-events: none;
     }
 
@@ -1161,7 +1163,7 @@
       grid-area: voice;
       display: grid;
       grid-template-rows: auto minmax(0, 1fr);
-      height: var(--room-height);
+      height: clamp(620px, calc(100vh - 168px), 860px);
       min-height: 0;
     }
 
@@ -1200,7 +1202,7 @@
       gap: 9px;
       min-height: 0;
       max-height: none;
-      overflow: hidden;
+      overflow: auto;
       background:
         linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(241, 245, 249, 0.94)),
         repeating-linear-gradient(135deg, rgba(148, 163, 184, 0.10) 0 1px, transparent 1px 16px);
@@ -1302,21 +1304,55 @@
       flex: 0 0 auto;
     }
 
+    .voice-avatar-person {
+      position: absolute;
+      inset: 6px 7px 5px;
+    }
+
+    .voice-avatar-person::before,
+    .voice-avatar-person::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      background: currentColor;
+    }
+
+    .voice-avatar-person::before {
+      top: 1px;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+    }
+
+    .voice-avatar-person::after {
+      bottom: 1px;
+      width: 18px;
+      height: 12px;
+      border-radius: 12px 12px 5px 5px;
+    }
+
     .voice-avatar-dot {
       position: absolute;
       right: -1px;
       bottom: -1px;
-      width: 10px;
-      height: 10px;
+      width: 13px;
+      height: 13px;
       border-radius: 999px;
       border: 2px solid #ffffff;
       background: var(--avatar-dot, #94a3b8);
+      display: grid;
+      place-items: center;
+      color: #ffffff;
+      font-size: 7px;
+      line-height: 1;
+      font-weight: 900;
     }
 
     .voice-bubble {
       position: relative;
       min-width: 0;
-      border: 1px solid rgba(15, 23, 42, 0.08);
+      border: 0;
       border-radius: 21px 21px 21px 6px;
       padding: 9px 11px 8px;
       background:
@@ -1333,8 +1369,7 @@
       bottom: 8px;
       width: 13px;
       height: 13px;
-      border-left: 1px solid rgba(15, 23, 42, 0.08);
-      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      border: 0;
       background: #ffffff;
       border-radius: 0 0 0 4px;
       transform: rotate(45deg);
@@ -3965,6 +4000,12 @@
             </span>
           `;
         }).join("")}
+        <span class="legend-item">
+          <span class="swatch" style="background:var(--male)"></span>男性
+        </span>
+        <span class="legend-item">
+          <span class="swatch" style="background:var(--female)"></span>女性
+        </span>
       `;
     }
 
@@ -3973,6 +4014,7 @@
       const fragment = document.createDocumentFragment();
       rows.forEach((row) => {
         const cohort = cohortIconFor(row);
+        const gender = genderIconFor(row.gender);
         const categoryColor = categoryByKey[row.dominant].color;
         const size = 7 + row.intensity * 9;
         const node = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -3992,13 +4034,13 @@
         node.style.animationDelay = `${-(idleSeed % 9) * 0.23}s`;
 
         const selected = row.id === state.selectedId;
-        appendAgentIcon(node, row, size, cohort, categoryColor, selected);
+        appendAgentIcon(node, row, size, cohort, gender, categoryColor, selected);
         fragment.appendChild(node);
       });
       agentLayer.appendChild(fragment);
     }
 
-    function appendAgentIcon(node, row, size, cohort, categoryColor, selected) {
+    function appendAgentIcon(node, row, size, cohort, gender, categoryColor, selected) {
       if (selected) {
         const glow = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         glow.setAttribute("cx", row.x);
@@ -4038,20 +4080,42 @@
       const core = document.createElementNS("http://www.w3.org/2000/svg", "circle");
       core.setAttribute("cx", row.x);
       core.setAttribute("cy", row.y);
-      core.setAttribute("r", Math.max(5, size * 0.62));
+      core.setAttribute("r", Math.max(5.5, size * 0.68));
       core.setAttribute("fill", "#ffffff");
-      core.setAttribute("opacity", "0.88");
+      core.setAttribute("opacity", "0.92");
       core.setAttribute("class", "agent-icon-core");
       node.appendChild(core);
 
-      const mark = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      mark.setAttribute("x", row.x);
-      mark.setAttribute("y", row.y + 0.4);
-      mark.setAttribute("font-size", Math.max(8.4, size * 0.72));
-      mark.setAttribute("fill", cohort.color);
-      mark.setAttribute("class", "agent-icon-text");
-      mark.textContent = cohort.mark;
-      node.appendChild(mark);
+      const head = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      head.setAttribute("cx", row.x);
+      head.setAttribute("cy", row.y - size * 0.24);
+      head.setAttribute("r", Math.max(2.8, size * 0.24));
+      head.setAttribute("fill", gender.color);
+      head.setAttribute("class", "agent-icon-head");
+      node.appendChild(head);
+
+      const body = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      const bodyTop = row.y + size * 0.12;
+      const bodyWidth = Math.max(6.5, size * 0.86);
+      const bodyHeight = Math.max(4.8, size * 0.42);
+      body.setAttribute("d", `
+        M ${row.x - bodyWidth / 2},${bodyTop + bodyHeight}
+        Q ${row.x - bodyWidth / 2},${bodyTop} ${row.x},${bodyTop}
+        Q ${row.x + bodyWidth / 2},${bodyTop} ${row.x + bodyWidth / 2},${bodyTop + bodyHeight}
+        Z
+      `);
+      body.setAttribute("fill", gender.color);
+      body.setAttribute("class", "agent-icon-body");
+      node.appendChild(body);
+
+      const cohortMark = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      cohortMark.setAttribute("x", row.x - size * 0.50);
+      cohortMark.setAttribute("y", row.y + size * 0.58);
+      cohortMark.setAttribute("font-size", Math.max(6.2, size * 0.38));
+      cohortMark.setAttribute("fill", cohort.color);
+      cohortMark.setAttribute("class", "agent-icon-text");
+      cohortMark.textContent = cohort.mark;
+      node.appendChild(cohortMark);
 
       const statusDot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
       statusDot.setAttribute("cx", row.x + size * 0.58);
@@ -4063,10 +4127,9 @@
       statusDot.setAttribute("class", "agent-icon-dot");
       node.appendChild(statusDot);
 
-      const emotion = row.emotion || categoryByKey[row.dominant].label;
       const exitLabel = row.socialExitStatus ? "離脱 / " : "";
-      const ageEmotionLabel = row.displayAge ? `${exitLabel}${row.displayAge}歳 ${emotion}` : `${exitLabel}${emotion}`;
-      appendEmotionLabel(node, row.x, row.y - size - 13, ageEmotionLabel, Boolean(row.socialExitStatus));
+      const mapLabel = `${exitLabel}${compactAgentName(row)} ${ageTextFor(row)} ${gender.short} ${categoryByKey[row.dominant].label}`;
+      appendEmotionLabel(node, row.x, row.y - size - 13, mapLabel, Boolean(row.socialExitStatus));
     }
 
     function appendEmotionLabel(node, x, y, text, isExit = false) {
@@ -4740,20 +4803,21 @@
       stream.innerHTML = voiceRows.map((row, index) => {
         const category = categoryByKey[row.dominant] || categoryByKey.neutral;
         const cohort = cohortIconFor(row);
+        const gender = genderIconFor(row.gender);
         const variant = voiceBubbleVariant(row, index);
         const displayName = row.name && row.name !== row.id ? `${row.name}` : row.id;
-        const ageText = row.displayAge ? `${row.displayAge}歳` : groupLabelByKey[row.group] || "観測";
+        const ageText = ageTextFor(row);
         const text = voiceTextFor(row, state.voiceMode);
         const reactions = voiceReactionsFor(row, index);
         return `
           <article class="voice-row ${variant.side} is-${state.voiceMode}" style="--voice-index:${index};--voice-offset:${variant.offset}px;--voice-width:${variant.width}%;--voice-accent:${category.color};--voice-tint:${category.soft}">
-            <div class="voice-avatar" style="--avatar-bg:${cohort.soft};--avatar-fg:${cohort.color};--avatar-dot:${category.color}" aria-hidden="true">
-              ${escapeHtml(cohort.mark)}
-              <span class="voice-avatar-dot"></span>
+            <div class="voice-avatar" style="--avatar-bg:${gender.soft};--avatar-fg:${gender.color};--avatar-dot:${category.color}" aria-hidden="true">
+              <span class="voice-avatar-person"></span>
+              <span class="voice-avatar-dot">${escapeHtml(cohort.mark)}</span>
             </div>
             <div class="voice-bubble">
               <div class="voice-meta">
-                <span class="voice-name">${escapeHtml(displayName)} / ${escapeHtml(ageText)}</span>
+                <span class="voice-name">${escapeHtml(displayName)} / ${escapeHtml(gender.label)} / ${escapeHtml(ageText)}</span>
                 <span class="voice-state">${escapeHtml(category.label)}</span>
               </div>
               <div class="voice-text">${escapeHtml(text)}</div>
@@ -4832,6 +4896,29 @@
 
     function cohortIconFor(row) {
       return cohortIconByKey[row.group] || cohortIconByKey.unknown;
+    }
+
+    function genderIconFor(genderValue) {
+      if (genderValue === "男性") {
+        return { label: "男性", short: "男", color: "#2563eb", soft: "#dbeafe" };
+      }
+      if (genderValue === "女性") {
+        return { label: "女性", short: "女", color: "#ef4444", soft: "#ffe4e6" };
+      }
+      if (genderValue === "世代代表") {
+        return { label: "世代代表", short: "代", color: "#7c3aed", soft: "#ede9fe" };
+      }
+      return { label: "性別不明", short: "他", color: "#64748b", soft: "#e2e8f0" };
+    }
+
+    function ageTextFor(row) {
+      const age = row.displayAge || row.age;
+      return age ? `${age}歳` : "年齢不明";
+    }
+
+    function compactAgentName(row) {
+      const name = String(row.name && row.name !== row.id ? row.name : row.id || "Agent").trim();
+      return name.length > 6 ? `${name.slice(0, 6)}…` : name;
     }
 
     function renderEmergenceTrace(rows) {
