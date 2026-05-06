@@ -14,6 +14,8 @@
 
 ![デモGIF](docs/assets/demo.gif)
 
+GIFは軽量版です。高画質版は [MP4](docs/assets/demo.mp4) を参照してください。
+
 ## まとめスライド
 
 ![まとめ1](docs/assets/まとめ1.png)
