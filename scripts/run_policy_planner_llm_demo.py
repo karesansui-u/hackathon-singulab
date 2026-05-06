@@ -106,7 +106,27 @@ def rows_near_step(rows: List[Dict[str, str]], step: int, window: int = 4) -> Li
 
 
 def scenario_policy_context(scenario_mode: str) -> Dict[str, Any]:
-    if scenario_mode == "policy_search_with_sustain":
+    if scenario_mode in {"policy_search_with_sustain", "policy_search_with_sustain_hope_family"}:
+        if scenario_mode == "policy_search_with_sustain_hope_family":
+            return {
+                "search_space": "構造持続あり + 出産支援/制度利用伴走 + 政策AI",
+                "allowed": [
+                    "構造持続通貨/nat報酬",
+                    "社会維持活動の報酬化",
+                    "出産・初期育児費用の緩衝",
+                    "産後休息・代替ケア・復帰キャリア支援",
+                    "個別資格通知、即時予約、家族形成面談",
+                    "副作用監査、異議申立、非強制説明",
+                    "政策疲労や対象外反発を見た順序変更・簡素化・補償",
+                ],
+                "not_allowed": [
+                    "出生や家族形成の強制",
+                    "希望感情の直接命令",
+                    "副作用や財源説明を省いた拡大",
+                    "非婚・非出産の選択を不利益化する設計",
+                ],
+                "core_hypothesis": "構造持続と家族形成支援を最初から敷いた上で、政策AIが副作用を見ながら補正すると、子ども希望だけでなく制度信頼と中立/希望側への移動がどこまで伸びるかを見る。",
+            }
         return {
             "search_space": "構造持続あり",
             "allowed": [
@@ -402,11 +422,17 @@ def deterministic_payload(
     feedback: Dict[str, str],
 ) -> Dict[str, Any]:
     issue = strongest_issue(feedback, japan_state)
-    with_sustain = scenario_mode == "policy_search_with_sustain"
+    with_sustain = scenario_mode in {"policy_search_with_sustain", "policy_search_with_sustain_hope_family"}
+    hope_family = scenario_mode == "policy_search_with_sustain_hope_family"
     if issue in {"政策疲労", "対象外反発", "制度要求"}:
         first = {
             "action": "simplify" if issue == "政策疲労" else "explain",
-            "policy_name": "申請一本化と対象外説明" if not with_sustain else "持続通貨申請一本化と異議申立",
+            "policy_name": (
+                "申請一本化と対象外説明"
+                if not with_sustain
+                else "伴走支援の申請一本化と異議申立" if hope_family
+                else "持続通貨申請一本化と異議申立"
+            ),
             "target": "低中所得層・ケア責任層・対象外不安層",
             "delivery_channel": "自治体/スマホ通知/相談窓口",
             "budget_cost_0to1": 0.18 if not with_sustain else 0.22,
@@ -421,7 +447,12 @@ def deterministic_payload(
     elif issue in {"撤退圧", "雇用不安"}:
         first = {
             "action": "add",
-            "policy_name": "移行雇用の短期保証" if not with_sustain else "社会維持活動nat付き移行雇用",
+            "policy_name": (
+                "移行雇用の短期保証"
+                if not with_sustain
+                else "家族形成期を支えるnat付き移行雇用" if hope_family
+                else "社会維持活動nat付き移行雇用"
+            ),
             "target": "若者・非正規・無業就活中",
             "delivery_channel": "学校/職場/自治体",
             "budget_cost_0to1": 0.30 if not with_sustain else 0.36,
@@ -436,7 +467,12 @@ def deterministic_payload(
     elif issue == "ケア負担":
         first = {
             "action": "localize",
-            "policy_name": "地域代替ケア即時枠" if not with_sustain else "nat報酬付き地域代替ケア",
+            "policy_name": (
+                "地域代替ケア即時枠"
+                if not with_sustain
+                else "面談連動のnat報酬付き代替ケア" if hope_family
+                else "nat報酬付き地域代替ケア"
+            ),
             "target": "家族ケア責任層・子育て初期",
             "delivery_channel": "自治体/地域/職場",
             "budget_cost_0to1": 0.28 if not with_sustain else 0.34,
@@ -451,7 +487,12 @@ def deterministic_payload(
     else:
         first = {
             "action": "sequence",
-            "policy_name": "家計防衛から未来投資への順序変更" if not with_sustain else "家計防衛と構造持続報酬の接続",
+            "policy_name": (
+                "家計防衛から未来投資への順序変更"
+                if not with_sustain
+                else "家計防衛と家族形成伴走の接続" if hope_family
+                else "家計防衛と構造持続報酬の接続"
+            ),
             "target": "低中所得層・家族形成層",
             "delivery_channel": "自治体/企業/スマホ通知",
             "budget_cost_0to1": 0.26 if not with_sustain else 0.32,
@@ -485,7 +526,7 @@ def deterministic_payload(
         "step": step,
         "diagnosis": f"{issue}が強く、施策追加より副作用を見ながら順序と届き方を調整する局面。",
         "dominant_issue": issue,
-        "adjustment_strategy": "構造持続探索" if with_sustain else "既存制度内探索",
+        "adjustment_strategy": "伴走支援つき構造持続探索" if hope_family else "構造持続探索" if with_sustain else "既存制度内探索",
         "policies": policies[:2],
     }
 
@@ -559,7 +600,13 @@ def policy_turn_row(payload: Dict[str, Any], scenario_mode: str, model: str) -> 
 def policy_event_rows(payload: Dict[str, Any], scenario_mode: str) -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
     step = int(payload["step"])
-    mode_label = "構造持続あり" if scenario_mode == "policy_search_with_sustain" else "通常政策のみ"
+    mode_label = (
+        "構造持続あり+伴走支援"
+        if scenario_mode == "policy_search_with_sustain_hope_family"
+        else "構造持続あり"
+        if scenario_mode == "policy_search_with_sustain"
+        else "通常政策のみ"
+    )
     for index, policy in enumerate(payload.get("policies", []), start=1):
         lag = int(policy.get("implementation_lag_steps", 1))
         event_step = step + lag
@@ -606,7 +653,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--start-step", type=int, default=1)
     parser.add_argument(
         "--scenario-mode",
-        choices=["policy_search_no_sustain", "policy_search_with_sustain"],
+        choices=[
+            "policy_search_no_sustain",
+            "policy_search_with_sustain",
+            "policy_search_with_sustain_hope_family",
+        ],
         default="policy_search_no_sustain",
     )
     parser.add_argument("--model", default="fixture")

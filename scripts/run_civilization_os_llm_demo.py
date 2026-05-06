@@ -166,6 +166,8 @@ def filter_events_for_scenario(events: List[Dict[str, str]], scenario_mode: str)
         ]
     if scenario_mode in {"policy_search_no_sustain", "policy_search_with_sustain"}:
         return [event for event in events if is_base_pressure_event(event)]
+    if scenario_mode == "policy_search_with_sustain_hope_family":
+        return events
     if scenario_mode == "structure_intervention":
         return [
             event for event in events
@@ -396,13 +398,28 @@ def scenario_context_for_mode(scenario_mode: str, step: int) -> Dict[str, Any]:
                 "副作用の無視",
             ],
         })
-    elif scenario_mode in {"policy_search_no_sustain", "policy_search_with_sustain"}:
-        has_sustain = scenario_mode == "policy_search_with_sustain"
+    elif scenario_mode in {"policy_search_no_sustain", "policy_search_with_sustain", "policy_search_with_sustain_hope_family"}:
+        has_sustain = scenario_mode in {"policy_search_with_sustain", "policy_search_with_sustain_hope_family"}
+        has_hope_family = scenario_mode == "policy_search_with_sustain_hope_family"
         context.update({
             "available_policy_channels": [
                 "LLM政策プランナーが予算・実装制約内で提案した施策",
                 *(
-                    ["構造持続通貨", "社会維持活動への報酬化"]
+                    [
+                        "構造持続通貨",
+                        "社会維持活動への報酬化",
+                        *(
+                            [
+                                "出産・初期育児費用の緩衝",
+                                "個別資格通知",
+                                "即時予約",
+                                "家族形成面談",
+                                "制度利用伴走",
+                            ]
+                            if has_hope_family
+                            else []
+                        ),
+                    ]
                     if has_sustain
                     else ["既存の財政・補助金・規制・説明施策"]
                 ),
@@ -411,6 +428,11 @@ def scenario_context_for_mode(scenario_mode: str, step: int) -> Dict[str, Any]:
             "known_constraints": [
                 "施策を増やすほど政策疲労、対象外反発、実装負荷が増え得る",
                 "悪化集団を見て、修正、一時停止、説明強化、補完策を選ぶ必要がある",
+                *(
+                    ["子どもを迎える/迎えない/待つ自由を残し、支援の強制感を監査する"]
+                    if has_hope_family
+                    else []
+                ),
             ],
             "what_is_not_available": [] if has_sustain else ["新しい通貨型の社会維持報酬", "社会維持活動を制度上の価値として扱う探索空間"],
         })
@@ -422,7 +444,7 @@ def scenario_context_for_mode(scenario_mode: str, step: int) -> Dict[str, Any]:
             "what_is_not_available": [],
         })
 
-    if scenario_mode != "structure_hope_family_package":
+    if scenario_mode not in {"structure_hope_family_package", "policy_search_with_sustain_hope_family"}:
         return context
 
     if step >= 18:
@@ -1469,6 +1491,7 @@ def main() -> None:
             "birth_grant_only",
             "policy_search_no_sustain",
             "policy_search_with_sustain",
+            "policy_search_with_sustain_hope_family",
             "structure_intervention",
             "structure_birth_grant_package",
             "structure_hope_family_package",

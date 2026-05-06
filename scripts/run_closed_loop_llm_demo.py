@@ -326,7 +326,11 @@ def maybe_feedback_input(output_dir: Path, name: str) -> Path:
 
 
 def is_policy_search_mode(scenario_mode: str) -> bool:
-    return scenario_mode in {"policy_search_no_sustain", "policy_search_with_sustain"}
+    return scenario_mode in {
+        "policy_search_no_sustain",
+        "policy_search_with_sustain",
+        "policy_search_with_sustain_hope_family",
+    }
 
 
 def build_policy_planner(
@@ -445,6 +449,7 @@ def parse_args() -> argparse.Namespace:
             "birth_grant_only",
             "policy_search_no_sustain",
             "policy_search_with_sustain",
+            "policy_search_with_sustain_hope_family",
             "structure_intervention",
             "structure_birth_grant_package",
             "structure_hope_family_package",

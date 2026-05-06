@@ -2524,6 +2524,7 @@
             <option value="birthGrant">構造持続通貨 + 出産支援</option>
             <option value="hopeFamily">構造持続通貨 + 制度利用伴走支援</option>
             <option value="policyWithSustain">政策設計AI介入（新通貨あり）</option>
+            <option value="policyWithSustainHopeFamily">政策設計AI介入（新通貨あり+伴走支援）</option>
           </optgroup>
         </select>
       </label>
@@ -2882,6 +2883,16 @@
         ],
         scheduledEventPaths: ["../data/runs/policy_search_with_sustain_71steps_panel48/scheduled_events_used.tsv"]
       },
+      policyWithSustainHopeFamily: {
+        label: "政策設計AI介入（新通貨あり+伴走支援）",
+        agentTurnsPaths: ["../data/runs/policy_search_with_sustain_hope_family_71steps_panel48/agent_turns.tsv"],
+        countryTurnsPaths: ["../data/runs/policy_search_with_sustain_hope_family_71steps_panel48/country_turns.tsv"],
+        autoEventPaths: [
+          "../data/runs/policy_search_with_sustain_hope_family_71steps_panel48/auto_events_with_feedback.tsv",
+          "../data/runs/policy_search_with_sustain_hope_family_71steps_panel48/auto_events_with_policy.tsv"
+        ],
+        scheduledEventPaths: ["../data/runs/policy_search_with_sustain_hope_family_71steps_panel48/scheduled_events_used.tsv"]
+      },
       sustain: {
         label: "構造持続通貨のみ",
         agentTurnsPaths: ["../data/runs/structure_intervention_100years_panel48_midprompt/agent_turns.tsv"],
@@ -3002,6 +3013,29 @@
               "政策プランナーは毎ステップ、追加、修正、順序変更、説明、局所化、簡素化、一時停止、補償を選べます。",
               "希望が増えるかだけでなく、手続き疲れ、対象外反発、財政不安、強制感が増えていないかを同じ画面で見ます。",
               "企業人事や自治体施策にも転用できるよう、誰に先に伝えるか、どの副作用を補完するかをイベントとして残します。"
+            ]
+          }
+        ]
+      },
+      policyWithSustainHopeFamily: {
+        title: "政策設計AI介入（新通貨あり+伴走支援）",
+        summary: "構造持続通貨、出産・子育て支援、制度利用伴走を固定条件に置き、政策設計AIが副作用を見ながら追加施策、簡素化、説明、補償、順序変更を続ける上限比較です。",
+        lead: "このシミュレーションは、いま考えている最強寄りの政策束です。構造持続通貨と家族形成支援を入れたうえで、政策設計AIが毎ステップの住民反応、政策疲労、対象外反発、財政不安を読み、次の打ち手を閉ループで生成します。希望が最大化するかだけでなく、強い施策でも残る副作用を検査します。",
+        sections: [
+          {
+            title: "検証している問い",
+            items: [
+              "構造持続通貨、出産支援、制度利用伴走、政策設計AIを重ねると、40年視点でどこまで希望と子ども希望指数が伸びるか。",
+              "最強寄りの条件でも、財政不安、政策疲労、対象外感、強制感、地域差は残るのか。",
+              "政策AIが単に施策を増やすのではなく、副作用を見て簡素化、説明、補償、順序変更へ動けるか。"
+            ]
+          },
+          {
+            title: "創発を観測するための設計ポイント",
+            items: [
+              "政策AIは毎ステップ、個人反応とフィードバックを読み、次の施策イベントを生成します。",
+              "住民エージェントは、政策を信じる、疑う、使う、疲れる、反発する、次の予約へ進むなどを固定スキーマで返します。",
+              "発表では、政策AIの閉ループ生成と住民LLMの反応を分けて見せることで、制度設計の創発性を説明できます。"
             ]
           }
         ]
@@ -3339,6 +3373,13 @@
         "非対象者の参加経路を補完",
         "副作用を見て施策順序を調整",
         "通常政策探索との差分を比較"
+      ],
+      policyWithSustainHopeFamily: [
+        "新通貨あり+伴走支援で政策AI開始",
+        "個別通知・即時予約・着金を束ねる",
+        "子育て支援と非対象者補完を両立",
+        "副作用を見て簡素化・補償へ修正",
+        "最強施策束の上限と残存リスクを比較"
       ],
       sustain: [
         "AGI能力上昇の初期観測",
@@ -3850,7 +3891,11 @@
     }
 
     function hasStructureSustainScenario(scenario = state.scenario) {
-      return scenario === "sustain" || scenario === "birthGrant" || scenario === "hopeFamily" || scenario === "policyWithSustain";
+      return scenario === "sustain"
+        || scenario === "birthGrant"
+        || scenario === "hopeFamily"
+        || scenario === "policyWithSustain"
+        || scenario === "policyWithSustainHopeFamily";
     }
 
     function hasPolicyEventsScenario(scenario = state.scenario) {
@@ -4092,7 +4137,7 @@
       const dangerPenalty = values.dominant === "danger" ? 0.12 : values.dominant === "caution" ? 0.05 : 0;
       const sustainBoost = hasStructureSustainScenario(values.scenario) && values.support > 0.58 ? 0.05 : 0;
       const familyPolicyBoost = isFamilyFormationAge
-        ? values.scenario === "hopeFamily"
+        ? values.scenario === "hopeFamily" || values.scenario === "policyWithSustainHopeFamily"
           ? 0.15
           : values.scenario === "birthGrant" || values.scenario === "birthOnly"
             ? 0.10
@@ -4137,7 +4182,7 @@
     function individualSideEffectProfile(row) {
       const age = Number(row.displayAge);
       const isFamilyFormationAge = Number.isFinite(age) && age >= 23 && age <= 49;
-      const isBirthPolicyScenario = ["birthOnly", "birthGrant", "hopeFamily"].includes(row.scenario);
+      const isBirthPolicyScenario = ["birthOnly", "birthGrant", "hopeFamily", "policyWithSustainHopeFamily"].includes(row.scenario);
       const actionCategory = row.actionCategory || actionCategoryFor(row.action, row.dominant);
       const distrust = clamp(1 - (row.trust || 0.5), 0, 1);
       const lowReach = clamp(1 - ((row.support || 0.5) * 0.55 + (row.pathway || 0.5) * 0.45), 0, 1);
@@ -4662,7 +4707,7 @@
       const countryRows = countryRowsForCurrentTurn();
       const fiscalPressure = countryRows.length ? averageCountryPressure(countryRows, "fiscal_pressure") / 100 : 0;
       const policyEventNames = eventsAtTurn(state.turn).map((event) => `${event.name || ""} ${event.direction || ""} ${event.description || ""}`).join(" ");
-      const birthPolicy = ["birthOnly", "birthGrant", "hopeFamily"].includes(state.scenario)
+      const birthPolicy = ["birthOnly", "birthGrant", "hopeFamily", "policyWithSustainHopeFamily"].includes(state.scenario)
         || (["policyNoSustain", "policyWithSustain"].includes(state.scenario) && /出産|出生|子ども|家族形成/.test(policyEventNames));
       const fiscalTextPressure = /財政|増税|インフレ|負担|逆選択/.test(policyEventNames) ? 0.24 : 0;
       const implementationTextPressure = /窓口|予約|申請|面談|監査|通知|枠/.test(policyEventNames) ? 0.18 : 0;
@@ -5168,6 +5213,8 @@
         ? state.turn < 18 ? "支援提示" : state.turn < 44 ? "申請確認中" : "不安が残存"
         : state.scenario === "policyNoSustain"
           ? state.turn < 18 ? "政策探索中" : state.turn < 44 ? "副作用監査" : "通常政策を調整"
+          : state.scenario === "policyWithSustainHopeFamily"
+            ? state.turn < 18 ? "伴走設計中" : state.turn < 44 ? "家族形成を補正" : "副作用を補完"
           : state.scenario === "policyWithSustain"
             ? state.turn < 18 ? "持続探索中" : state.turn < 44 ? "構造報酬を調整" : "参加経路を補完"
             : hasStructureSustainScenario()

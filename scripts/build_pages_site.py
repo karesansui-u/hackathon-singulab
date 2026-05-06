@@ -21,6 +21,7 @@ REQUIRED_RUN_IDS = (
 OPTIONAL_RUN_IDS = (
     "policy_search_no_sustain_71steps_panel48",
     "policy_search_with_sustain_71steps_panel48",
+    "policy_search_with_sustain_hope_family_71steps_panel48",
     "birth_grant_only_83steps_panel48",
     "structure_birth_grant_package_83steps_panel48",
     "structure_hope_family_package_83steps_panel48",
