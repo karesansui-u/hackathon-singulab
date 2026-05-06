@@ -1,0 +1,73 @@
+	</div>
+	<div id="progress"></div>
+	<nav class="slide-nav" aria-label="スライド操作">
+		<button type="button" id="prevSlideButton">戻る</button>
+		<button type="button" id="nextSlideButton">進む</button>
+	</nav>
+
+	<script>
+		const slides = Array.from(document.querySelectorAll('.slide'));
+		const progress = document.getElementById('progress');
+		const prevSlideButton = document.getElementById('prevSlideButton');
+		const nextSlideButton = document.getElementById('nextSlideButton');
+		let current = 0;
+
+		function showSlide(index) {
+			current = Math.max(0, Math.min(slides.length - 1, index));
+			slides.forEach((slide, i) => {
+				slide.classList.toggle('active', i === current);
+			});
+			progress.style.width = ((current + 1) / slides.length * 100) + '%';
+			prevSlideButton.disabled = current === 0;
+			nextSlideButton.disabled = current === slides.length - 1;
+			history.replaceState(null, '', '#' + (current + 1));
+		}
+
+		function nextSlide() {
+			showSlide(current + 1);
+		}
+
+		function prevSlide() {
+			showSlide(current - 1);
+		}
+
+		document.addEventListener('keydown', (event) => {
+			if (event.key === 'ArrowRight' || event.key === ' ' || event.key === 'PageDown') {
+				event.preventDefault();
+				nextSlide();
+			}
+			if (event.key === 'ArrowLeft' || event.key === 'PageUp') {
+				event.preventDefault();
+				prevSlide();
+			}
+			if (event.key === 'Home') {
+				event.preventDefault();
+				showSlide(0);
+			}
+			if (event.key === 'End') {
+				event.preventDefault();
+				showSlide(slides.length - 1);
+			}
+		});
+
+		document.addEventListener('click', (event) => {
+			if (event.target.closest('a, button')) return;
+			if (event.clientX < window.innerWidth * 0.36) {
+				prevSlide();
+			} else {
+				nextSlide();
+			}
+		});
+
+		prevSlideButton.addEventListener('click', prevSlide);
+		nextSlideButton.addEventListener('click', nextSlide);
+
+		const hashIndex = Number.parseInt(location.hash.replace('#', ''), 10);
+		if (Number.isFinite(hashIndex) && hashIndex > 0) {
+			showSlide(hashIndex - 1);
+		} else {
+			showSlide(0);
+		}
+	</script>
+</body>
+</html>

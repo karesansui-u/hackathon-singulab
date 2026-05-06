@@ -1,0 +1,154 @@
+		<div class="slide" data-slide="8">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Abstraction</span><span>火災シミュレーターの抽象化</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">ハッカソン文脈</div>
+					<h2>火災シミュレーターを、<br>心理・制度空間へ拡張する</h2>
+					<div class="features-3">
+						<div class="feature"><div class="feature-icon red">火</div><h3>物理空間</h3><p>火災、煙、出口、混雑を置き、人がどの経路で避難するかを見る。</p></div>
+						<div class="feature"><div class="feature-icon amber">心</div><h3>心理空間</h3><p>不安、制度不信、SNS悲観、家計圧迫を置き、人が何を諦めるかを見る。</p></div>
+						<div class="feature"><div class="feature-icon cyan">制</div><h3>制度空間</h3><p>通知、予約、着金、相談、参加導線を置き、人がどの支援へ移るかを見る。</p></div>
+					</div>
+					<div class="callout">避難経路のシミュレーションを、制度利用・相談・参加への反応経路の観測に抽象化した。見る対象は「人がどこへ逃げるか」から「人がどの選択肢を残せるか」へ広がる。</div>
+				</div>
+				<span class="page-num"></span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="9">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Architecture</span><span>全体構造</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">システム構造</div>
+					<h2>LLMエージェントを閉ループに組み込む</h2>
+					<div class="flow">
+						<div class="flow-step">国家/世界圧力</div><div class="flow-arrow">→</div>
+						<div class="flow-step">日本社会状態</div><div class="flow-arrow">→</div>
+						<div class="flow-step active">若者・家族形成世代</div><div class="flow-arrow">→</div>
+						<div class="flow-step">行動row</div><div class="flow-arrow">→</div>
+						<div class="flow-step">社会フィードバック</div>
+					</div>
+					<div class="features-3">
+						<div class="feature"><h3>入力</h3><p>イベント、制度、社会状態、エージェント属性。</p></div>
+						<div class="feature"><h3>推論</h3><p>LLMが感情、行動、発話、根拠を生成。</p></div>
+						<div class="feature"><h3>出力</h3><p>UIで再生し、分布と個別反応を比較。</p></div>
+					</div>
+				</div>
+				<span class="page-num"></span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="10">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Why LLM</span><span>なぜLLMエージェントか</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">観測価値</div>
+					<h2>統計モデルやアンケートだけでは、<br>反応の途中経路が薄くなる</h2>
+					<table class="data-table compact">
+						<thead><tr><th>手法</th><th>得意なこと</th><th>見えにくいこと</th><th>本作で補う観測面</th></tr></thead>
+						<tbody>
+							<tr><td>統計モデル</td><td>実データに基づく分布推定、因果検証</td><td>制度を聞いた瞬間の誤解、友人への相談、SNSでの増幅、次月へ残る懸念</td><td>内心、私的会話、公開発話、行動、記憶更新を同じrowに残す</td></tr>
+							<tr><td>アンケート</td><td>大人数の意向把握、定量比較</td><td>建前回答、制度をまだ知らない人の反応、行動へ移る直前の迷い</td><td>属性と状況を与え、通知を見た後の予約/相談/先送りを生成する</td></tr>
+							<tr><td>LLMエージェント</td><td>仮想人格の状況依存反応を多面で出す</td><td>現実の代表性と妥当性は別途検証が必要</td><td>制度案の事前デバッグとして、想定外の受け取り方と副作用を早く発見する</td></tr>
+						</tbody>
+					</table>
+					<div class="callout callout-cyan">価値は「正確な予測」ではなく、制度が人間の内側、会話、SNS、行動、持ち越し懸念を通ってどう変形するかを観測できる点にある。</div>
+				</div>
+				<span class="page-num"></span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="11">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Agent</span><span>エージェント設計</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">エージェント設計</div>
+					<h2>同じイベントでも、人によって反応は違う</h2>
+					<table class="data-table">
+						<thead><tr><th>属性カテゴリ</th><th>例</th><th>効く理由</th></tr></thead>
+						<tbody>
+							<tr><td>生活属性</td><td>年齢、家計、住居、雇用、地域</td><td>生活コストや雇用不安の受け方が変わる</td></tr>
+							<tr><td>家族形成</td><td>結婚、子ども意向、ケア責任</td><td>未来選択と制度支援への感度が変わる</td></tr>
+							<tr><td>認知属性</td><td>制度信頼、SNS影響、不安感受性</td><td>同じ制度を信じるか疑うかが変わる</td></tr>
+							<tr><td>記憶</td><td>過去の利用経験、持ち越し懸念</td><td>次ステップの行動へ影響する</td></tr>
+						</tbody>
+					</table>
+				</div>
+				<span class="page-num"></span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="12">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Events</span><span>イベント設計</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">イベント設計</div>
+					<h2>世界ショックと制度介入を分ける</h2>
+					<div class="features">
+						<div class="feature"><div class="feature-icon red">外</div><h3>外生イベント</h3><p>AGI/AIロボ普及、生活コスト、地政学不安、SNS悲観、医療・介護負荷。</p></div>
+						<div class="feature"><div class="feature-icon purple">制</div><h3>制度介入</h3><p>出産支援、構造持続通貨、社会持続活動報酬、制度利用伴走支援。</p></div>
+					</div>
+					<div class="callout">イベントを混ぜないことで、「外圧に対して、どの制度設計がどこに効いたか」を比較できる。</div>
+				</div>
+				<span class="page-num"></span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="13">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Intervention</span><span>比較対象</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">介入設計</div>
+					<h2>比較するシナリオ</h2>
+					<table class="data-table">
+						<thead><tr><th>シナリオ</th><th>設計</th><th>見ること</th></tr></thead>
+						<tbody>
+							<tr><td>介入なし</td><td>制度側の追加介入なし</td><td>不安、制度不信、生活防衛がどう増えるか</td></tr>
+							<tr><td>出産支援のみ</td><td>子育て初期一時金1000万円</td><td>金銭支援だけで家族形成意向が戻るか</td></tr>
+							<tr><td>構造持続通貨 + 伴走</td><td>社会持続活動への報酬、通知、予約、着金、メンター、相談導線</td><td>制度利用・相談・参加への行動変化の芽が出るか</td></tr>
+						</tbody>
+					</table>
+					<p style="font-size: 15px; color: var(--text-light); margin-top: 14px;">構造持続通貨は単なる給付ではない。子育て、地域ケア、学び直し、相談参加など、社会を持続させる活動に報酬が流れるインセンティブ設計として置く。</p>
+				</div>
+				<span class="page-num"></span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="14">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Emotion</span><span>未来感情分類</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">未来感情分類</div>
+					<h2>細かい感情を、見やすい4分類へ集約する</h2>
+					<div class="features-4">
+						<div class="feature"><div class="feature-icon cyan">希</div><h3>希望</h3><p>安心、希望、連帯感、自己効力感。</p></div>
+						<div class="feature"><div class="feature-icon purple">中</div><h3>中立</h3><p>平静、様子見、情報収集。</p></div>
+						<div class="feature"><div class="feature-icon amber">注</div><h3>注意</h3><p>不安、喪失感、制度不信、生活防衛。</p></div>
+						<div class="feature"><div class="feature-icon red">危</div><h3>危険</h3><p>絶望、撤退圧、強い怒り、諦念。</p></div>
+					</div>
+					<div class="callout callout-cyan">UIでは4分類で見やすくし、rowには主感情や行動を細かく残す。</div>
+				</div>
+				<span class="page-num"></span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="15">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Row</span><span>LLM出力仕様</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">rowデータ設計</div>
+					<h2>LLM出力を、再生・比較・監査できる形にする</h2>
+					<div class="code-block">
+						<span class="prompt">columns</span>: evaluation, emotion, pathway, support, intensity,<br>
+						action_category, action_detail, thought, private_talk, social_post,<br>
+						perceived_situation, reasoning_basis, memory_update, carryover_concern
+					</div>
+					<div class="features-3">
+						<div class="feature"><h3>再現性</h3><p>発表時は生成済みrowを安定再生。</p></div>
+						<div class="feature"><h3>比較性</h3><p>介入前後、シナリオ間の差分を比較。</p></div>
+						<div class="feature"><h3>監査性</h3><p>なぜそう反応したかの根拠も残す。</p></div>
+					</div>
+				</div>
+				<span class="page-num"></span>
+			</div>
+		</div>

@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>課題提出用スライド 詳細版 — 構造持続理論ベースの新しい文明OSシミュレーション</title>
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		:root {
+			--navy: #0a2540;
+			--text: #425466;
+			--text-light: #68778d;
+			--purple: #635bff;
+			--purple-light: #7a73ff;
+			--purple-bg: #f0eeff;
+			--cyan: #00d4aa;
+			--cyan-dark: #00a884;
+			--cyan-bg: #e6faf5;
+			--bg: #ffffff;
+			--bg-alt: #f6f9fc;
+			--border: #e3e8ee;
+			--red: #ff5b6a;
+			--red-bg: #fff0f2;
+			--amber: #f5a524;
+			--amber-bg: #fff6e6;
+		}
+
+		html,
+		body {
+			overflow: hidden;
+			height: 100%;
+		}
+
+		body {
+			font-family: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+			background: #0a0a0a;
+			color: var(--text);
+			line-height: 1.6;
+		}
+
+		.deck {
+			position: relative;
+			width: 100vw;
+			height: 100vh;
+		}
+
+		.slide {
+			position: absolute;
+			inset: 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			opacity: 0;
+			pointer-events: none;
+			transition: opacity 0.45s ease;
+		}
+
+		.slide.active {
+			opacity: 1;
+			pointer-events: auto;
+		}
+
+		.slide-inner {
+			width: 1280px;
+			height: 720px;
+			background: var(--bg);
+			border-radius: 8px;
+			overflow: hidden;
+			position: relative;
+			display: flex;
+			flex-direction: column;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+		}
+
+		.slide-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 16px 40px;
+			border-bottom: 1px solid var(--border);
+			background: var(--bg);
+			flex-shrink: 0;
+			z-index: 5;
+		}
+
+		.slide-header-logo {
+			display: flex;
+			align-items: baseline;
+			gap: 8px;
+		}
+
+		.slide-header-logo .mark {
+			font-size: 20px;
+			font-weight: 300;
+			color: var(--purple);
+		}
+
+		.slide-header-logo .name {
+			font-size: 14px;
+			font-weight: 700;
+			color: var(--navy);
+		}
+
+		.slide-header-badge {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 12px;
+			font-weight: 600;
+			color: var(--text-light);
+		}
+
+		.slide-header-badge .badge-label {
+			color: var(--purple);
+			font-weight: 700;
+			text-transform: uppercase;
+		}
+
+		.slide-body {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			justify-content: flex-start;
+			padding: 42px 68px;
+			overflow: hidden;
+		}
+
+		.page-num {
+			position: absolute;
+			bottom: 20px;
+			right: 36px;
+			font-size: 12px;
+			color: var(--text-light);
+			font-weight: 500;
+			font-variant-numeric: tabular-nums;
+			z-index: 5;
+		}
+
+		#progress {
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			height: 3px;
+			background: var(--purple);
+			transition: width 0.4s ease;
+			z-index: 100;
+		}
+
+		h1 {
+			font-size: 58px;
+			font-weight: 800;
+			color: var(--navy);
+			line-height: 1.2;
+			margin-bottom: 24px;
+		}
+
+		h2 {
+			font-size: 34px;
+			font-weight: 700;
+			color: var(--navy);
+			line-height: 1.28;
+			margin-bottom: 18px;
+		}
+
+		h3 {
+			font-size: 18px;
+			font-weight: 700;
+			color: var(--navy);
+			margin-bottom: 8px;
+		}
+
+		p {
+			font-size: 18px;
+			color: var(--text);
+			line-height: 1.65;
+			margin-bottom: 10px;
+		}
+
+		.lead {
+			font-size: 22px;
+			color: var(--text-light);
+			font-weight: 400;
+		}
+
+		.slide-title .slide-inner,
+		.slide-closing .slide-inner {
+			background: linear-gradient(135deg, #0a2540 0%, #1a3a5c 50%, #0a2540 100%);
+			text-align: center;
+			align-items: center;
+			justify-content: center;
+			padding: 0;
+		}
+
+		.slide-title .slide-header,
+		.slide-closing .slide-header {
+			display: none;
+		}
+
+		.slide-title h1 {
+			color: #fff;
+			font-size: 58px;
+			margin-bottom: 14px;
+			position: relative;
+		}
+
+		.slide-title .subtitle {
+			color: #adbdcc;
+			font-size: 22px;
+			font-weight: 400;
+			line-height: 1.6;
+			position: relative;
+		}
+
+		.slide-title .tagline {
+			color: rgba(255, 255, 255, 0.72);
+			font-size: 16px;
+			font-weight: 500;
+			position: relative;
+			margin-bottom: 8px;
+		}
+
+		.section-badge {
+			display: inline-flex;
+			align-items: center;
+			align-self: flex-start;
+			gap: 8px;
+			font-size: 12px;
+			font-weight: 700;
+			color: var(--purple);
+			text-transform: uppercase;
+			margin-bottom: 14px;
+		}
+
+		.section-badge::before {
+			content: '';
+			width: 24px;
+			height: 3px;
+			border-radius: 4px;
+			background: var(--purple);
+		}
+
+		.callout {
+			background: var(--bg-alt);
+			border-left: 4px solid var(--purple);
+			border-radius: 0 12px 12px 0;
+			padding: 20px 28px;
+			margin: 18px 0;
+			font-size: 20px;
+			color: var(--navy);
+			font-weight: 500;
+		}
+
+		.callout-cyan {
+			border-left-color: var(--cyan);
+			background: var(--cyan-bg);
+		}
+
+		.callout-red {
+			border-left-color: var(--red);
+			background: var(--red-bg);
+		}
+
+		.code-block {
+			background: var(--navy);
+			color: #e0e7ee;
+			font-family: 'JetBrains Mono', monospace;
+			font-size: 15px;
+			padding: 18px 24px;
+			border-radius: 12px;
+			margin: 16px 0;
+			line-height: 1.65;
+		}
+
+		.code-block .prompt {
+			color: var(--cyan);
+		}
+
+		.features {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 18px;
+			margin-top: 14px;
+		}
+
+		.features-3 {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 16px;
+			margin-top: 16px;
+		}
+
+		.features-4 {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 12px;
+			margin-top: 16px;
+		}
+
+		.features-5 {
+			display: grid;
+			grid-template-columns: repeat(5, 1fr);
+			gap: 10px;
+			margin-top: 14px;
+		}
+
+		.feature {
+			background: var(--bg-alt);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 20px 22px;
+		}
+
+		.feature-icon {
+			width: 34px;
+			height: 34px;
+			border-radius: 8px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 14px;
+			margin-bottom: 10px;
+			font-weight: 700;
+		}
+
+		.feature-icon.purple {
+			background: var(--purple-bg);
+			color: var(--purple);
+		}
+
+		.feature-icon.cyan {
+			background: var(--cyan-bg);
+			color: var(--cyan-dark);
+		}
+
+		.feature-icon.amber {
+			background: var(--amber-bg);
+			color: var(--amber);
+		}
+
+		.feature-icon.red {
+			background: var(--red-bg);
+			color: var(--red);
+		}
+
+		.feature p,
+		.feature li {
+			font-size: 14px;
+			color: var(--text-light);
+			margin: 0;
+			line-height: 1.5;
+		}
+
+		.feature.tight {
+			padding: 16px 18px;
+		}
+
+		.feature.tight h3 {
+			font-size: 16px;
+		}
+
+		.feature.tight p {
+			font-size: 13px;
+		}
+
+		.bullet-list {
+			list-style: none;
+			padding: 0;
+		}
+
+		.bullet-list li {
+			font-size: 17px;
+			padding: 9px 0 9px 26px;
+			position: relative;
+			color: var(--text);
+			border-bottom: 1px solid var(--border);
+		}
+
+		.bullet-list li:last-child {
+			border-bottom: none;
+		}
+
+		.bullet-list li::before {
+			content: '';
+			position: absolute;
+			left: 0;
+			top: 18px;
+			width: 9px;
+			height: 9px;
+			border-radius: 50%;
+			background: var(--purple);
+		}
+
+		.bullet-list li strong {
+			color: var(--navy);
+			font-weight: 700;
+		}
+
+		.data-table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 15px;
+			margin-top: 12px;
+		}
+
+		.data-table th {
+			text-align: left;
+			padding: 10px 14px;
+			font-weight: 600;
+			color: var(--text-light);
+			font-size: 12px;
+			text-transform: uppercase;
+			border-bottom: 2px solid var(--border);
+		}
+
+		.data-table td {
+			padding: 10px 14px;
+			border-bottom: 1px solid var(--border);
+			color: var(--text);
+		}
+
+		.data-table td:first-child {
+			font-weight: 600;
+			color: var(--navy);
+		}
+
+		.data-table .badge {
+			display: inline-block;
+			background: var(--cyan-bg);
+			color: var(--cyan-dark);
+			font-size: 12px;
+			font-weight: 600;
+			padding: 2px 10px;
+			border-radius: 20px;
+		}
+
+		.data-table.compact {
+			font-size: 13px;
+		}
+
+		.data-table.compact th,
+		.data-table.compact td {
+			padding: 8px 10px;
+			vertical-align: top;
+		}
+
+		.stats {
+			display: flex;
+			gap: 18px;
+			margin: 20px 0;
+		}
+
+		.stat {
+			flex: 1;
+			text-align: center;
+			padding: 22px 14px;
+			background: var(--bg-alt);
+			border-radius: 12px;
+			border: 1px solid var(--border);
+		}
+
+		.stat-number {
+			font-size: 38px;
+			font-weight: 800;
+			color: var(--navy);
+			line-height: 1;
+			margin-bottom: 6px;
+			font-variant-numeric: tabular-nums;
+		}
+
+		.stat-label {
+			font-size: 13px;
+			color: var(--text-light);
+			font-weight: 500;
+		}
+
+		.hl {
+			color: var(--purple);
+			font-weight: 600;
+		}
+
+		.hl-navy {
+			color: var(--navy);
+			font-weight: 700;
+		}
+
+		.hl-red {
+			color: var(--red);
+			font-weight: 600;
+		}
+
+		.cols {
+			display: flex;
+			gap: 40px;
+			align-items: flex-start;
+		}
+
+		.col {
+			flex: 1;
+		}
+
+		.flow {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			margin: 18px 0;
+			flex-wrap: wrap;
+		}
+
+		.flow-step {
+			background: var(--bg-alt);
+			border: 1px solid var(--border);
+			border-radius: 10px;
+			padding: 11px 16px;
+			font-size: 14px;
+			font-weight: 600;
+			color: var(--navy);
+			white-space: nowrap;
+		}
+
+		.flow-step.active {
+			background: var(--purple);
+			border-color: var(--purple);
+			color: #fff;
+		}
+
+		.flow-arrow {
+			color: var(--border);
+			font-size: 20px;
+		}
+
+		.slide-closing h1 {
+			color: #fff;
+			font-size: 52px;
+			position: relative;
+			max-width: 980px;
+		}
+
+		.slide-closing p {
+			color: #adbdcc;
+			font-size: 22px;
+			position: relative;
+			max-width: 920px;
+		}
+
+		.slide-title .page-num,
+		.slide-closing .page-num {
+			color: rgba(255, 255, 255, 0.3);
+		}
+
+		.speaker-note {
+			display: none;
+		}
+
+		.slide-nav {
+			position: fixed;
+			left: 50%;
+			bottom: 18px;
+			display: flex;
+			gap: 8px;
+			transform: translateX(-50%);
+			z-index: 120;
+		}
+
+		.slide-nav button {
+			appearance: none;
+			border: 1px solid rgba(255, 255, 255, 0.18);
+			border-radius: 999px;
+			background: rgba(10, 37, 64, 0.82);
+			color: #fff;
+			cursor: pointer;
+			font-family: inherit;
+			font-size: 12px;
+			font-weight: 700;
+			padding: 8px 14px;
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+		}
+
+		.slide-nav button:disabled {
+			cursor: default;
+			opacity: 0.38;
+		}
+
+		@media print {
+			@page {
+				size: 1280px 720px;
+				margin: 0;
+			}
+
+			html,
+			body {
+				width: 1280px;
+				height: auto;
+				overflow: visible;
+				background: #fff;
+			}
+
+			.deck {
+				width: 1280px;
+				height: auto;
+			}
+
+			.slide {
+				position: relative;
+				inset: auto;
+				display: block;
+				width: 1280px;
+				height: 720px;
+				opacity: 1;
+				pointer-events: auto;
+				page-break-after: always;
+				break-after: page;
+			}
+
+			.slide:last-child {
+				page-break-after: auto;
+				break-after: auto;
+			}
+
+			.slide-inner {
+				width: 1280px;
+				height: 720px;
+				border-radius: 0;
+				box-shadow: none;
+			}
+
+			#progress,
+			.slide-nav {
+				display: none;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="deck" id="deck">
+<div class="slide slide-title active" data-slide="0">
+			<div class="slide-inner">
+				<p class="tagline">Submission Deck / Detailed Version</p>
+				<h1>構造持続理論ベースの<br>新しい文明OSシミュレーション</h1>
+				<p class="subtitle">シンギュラリティ後の社会移行において、<br>若者と家族形成世代が未来の選択肢を持てるかを検証する制度設計AI</p>
+				<span class="page-num">1 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="1">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Summary</span><span>提出用要約</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">概要</div>
+					<h2>30秒で読む提出物サマリー</h2>
+					<div class="callout">本作は、シンギュラリティ後の社会移行で若者と家族形成世代が未来の選択肢を持てるかを、LLMエージェントの反応経路として事前観測する制度設計AIである。</div>
+					<div class="features-4">
+						<div class="feature tight"><div class="feature-icon purple">問</div><h3>問いの深さ</h3><p>技術進歩ではなく、雇用・所得・役割・家族形成が同時に揺れる状況を扱う。</p></div>
+						<div class="feature tight"><div class="feature-icon cyan">独</div><h3>独自性</h3><p>火災避難の発想を、心理・制度空間の反応観測へ抽象化した。</p></div>
+						<div class="feature tight"><div class="feature-icon amber">実</div><h3>実装</h3><p>属性、記憶、内心、友達トーク、SNS、行動をrow化して再生する。</p></div>
+						<div class="feature tight"><div class="feature-icon red">誠</div><h3>誠実さ</h3><p>未来予測ではなく、制度設計の事前デバッグとして限界を明示する。</p></div>
+					</div>
+					<p style="font-size: 15px; color: var(--text-light); margin-top: 14px;">中心仮説: 単なる給付よりも、社会持続活動に報酬が流れるインセンティブ設計と、通知/予約/着金/メンター/相談導線を組み合わせた方が、制度利用・相談・参加への行動変化の芽を観測しやすい。</p>
+				</div>
+				<span class="page-num">2 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="2">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Question</span><span>中心の問い</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">問い</div>
+					<h2>シンギュラリティ後の未来に、<br>我々はどう希望を見出すか</h2>
+					<p class="lead">これは技術だけの問題ではなく、制度、経済、人間の行動、そして次世代の選択肢の問題である。</p>
+					<div class="flow">
+						<div class="flow-step">AI/AGIの進展</div><div class="flow-arrow">→</div>
+						<div class="flow-step">雇用・所得・役割の再編</div><div class="flow-arrow">→</div>
+						<div class="flow-step">家族形成と未来感情</div><div class="flow-arrow">→</div>
+						<div class="flow-step active">制度設計の必要性</div>
+					</div>
+				</div>
+				<span class="page-num">3 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="3">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Motivation</span><span>なぜ作ったか</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">背景</div>
+					<h2>資本主義の性質が、<br>シンギュラリティで極端化する可能性</h2>
+					<div class="features">
+						<div class="feature"><div class="feature-icon cyan">+</div><h3>短期最適化の強さ</h3><p>資本主義は、価値創造、競争、投資、効率化、技術発展を強く押し進める。AIはこの速度をさらに上げる。</p></div>
+						<div class="feature"><div class="feature-icon red">-</div><h3>外部化される弱さ</h3><p>格差、役割喪失、ケア負担、制度不信、将来不安は、短期の収益指標からこぼれ落ちやすい。</p></div>
+					</div>
+					<div class="callout callout-red">AIが価値創造を加速すると、資本主義の良い面だけでなく、弱い面も極端化するかもしれない。だから、利益の最大化とは別に、社会が壊れず続く条件を設計対象にする必要がある。</div>
+				</div>
+				<span class="page-num">4 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="4">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Personal</span><span>個人的動機</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">個人的な動機</div>
+					<h2>去年、一人の息子が生まれた</h2>
+					<p class="lead">未来社会の議論は、抽象的な技術論ではなく、次の世代が希望を持てるかという問いになった。</p>
+					<div class="callout">「AGIの未来はどうなるか」ではなく、「その未来に生まれる子どもたちは、何を信じ、どんな選択肢を持てるのか」を見たい。</div>
+				</div>
+				<span class="page-num">5 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="5">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Politics</span><span>制度設計問題</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">政治と経済</div>
+					<h2>最終的には、政治と制度設計の問題になる</h2>
+					<div class="flow">
+						<div class="flow-step">生活実感</div><div class="flow-arrow">→</div>
+						<div class="flow-step">世論</div><div class="flow-arrow">→</div>
+						<div class="flow-step">政治判断</div><div class="flow-arrow">→</div>
+						<div class="flow-step">制度設計</div><div class="flow-arrow">→</div>
+						<div class="flow-step active">未来の選択肢</div>
+					</div>
+					<p class="lead">希望は精神論だけでは維持できない。経済条件、制度信頼、役割、使える支援の経路によって左右される。</p>
+				</div>
+				<span class="page-num">6 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="6">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Theory</span><span>独自の前提知識</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">構造持続論</div>
+					<h2>社会は、お金や制度が<br>存在するだけでは続かない</h2>
+					<div class="features-3">
+						<div class="feature"><div class="feature-icon purple">役</div><h3>役割</h3><p>人が社会の中で意味ある役割を持てること。</p></div>
+						<div class="feature"><div class="feature-icon cyan">路</div><h3>未来経路</h3><p>今の困難から次の選択肢へ進む経路が残ること。</p></div>
+						<div class="feature"><div class="feature-icon amber">修</div><h3>修復可能性</h3><p>制度が壊れても、直せる余地が残っていること。</p></div>
+					</div>
+					<div class="callout callout-cyan">構造持続論は、短期利益だけでなく、社会が持続するための条件を設計対象にする考え方。お金を配るか否かではなく、役割・経路・修復可能性に資源が流れる制度を考える。</div>
+				</div>
+				<span class="page-num">7 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="7">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">What</span><span>何をシミュレーションするか</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">設計概要</div>
+					<h2>制度が人間に届き、<br>感情・行動・社会反応へ変わる過程</h2>
+					<div class="flow">
+						<div class="flow-step">世界イベント</div><div class="flow-arrow">→</div>
+						<div class="flow-step">制度介入</div><div class="flow-arrow">→</div>
+						<div class="flow-step">生活者の反応</div><div class="flow-arrow">→</div>
+						<div class="flow-step">集団集約</div><div class="flow-arrow">→</div>
+						<div class="flow-step active">次の社会状態</div>
+					</div>
+					<p class="lead">未来を一発で予言するのではなく、制度の反応経路と副作用を観測する。</p>
+				</div>
+				<span class="page-num">8 / 29</span>
+			</div>
+		</div>
+
+<div class="slide" data-slide="8">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Abstraction</span><span>火災シミュレーターの抽象化</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">ハッカソン文脈</div>
+					<h2>火災シミュレーターを、<br>心理・制度空間へ拡張する</h2>
+					<div class="features-3">
+						<div class="feature"><div class="feature-icon red">火</div><h3>物理空間</h3><p>火災、煙、出口、混雑を置き、人がどの経路で避難するかを見る。</p></div>
+						<div class="feature"><div class="feature-icon amber">心</div><h3>心理空間</h3><p>不安、制度不信、SNS悲観、家計圧迫を置き、人が何を諦めるかを見る。</p></div>
+						<div class="feature"><div class="feature-icon cyan">制</div><h3>制度空間</h3><p>通知、予約、着金、相談、参加導線を置き、人がどの支援へ移るかを見る。</p></div>
+					</div>
+					<div class="callout">避難経路のシミュレーションを、制度利用・相談・参加への反応経路の観測に抽象化した。見る対象は「人がどこへ逃げるか」から「人がどの選択肢を残せるか」へ広がる。</div>
+				</div>
+				<span class="page-num">9 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="9">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Architecture</span><span>全体構造</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">システム構造</div>
+					<h2>LLMエージェントを閉ループに組み込む</h2>
+					<div class="flow">
+						<div class="flow-step">国家/世界圧力</div><div class="flow-arrow">→</div>
+						<div class="flow-step">日本社会状態</div><div class="flow-arrow">→</div>
+						<div class="flow-step active">若者・家族形成世代</div><div class="flow-arrow">→</div>
+						<div class="flow-step">行動row</div><div class="flow-arrow">→</div>
+						<div class="flow-step">社会フィードバック</div>
+					</div>
+					<div class="features-3">
+						<div class="feature"><h3>入力</h3><p>イベント、制度、社会状態、エージェント属性。</p></div>
+						<div class="feature"><h3>推論</h3><p>LLMが感情、行動、発話、根拠を生成。</p></div>
+						<div class="feature"><h3>出力</h3><p>UIで再生し、分布と個別反応を比較。</p></div>
+					</div>
+				</div>
+				<span class="page-num">10 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="10">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Why LLM</span><span>なぜLLMエージェントか</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">観測価値</div>
+					<h2>統計モデルやアンケートだけでは、<br>反応の途中経路が薄くなる</h2>
+					<table class="data-table compact">
+						<thead><tr><th>手法</th><th>得意なこと</th><th>見えにくいこと</th><th>本作で補う観測面</th></tr></thead>
+						<tbody>
+							<tr><td>統計モデル</td><td>実データに基づく分布推定、因果検証</td><td>制度を聞いた瞬間の誤解、友人への相談、SNSでの増幅、次月へ残る懸念</td><td>内心、私的会話、公開発話、行動、記憶更新を同じrowに残す</td></tr>
+							<tr><td>アンケート</td><td>大人数の意向把握、定量比較</td><td>建前回答、制度をまだ知らない人の反応、行動へ移る直前の迷い</td><td>属性と状況を与え、通知を見た後の予約/相談/先送りを生成する</td></tr>
+							<tr><td>LLMエージェント</td><td>仮想人格の状況依存反応を多面で出す</td><td>現実の代表性と妥当性は別途検証が必要</td><td>制度案の事前デバッグとして、想定外の受け取り方と副作用を早く発見する</td></tr>
+						</tbody>
+					</table>
+					<div class="callout callout-cyan">価値は「正確な予測」ではなく、制度が人間の内側、会話、SNS、行動、持ち越し懸念を通ってどう変形するかを観測できる点にある。</div>
+				</div>
+				<span class="page-num">11 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="11">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Agent</span><span>エージェント設計</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">エージェント設計</div>
+					<h2>同じイベントでも、人によって反応は違う</h2>
+					<table class="data-table">
+						<thead><tr><th>属性カテゴリ</th><th>例</th><th>効く理由</th></tr></thead>
+						<tbody>
+							<tr><td>生活属性</td><td>年齢、家計、住居、雇用、地域</td><td>生活コストや雇用不安の受け方が変わる</td></tr>
+							<tr><td>家族形成</td><td>結婚、子ども意向、ケア責任</td><td>未来選択と制度支援への感度が変わる</td></tr>
+							<tr><td>認知属性</td><td>制度信頼、SNS影響、不安感受性</td><td>同じ制度を信じるか疑うかが変わる</td></tr>
+							<tr><td>記憶</td><td>過去の利用経験、持ち越し懸念</td><td>次ステップの行動へ影響する</td></tr>
+						</tbody>
+					</table>
+				</div>
+				<span class="page-num">12 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="12">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Events</span><span>イベント設計</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">イベント設計</div>
+					<h2>世界ショックと制度介入を分ける</h2>
+					<div class="features">
+						<div class="feature"><div class="feature-icon red">外</div><h3>外生イベント</h3><p>AGI/AIロボ普及、生活コスト、地政学不安、SNS悲観、医療・介護負荷。</p></div>
+						<div class="feature"><div class="feature-icon purple">制</div><h3>制度介入</h3><p>出産支援、構造持続通貨、社会持続活動報酬、制度利用伴走支援。</p></div>
+					</div>
+					<div class="callout">イベントを混ぜないことで、「外圧に対して、どの制度設計がどこに効いたか」を比較できる。</div>
+				</div>
+				<span class="page-num">13 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="13">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Intervention</span><span>比較対象</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">介入設計</div>
+					<h2>比較するシナリオ</h2>
+					<table class="data-table">
+						<thead><tr><th>シナリオ</th><th>設計</th><th>見ること</th></tr></thead>
+						<tbody>
+							<tr><td>介入なし</td><td>制度側の追加介入なし</td><td>不安、制度不信、生活防衛がどう増えるか</td></tr>
+							<tr><td>出産支援のみ</td><td>子育て初期一時金1000万円</td><td>金銭支援だけで家族形成意向が戻るか</td></tr>
+							<tr><td>構造持続通貨 + 伴走</td><td>社会持続活動への報酬、通知、予約、着金、メンター、相談導線</td><td>制度利用・相談・参加への行動変化の芽が出るか</td></tr>
+						</tbody>
+					</table>
+					<p style="font-size: 15px; color: var(--text-light); margin-top: 14px;">構造持続通貨は単なる給付ではない。子育て、地域ケア、学び直し、相談参加など、社会を持続させる活動に報酬が流れるインセンティブ設計として置く。</p>
+				</div>
+				<span class="page-num">14 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="14">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Emotion</span><span>未来感情分類</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">未来感情分類</div>
+					<h2>細かい感情を、見やすい4分類へ集約する</h2>
+					<div class="features-4">
+						<div class="feature"><div class="feature-icon cyan">希</div><h3>希望</h3><p>安心、希望、連帯感、自己効力感。</p></div>
+						<div class="feature"><div class="feature-icon purple">中</div><h3>中立</h3><p>平静、様子見、情報収集。</p></div>
+						<div class="feature"><div class="feature-icon amber">注</div><h3>注意</h3><p>不安、喪失感、制度不信、生活防衛。</p></div>
+						<div class="feature"><div class="feature-icon red">危</div><h3>危険</h3><p>絶望、撤退圧、強い怒り、諦念。</p></div>
+					</div>
+					<div class="callout callout-cyan">UIでは4分類で見やすくし、rowには主感情や行動を細かく残す。</div>
+				</div>
+				<span class="page-num">15 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="15">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Row</span><span>LLM出力仕様</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">rowデータ設計</div>
+					<h2>LLM出力を、再生・比較・監査できる形にする</h2>
+					<div class="code-block">
+						<span class="prompt">columns</span>: evaluation, emotion, pathway, support, intensity,<br>
+						action_category, action_detail, thought, private_talk, social_post,<br>
+						perceived_situation, reasoning_basis, memory_update, carryover_concern
+					</div>
+					<div class="features-3">
+						<div class="feature"><h3>再現性</h3><p>発表時は生成済みrowを安定再生。</p></div>
+						<div class="feature"><h3>比較性</h3><p>介入前後、シナリオ間の差分を比較。</p></div>
+						<div class="feature"><h3>監査性</h3><p>なぜそう反応したかの根拠も残す。</p></div>
+					</div>
+				</div>
+				<span class="page-num">16 / 29</span>
+			</div>
+		</div>
+
+<div class="slide" data-slide="16">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">UI</span><span>デモ画面</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">UI設計</div>
+					<h2>集団分布と一人の内側を同時に見る</h2>
+					<div class="features">
+						<div class="feature"><div class="feature-icon purple">Map</div><h3>4分類マップ</h3><p>希望、中立、注意、危険にエージェントを配置し、感情分布を見る。</p></div>
+						<div class="feature"><div class="feature-icon cyan">Voice</div><h3>Live Voice</h3><p>つぶやき、友達トーク、行動を切り替え、制度がどう受け取られたかを見る。</p></div>
+					</div>
+					<div class="callout">SUMMARYでは、希望・中立・注意・危険と子ども希望指数を毎回表示する。</div>
+				</div>
+				<span class="page-num">17 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="17">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Result</span><span>介入なし</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">シミュレーション結果 1</div>
+					<h2>介入なし: 不安と生活防衛が残る</h2>
+					<div class="features-3">
+						<div class="feature"><div class="feature-icon red">不</div><h3>不安</h3><p>AGI普及、生活コスト、SNS悲観により、将来の見通しが弱まる。</p></div>
+						<div class="feature"><div class="feature-icon amber">防</div><h3>生活防衛</h3><p>子ども、転居、学び直しなどの選択を先送りする傾向。</p></div>
+						<div class="feature"><div class="feature-icon purple">信</div><h3>制度不信</h3><p>制度があっても届くのか、続くのかへの疑いが残る。</p></div>
+					</div>
+					<div class="callout callout-red">読み方: 希望がある/ないだけではなく、どのイベントが撤退圧、制度要求、先送り行動へ変換されるかを見る。介入なしは、外圧が生活防衛に流れやすい基準線として扱う。</div>
+				</div>
+				<span class="page-num">18 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="18">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Result</span><span>出産支援のみ</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">シミュレーション結果 2</div>
+					<h2>出産支援のみ: 金銭不安は下がるが、導線が弱い</h2>
+					<div class="features">
+						<div class="feature"><div class="feature-icon cyan">効</div><h3>効く部分</h3><p>子育て初期一時金1000万円は、妊娠・出産・初期育児の経済不安を一部下げる。</p></div>
+						<div class="feature"><div class="feature-icon amber">残</div><h3>残る部分</h3><p>住居、仕事、ケア、相談相手、制度信頼が弱いと、子どもを持つ選択は十分には戻らない。</p></div>
+					</div>
+					<div class="callout">読み方: 金額は短期の不安を下げるが、制度利用、職場調整、住居、ケア、相談相手への導線が弱いと、行動は「情報収集」や「様子見」に留まりやすい。</div>
+				</div>
+				<span class="page-num">19 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="19">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Result</span><span>構造持続通貨 + 伴走</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">シミュレーション結果 3</div>
+					<h2>構造持続通貨 + 伴走: 制度が使える状態を作る</h2>
+					<div class="flow">
+						<div class="flow-step">社会持続活動報酬</div><div class="flow-arrow">→</div>
+						<div class="flow-step">通知</div><div class="flow-arrow">→</div>
+						<div class="flow-step">予約</div><div class="flow-arrow">→</div>
+						<div class="flow-step">着金</div><div class="flow-arrow">→</div>
+						<div class="flow-step">相談</div><div class="flow-arrow">→</div>
+						<div class="flow-step active">参加</div>
+					</div>
+					<div class="stats">
+						<div class="stat"><div class="stat-number">982</div><div class="stat-label">制度利用 row</div></div>
+						<div class="stat"><div class="stat-number">289</div><div class="stat-label">相談 row</div></div>
+						<div class="stat"><div class="stat-number">21</div><div class="stat-label">参加・連帯 row</div></div>
+					</div>
+					<div class="callout callout-cyan">row上は「支え合いが自然発生」ではなく、「インセンティブ設計と伴走導線により行動変化の芽が観測された」が正確。</div>
+				</div>
+				<span class="page-num">20 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="20">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Compare</span><span>結果比較</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">シミュレーション結果の読み方</div>
+					<h2>3シナリオは、効いた場所が違う</h2>
+					<table class="data-table compact">
+						<thead><tr><th>比較軸</th><th>介入なし</th><th>出産支援のみ</th><th>構造持続通貨 + 伴走</th></tr></thead>
+						<tbody>
+							<tr><td>主な反応</td><td>不安、様子見、生活防衛</td><td>金銭不安の低下、情報収集</td><td>制度利用、相談、参加への移行</td></tr>
+							<tr><td>残る懸念</td><td>将来所得、役割喪失、制度不信</td><td>仕事、住居、ケア負担、制度継続性</td><td>参加負担、対象外感、運用の公平性</td></tr>
+							<tr><td>設計示唆</td><td>外圧だけでは撤退圧が増えやすい</td><td>給付は必要だが、導線設計が不足する</td><td>報酬と伴走が、使える制度への橋になる</td></tr>
+							<tr><td>言えること</td><td>基準線としての悪化経路</td><td>金銭支援の効く範囲と限界</td><td>行動変化の芽と、追加検証すべき副作用</td></tr>
+						</tbody>
+					</table>
+					<div class="callout">重要なのは勝ち負けではなく、制度が「どの不安を下げ、どの行動へつながり、何を残すか」を分解して読めること。</div>
+				</div>
+				<span class="page-num">21 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="21">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Discovery</span><span>発見</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">考察・発見</div>
+					<h2>制度の効果は、金額だけでは説明できない</h2>
+					<ul class="bullet-list">
+						<li><strong>金銭支援</strong>は重要だが、それだけでは制度信頼や生活経路まで戻らない。</li>
+						<li><strong>通知・予約・着金</strong>が揃うと、制度が「存在する」から「使える」に変わる。</li>
+						<li><strong>メンター・伴走</strong>があると、不安が相談や制度利用へ変わりやすい。</li>
+						<li><strong>社会持続活動への報酬</strong>を置くと、役割と参加の経路を設計対象にできる。</li>
+					</ul>
+				</div>
+				<span class="page-num">22 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="22">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Emergence</span><span>創発の線引き</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">誠実な主張範囲</div>
+					<h2>創発と言える部分と、<br>言い過ぎな部分を分ける</h2>
+					<div class="features">
+						<div class="feature"><div class="feature-icon cyan">言</div><h3>創発と言える部分</h3><p>個別エージェントに「相談者を増やせ」と直接命令していなくても、属性、外圧、制度導線、記憶更新の組み合わせから、相談・制度利用・参加への反応がrowとして現れた。</p></div>
+						<div class="feature"><div class="feature-icon red">止</div><h3>言い過ぎな部分</h3><p>現実社会で支え合いが自然発生した、未来を正確に予測した、政策効果を実証した、とは言わない。LLM出力は仮説生成であり、実データ検証が必要。</p></div>
+					</div>
+					<div class="callout">本作の強みは、創発を神秘化することではなく、どの条件からどの反応経路が出たかをrowで監査できるようにした点にある。</div>
+				</div>
+				<span class="page-num">23 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="23">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Tech</span><span>技術的なこだわり</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">技術的なこだわり</div>
+					<h2>LLMデモで終わらせないための設計</h2>
+					<div class="features-4">
+						<div class="feature"><div class="feature-icon purple">型</div><h3>固定スキーマ</h3><p>自由作文を比較可能なrowへ変換。</p></div>
+						<div class="feature"><div class="feature-icon cyan">層</div><h3>観測面分離</h3><p>内心、友達、SNS、行動を分ける。</p></div>
+						<div class="feature"><div class="feature-icon amber">再</div><h3>安定再生</h3><p>発表中は生成済みrowを再生。</p></div>
+						<div class="feature"><div class="feature-icon red">限</div><h3>過剰主張回避</h3><p>予測ではなく反応仮説として扱う。</p></div>
+					</div>
+					<div class="callout">LLMを「話すキャラ」ではなく、属性と状況に対する反応生成器として閉ループに組み込む。</div>
+				</div>
+				<span class="page-num">24 / 29</span>
+			</div>
+		</div>
+
+<div class="slide" data-slide="24">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Transfer</span><span>製品パッケージ化</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">転用・製品化</div>
+					<h2>AGI若者デモから、制度変更シミュレーターへ</h2>
+					<table class="data-table">
+						<thead><tr><th>ドメイン</th><th>用途</th><th>観測できること</th></tr></thead>
+						<tbody>
+							<tr><td>企業</td><td>人事制度変更、評価制度、AI導入</td><td>不満者、退職リスク、モチベーション低下、説明順序、納得形成</td></tr>
+							<tr><td>自治体</td><td>子育て、介護、移住、地域交通</td><td>制度利用、反発、届かない層、副作用</td></tr>
+							<tr><td>学校</td><td>進路支援、校則変更、探究学習</td><td>生徒・保護者・教員の受け取り方</td></tr>
+							<tr><td>行政</td><td>政策説明、制度設計、住民合意</td><td>信頼、制度要求、対象外感、参加経路</td></tr>
+						</tbody>
+					</table>
+				</div>
+				<span class="page-num">25 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="25">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Enterprise</span><span>企業転用例</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">製品転用の具体例</div>
+					<h2>企業の人事制度変更を、<br>事前に不満・退職・意欲低下まで読む</h2>
+					<table class="data-table compact">
+						<thead><tr><th>入力する変更案</th><th>エージェント属性</th><th>観測する反応</th><th>設計へ戻す示唆</th></tr></thead>
+						<tbody>
+							<tr><td>評価制度の変更、AI導入、職務再定義、報酬配分</td><td>職種、年齢、成果実感、上司信頼、家庭事情、転職容易性</td><td>内心の不満、同僚トーク、社内SNS投稿、退職検討、モチベーション変化</td><td>説明順序、移行期間、例外規定、相談窓口、マネージャー向けFAQ</td></tr>
+							<tr><td>リモート勤務縮小、出社方針、福利厚生改定</td><td>通勤時間、育児介護、地域、チーム依存度、過去の不公平感</td><td>反発する層、沈黙する層、納得する層、制度を誤読する層</td><td>対象者別メッセージ、補償設計、段階導入、退職リスクの早期検知</td></tr>
+						</tbody>
+					</table>
+					<div class="callout callout-cyan">企業向けには「制度変更の火災訓練」として売れる。炎上、退職、意欲低下が起きる前に、どの説明と伴走が必要かをデバッグする。</div>
+				</div>
+				<span class="page-num">26 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="26">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Limits</span><span>注意点</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">限界と注意点</div>
+					<h2>これは未来を正確に当てるAIではない</h2>
+					<ul class="bullet-list">
+						<li><strong>LLM出力は仮説</strong>であり、現実調査や統計モデルの代替ではない。</li>
+						<li><strong>rowデータの創発</strong>は、設計イベントとプロンプト条件に依存する。</li>
+						<li><strong>社会実装</strong>には、実データ、専門家レビュー、倫理監査、住民参加が必要。</li>
+						<li><strong>価値</strong>は、正解を出すことではなく、見落としや副作用を事前に発見すること。</li>
+					</ul>
+					<div class="callout callout-red">発表では「予測」ではなく「制度設計の事前デバッグ」として説明する。結果は政策決定の根拠ではなく、調査設計・専門家レビュー・実証実験に進む前の仮説地図である。</div>
+				</div>
+				<span class="page-num">27 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide" data-slide="27">
+			<div class="slide-inner">
+				<div class="slide-header"><div class="slide-header-logo"><span class="mark">δ</span><span class="name">文明OSシミュレーション</span></div><div class="slide-header-badge"><span class="badge-label">Evaluation</span><span>評価ポイント</span></div></div>
+				<div class="slide-body">
+					<div class="section-badge">この作品の評価ポイント</div>
+					<h2>自由なアイデアを、<br>実装と検証可能性に落とした</h2>
+					<div class="features-5">
+						<div class="feature tight"><div class="feature-icon purple">問</div><h3>問い</h3><p>AGI後の希望を、家族形成と制度信頼の問題へ具体化。</p></div>
+						<div class="feature tight"><div class="feature-icon cyan">抽</div><h3>抽象化</h3><p>火災避難を、心理・制度空間の反応観測へ拡張。</p></div>
+						<div class="feature tight"><div class="feature-icon amber">実</div><h3>実装</h3><p>LLM反応を固定スキーマrowにし、UIで再生・比較。</p></div>
+						<div class="feature tight"><div class="feature-icon red">読</div><h3>結果読解</h3><p>金銭、導線、伴走、報酬設計の効く場所を分解。</p></div>
+						<div class="feature tight"><div class="feature-icon purple">転</div><h3>転用性</h3><p>行政だけでなく、企業人事制度の事前調査にも展開可能。</p></div>
+					</div>
+					<div class="callout">審査で見てほしいのは、壮大な未来予言ではなく、自由な社会構想をLLMエージェント、row設計、比較UI、限界明示まで落とし込んだ設計力。</div>
+				</div>
+				<span class="page-num">28 / 29</span>
+			</div>
+		</div>
+
+		<div class="slide slide-closing" data-slide="28">
+			<div class="slide-inner">
+				<h1>希望を精神論ではなく、<br>設計可能な社会条件として扱う。</h1>
+				<p>制度が社会に出る前に、人間の反応経路を観測する。<br>それが、構造持続理論ベースの新しい文明OSシミュレーションです。</p>
+				<span class="page-num">29 / 29</span>
+			</div>
+		</div>
+</div>
+	<div id="progress"></div>
+	<nav class="slide-nav" aria-label="スライド操作">
+		<button type="button" id="prevSlideButton">戻る</button>
+		<button type="button" id="nextSlideButton">進む</button>
+	</nav>
+
+	<script>
+		const slides = Array.from(document.querySelectorAll('.slide'));
+		const progress = document.getElementById('progress');
+		const prevSlideButton = document.getElementById('prevSlideButton');
+		const nextSlideButton = document.getElementById('nextSlideButton');
+		let current = 0;
+
+		function setPageNumbers() {
+			slides.forEach((slide, index) => {
+				const page = slide.querySelector('.page-num');
+				if (page) page.textContent = `${index + 1} / ${slides.length}`;
+			});
+		}
+
+		function showSlide(index) {
+			current = Math.max(0, Math.min(slides.length - 1, index));
+			slides.forEach((slide, i) => {
+				slide.classList.toggle('active', i === current);
+			});
+			progress.style.width = ((current + 1) / slides.length * 100) + '%';
+			prevSlideButton.disabled = current === 0;
+			nextSlideButton.disabled = current === slides.length - 1;
+			history.replaceState(null, '', '#' + (current + 1));
+		}
+
+		function nextSlide() {
+			showSlide(current + 1);
+		}
+
+		function prevSlide() {
+			showSlide(current - 1);
+		}
+
+		document.addEventListener('keydown', (event) => {
+			if (event.key === 'ArrowRight' || event.key === ' ' || event.key === 'PageDown') {
+				event.preventDefault();
+				nextSlide();
+			}
+			if (event.key === 'ArrowLeft' || event.key === 'PageUp') {
+				event.preventDefault();
+				prevSlide();
+			}
+			if (event.key === 'Home') {
+				event.preventDefault();
+				showSlide(0);
+			}
+			if (event.key === 'End') {
+				event.preventDefault();
+				showSlide(slides.length - 1);
+			}
+		});
+
+		document.addEventListener('click', (event) => {
+			if (event.target.closest('a, button')) return;
+			if (event.clientX < window.innerWidth * 0.36) {
+				prevSlide();
+			} else {
+				nextSlide();
+			}
+		});
+
+		prevSlideButton.addEventListener('click', prevSlide);
+		nextSlideButton.addEventListener('click', nextSlide);
+
+		setPageNumbers();
+		const hashIndex = Number.parseInt(location.hash.replace('#', ''), 10);
+		if (Number.isFinite(hashIndex) && hashIndex > 0) {
+			showSlide(hashIndex - 1);
+		} else {
+			showSlide(0);
+		}
+	</script>
+</body>
+</html>

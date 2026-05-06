@@ -2512,27 +2512,29 @@
 
     <section class="controls" aria-label="simulation controls">
       <label class="scenario-picker" for="scenarioSelect">
-        <span class="scenario-select-label">シミュレーション</span>
+        <span class="scenario-select-label">比較シナリオ</span>
         <select class="scenario-select" id="scenarioSelect" disabled>
-          <optgroup label="新通貨制度なし">
-            <option value="baseline">介入なし</option>
-            <option value="birthOnly">出産支援のみ</option>
-            <option value="policyNoSustain">政策設計AI介入（新通貨なし）</option>
+          <optgroup label="基本比較">
+            <option value="baseline">比較基準（追加施策なし）</option>
+            <option value="birthOnly">一時金のみ（1000万円）</option>
           </optgroup>
-          <optgroup label="新通貨制度あり（構造持続論ベース）">
-            <option value="sustain" selected>構造持続通貨のみ</option>
-            <option value="birthGrant">構造持続通貨 + 出産支援</option>
-            <option value="hopeFamily">構造持続通貨 + 制度利用伴走支援</option>
-            <option value="policyWithSustain">政策設計AI介入（新通貨あり）</option>
-            <option value="policyWithSustainHopeFamily">政策設計AI介入（新通貨あり+伴走支援）</option>
+          <optgroup label="持続報酬を使う設計">
+            <option value="sustain" selected>持続報酬のみ</option>
+            <option value="birthGrant">持続報酬 + 一時金（伴走なし）</option>
+            <option value="hopeFamily">持続報酬 + 伴走支援</option>
+          </optgroup>
+          <optgroup label="参考: AI自動調整">
+            <option value="policyNoSustain">AI自動調整：通常制度</option>
+            <option value="policyWithSustain">AI自動調整：持続報酬あり</option>
+            <option value="policyWithSustainHopeFamily">AI自動調整：持続報酬 + 伴走</option>
           </optgroup>
         </select>
       </label>
       <section class="scenario-brief" aria-label="選択中のシミュレーション概要">
         <div class="scenario-brief-main">
-          <div class="scenario-brief-kicker">選択中のシミュレーション</div>
-          <div class="scenario-brief-title" id="scenarioBriefTitle">構造持続通貨のみ</div>
-          <div class="scenario-brief-summary" id="scenarioBriefSummary">住居、学び直し、ケア、社会持続活動への報酬が、若者と家族形成世代の未来感情をどう変えるかを観測します。</div>
+          <div class="scenario-brief-kicker">選択中の比較シナリオ</div>
+          <div class="scenario-brief-title" id="scenarioBriefTitle">持続報酬のみ</div>
+          <div class="scenario-brief-summary" id="scenarioBriefSummary">社会を支える活動への報酬が、若者と家族形成世代の未来感情をどう変えるかを観測します。</div>
         </div>
         <div class="scenario-brief-actions">
           <button type="button" class="scenario-detail-button" id="scenarioDetailButton">設計の詳細</button>
@@ -2554,7 +2556,7 @@
         <header class="modal-head">
           <div>
             <div class="modal-kicker">シナリオ設計の詳細</div>
-            <h2 class="modal-title" id="scenarioModalTitle">構造持続通貨のみ</h2>
+            <h2 class="modal-title" id="scenarioModalTitle">持続報酬のみ</h2>
           </div>
           <button type="button" class="modal-close" id="scenarioModalClose" aria-label="閉じる">×</button>
         </header>
@@ -2732,7 +2734,7 @@
 
         <section class="panel counterfactual-panel">
           <header class="panel-header">
-            <h2 class="panel-title">介入なしとの差分</h2>
+            <h2 class="panel-title">比較基準との差分</h2>
             <span class="panel-title-sub" id="counterfactualLabel">同時点比較</span>
           </header>
           <div class="cockpit-body">
@@ -2850,21 +2852,21 @@
     const worldEventsTsvPath = "../domain_packs/agi_youth_japan/data/world_events.tsv";
     const runConfigs = {
       baseline: {
-        label: "介入なし",
+        label: "比較基準（追加施策なし）",
         agentTurnsPaths: ["../outputs/runs/no_intervention_71steps_panel48/agent_turns.tsv"],
         countryTurnsPaths: ["../outputs/runs/no_intervention_71steps_panel48/country_turns.tsv"],
         autoEventPaths: ["../outputs/runs/no_intervention_71steps_panel48/auto_events_with_feedback.tsv"],
         scheduledEventPaths: ["../outputs/runs/no_intervention_71steps_panel48/scheduled_events_used.tsv"]
       },
       birthOnly: {
-        label: "出産支援のみ",
+        label: "一時金のみ（1000万円）",
         agentTurnsPaths: ["../outputs/runs/birth_grant_only_83steps_panel48/agent_turns.tsv"],
         countryTurnsPaths: ["../outputs/runs/birth_grant_only_83steps_panel48/country_turns.tsv"],
         autoEventPaths: ["../outputs/runs/birth_grant_only_83steps_panel48/auto_events_with_feedback.tsv"],
         scheduledEventPaths: ["../outputs/runs/birth_grant_only_83steps_panel48/scheduled_events_used.tsv"]
       },
       policyNoSustain: {
-        label: "政策設計AI介入（新通貨なし）",
+        label: "AI自動調整：通常制度",
         agentTurnsPaths: ["../outputs/runs/policy_search_no_sustain_71steps_panel48/agent_turns.tsv"],
         countryTurnsPaths: ["../outputs/runs/policy_search_no_sustain_71steps_panel48/country_turns.tsv"],
         autoEventPaths: [
@@ -2874,7 +2876,7 @@
         scheduledEventPaths: ["../outputs/runs/policy_search_no_sustain_71steps_panel48/scheduled_events_used.tsv"]
       },
       policyWithSustain: {
-        label: "政策設計AI介入（新通貨あり）",
+        label: "AI自動調整：持続報酬あり",
         agentTurnsPaths: ["../outputs/runs/policy_search_with_sustain_71steps_panel48/agent_turns.tsv"],
         countryTurnsPaths: ["../outputs/runs/policy_search_with_sustain_71steps_panel48/country_turns.tsv"],
         autoEventPaths: [
@@ -2884,7 +2886,7 @@
         scheduledEventPaths: ["../outputs/runs/policy_search_with_sustain_71steps_panel48/scheduled_events_used.tsv"]
       },
       policyWithSustainHopeFamily: {
-        label: "政策設計AI介入（新通貨あり+伴走支援）",
+        label: "AI自動調整：持続報酬 + 伴走",
         agentTurnsPaths: ["../outputs/runs/policy_search_with_sustain_hope_family_71steps_panel48/agent_turns.tsv"],
         countryTurnsPaths: ["../outputs/runs/policy_search_with_sustain_hope_family_71steps_panel48/country_turns.tsv"],
         autoEventPaths: [
@@ -2894,7 +2896,7 @@
         scheduledEventPaths: ["../outputs/runs/policy_search_with_sustain_hope_family_71steps_panel48/scheduled_events_used.tsv"]
       },
       sustain: {
-        label: "構造持続通貨のみ",
+        label: "持続報酬のみ",
         agentTurnsPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/agent_turns.tsv"],
         countryTurnsPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/country_turns.tsv"],
         autoEventPaths: ["../outputs/runs/structure_intervention_100years_panel48_midprompt/auto_events_with_feedback.tsv"],
@@ -2902,14 +2904,14 @@
         scheduledEventFilter: (row) => (row.event_id || "") !== "P04"
       },
       birthGrant: {
-        label: "構造持続通貨 + 出産支援",
+        label: "持続報酬 + 一時金（伴走なし）",
         agentTurnsPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/agent_turns.tsv"],
         countryTurnsPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/country_turns.tsv"],
         autoEventPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/auto_events_with_feedback.tsv"],
         scheduledEventPaths: ["../outputs/runs/structure_birth_grant_package_83steps_panel48/scheduled_events_used.tsv"]
       },
       hopeFamily: {
-        label: "構造持続通貨 + 制度利用伴走支援",
+        label: "持続報酬 + 伴走支援",
         agentTurnsPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/agent_turns.tsv"],
         countryTurnsPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/country_turns.tsv"],
         autoEventPaths: ["../outputs/runs/structure_hope_family_package_83steps_panel48/auto_events_with_feedback.tsv"],
@@ -2918,7 +2920,7 @@
     };
     const scenarioDescriptions = {
       baseline: {
-        title: "介入なし",
+        title: "比較基準（追加施策なし）",
         summary: "AGI/AIロボ普及、生活コスト、地政学不安、SNS悲観が進む一方で、制度側の新しい支援を入れない比較基準です。若者・家族形成世代・次世代が、不安、生活防衛、制度不信、社会からの撤退へどう動くかを観測します。",
         lead: "このシミュレーションは「何もしなかったらこうなる」を見せる基準線です。LLMには悲観するよう命令せず、社会圧力、属性、年齢、雇用・住居・ケア制約、前ステップの記憶だけを渡して、各エージェントが自然にどう受け取るかを観測データとして保存しています。",
         sections: [
@@ -2941,9 +2943,9 @@
         ]
       },
       birthOnly: {
-        title: "出産支援のみ",
-        summary: "構造持続通貨や役割再設計を入れず、2年目3か月から子育て初期一時金1000万円、産後休息、代替ケア、復帰キャリア、非強制監査だけを重ねた比較です。お金と支援メニューだけで、家族形成の現実性がどこまで戻るかを見ます。",
-        lead: "この比較は、構造持続の思想を外した時に、出生・子育て支援がどう受け取られるかを見るための対照軸です。主施策は2年目3か月から4年目9か月までの子育て初期一時金1000万円で、出生前後の初期費用を大きく緩和する一方、財政負荷、対象外感、逆選択リスクも同時に観測します。正式なLLM再生成では scenario_mode=birth_grant_only を使います。",
+        title: "一時金のみ（子育て初期1000万円）",
+        summary: "持続報酬や役割再設計を入れず、2年目3か月から子育て初期一時金1000万円、産後休息、代替ケア、復帰キャリア、非強制監査だけを重ねた比較です。お金と支援メニューだけで、家族形成の現実性がどこまで戻るかを見ます。",
+        lead: "この比較は、持続報酬の設計を外した時に、出生・子育て支援がどう受け取られるかを見るための対照軸です。主施策は2年目3か月から4年目9か月までの子育て初期一時金1000万円で、出生前後の初期費用を大きく緩和する一方、財政負荷、対象外感、逆選択リスクも同時に観測します。正式なLLM再生成では scenario_mode=birth_grant_only を使います。",
         sections: [
           {
             title: "施策パラメータ",
@@ -2957,8 +2959,8 @@
             title: "検証している問い",
             items: [
               "出生・子育て支援だけで、家計、住居、雇用、ケア不安を押し返せるのか。",
-              "構造持続の役割報酬や学び直し経路がない場合、支援は希望ではなく確認行動や対象外感に吸収されないか。",
-              "出産支援を勝たせるには、金額よりもどの周辺条件が必要なのか。"
+              "持続報酬の役割報酬や学び直し経路がない場合、支援は希望ではなく確認行動や対象外感に吸収されないか。",
+              "一時金を希望につなげるには、金額よりもどの周辺条件が必要なのか。"
             ]
           },
           {
@@ -2966,15 +2968,15 @@
             items: [
               "子ども希望指数は上がっても、希望・安心・制度信頼までは自動で増えない可能性を見ます。",
               "非婚・非出産層の反発、財政不安、条件変更への恐怖が残る設計として扱います。",
-              "構造持続のみ、構造持続+出産との差を見ることで、出生支援が単体施策なのか、構造条件の上乗せなのかを説明できます。"
+              "持続報酬のみ、持続報酬+一時金との差を見ることで、出生支援が単体施策なのか、土台条件の上乗せなのかを説明できます。"
             ]
           }
         ]
       },
       policyNoSustain: {
-        title: "政策設計AI介入（新通貨なし）",
-        summary: "構造持続通貨の概念を使わず、政策設計AIが副作用、二極化、政策疲労を見ながら、現実的な補助金、説明、窓口、規制緩和、手続き簡素化を打ち続ける比較です。",
-        lead: "このシミュレーションは、政策設計AIに『ありとあらゆる現実的な手』を探させる一方で、構造持続通貨やnat報酬は使えない条件にしています。政策を増やせば救えるのか、それとも財政不安、対象外感、手続き疲れ、制度不信が膨らむのかを観測します。",
+        title: "AI自動調整：通常制度",
+        summary: "持続報酬の概念を使わず、政策設計AIが副作用、二極化、政策疲労を見ながら、現実的な補助金、説明、窓口、規制緩和、手続き簡素化を打ち続ける参考比較です。",
+        lead: "このシミュレーションは、政策設計AIに『ありとあらゆる現実的な手』を探させる一方で、持続報酬や社会を支える活動への報酬は使えない条件にしています。政策を増やせば救えるのか、それとも財政不安、対象外感、手続き疲れ、制度不信が膨らむのかを観測します。",
         sections: [
           {
             title: "検証している問い",
@@ -2988,21 +2990,21 @@
             title: "設計ポイント",
             items: [
               "個人反応から政策疲労、公平感欠損、強制感、財政不安を集約し、次ステップの政策探索へ戻します。",
-              "構造持続やnatという言葉を禁止し、既存制度の範囲でどこまで改善できるかを厳密に分けます。",
+              "持続報酬という考え方を禁止し、既存制度の範囲でどこまで改善できるかを厳密に分けます。",
               "勝ち筋が出ても、副作用の増加を同時に見るため、単なる政策宣伝ではなく制度設計レビューとして使えます。"
             ]
           }
         ]
       },
       policyWithSustain: {
-        title: "政策設計AI介入（新通貨あり）",
-        summary: "政策設計AIが副作用を監査しながら、構造持続通貨、社会維持活動報酬、住居、ケア、学び直し、地域更新を組み替え続ける比較です。",
-        lead: "このシミュレーションは、構造持続の概念を最初から正解扱いしません。通常政策と同じく副作用を出し、二極化や政策疲労を観測したうえで、政策設計AIが施策の順序、対象、説明、補完策を調整できるかを見ます。",
+        title: "AI自動調整：持続報酬あり",
+        summary: "政策設計AIが副作用を監査しながら、持続報酬、社会維持活動報酬、住居、ケア、学び直し、地域更新を組み替え続ける参考比較です。",
+        lead: "このシミュレーションは、持続報酬の概念を最初から正解扱いしません。通常政策と同じく副作用を出し、二極化や政策疲労を観測したうえで、政策設計AIが施策の順序、対象、説明、補完策を調整できるかを見ます。",
         sections: [
           {
             title: "検証している問い",
             items: [
-              "構造持続通貨があると、給付の追加ではなく、役割、報酬、ケア、地域維持の再設計へ探索空間が広がるか。",
+              "持続報酬があると、給付の追加ではなく、役割、報酬、ケア、地域維持の再設計へ探索空間が広がるか。",
               "家族形成支援が、非婚・非出産層の対象外感を生まず、別の社会参加経路と両立できるか。",
               "通常政策を全力で打つ比較より、現実的で副作用の少ない調整経路を見つけられるか。"
             ]
@@ -3018,14 +3020,14 @@
         ]
       },
       policyWithSustainHopeFamily: {
-        title: "政策設計AI介入（新通貨あり+伴走支援）",
-        summary: "構造持続通貨、出産・子育て支援、制度利用伴走を固定条件に置き、政策設計AIが副作用を見ながら追加施策、簡素化、説明、補償、順序変更を続ける上限比較です。",
-        lead: "このシミュレーションは、いま考えている最強寄りの政策束です。構造持続通貨と家族形成支援を入れたうえで、政策設計AIが毎ステップの住民反応、政策疲労、対象外反発、財政不安を読み、次の打ち手を閉ループで生成します。希望が最大化するかだけでなく、強い施策でも残る副作用を検査します。",
+        title: "AI自動調整：持続報酬 + 伴走",
+        summary: "持続報酬、出産・子育て支援、制度利用伴走を固定条件に置き、政策設計AIが副作用を見ながら追加施策、簡素化、説明、補償、順序変更を続ける上限比較です。",
+        lead: "このシミュレーションは、いま考えている最強寄りの政策束です。持続報酬と家族形成支援を入れたうえで、政策設計AIが毎ステップの住民反応、政策疲労、対象外反発、財政不安を読み、次の打ち手を閉ループで生成します。希望が最大化するかだけでなく、強い施策でも残る副作用を検査します。",
         sections: [
           {
             title: "検証している問い",
             items: [
-              "構造持続通貨、出産支援、制度利用伴走、政策設計AIを重ねると、40年視点でどこまで希望と子ども希望指数が伸びるか。",
+              "持続報酬、子育て初期一時金、制度利用伴走、政策設計AIを重ねると、40年視点でどこまで希望と子ども希望指数が伸びるか。",
               "最強寄りの条件でも、財政不安、政策疲労、対象外感、強制感、地域差は残るのか。",
               "政策AIが単に施策を増やすのではなく、副作用を見て簡素化、説明、補償、順序変更へ動けるか。"
             ]
@@ -3041,9 +3043,9 @@
         ]
       },
       sustain: {
-        title: "構造持続通貨のみ",
+        title: "持続報酬のみ",
         summary: "住居、学び直し、ケア、地域更新、社会持続活動への報酬を入れたシミュレーションです。経済成長だけでなく、社会を維持・修復する行動が役割と所得になると、人の未来感情と行動がどう変わるかを見ます。",
-        lead: "構造持続理論を社会制度に落とす最初の介入です。資源や給付額だけでなく、本人が『直す・変える・続ける経路』を持てるか、社会を維持する活動が飯の種になるかを観測します。",
+        lead: "正式設計名は『構造持続通貨』です。UIでは初見で伝わるように、社会を支える活動へ報酬が流れる仕組みとして『持続報酬』と呼びます。資源や給付額だけでなく、本人が『直す・変える・続ける経路』を持てるか、社会を維持する活動が飯の種になるかを観測します。",
         sections: [
           {
             title: "検証している問い",
@@ -3064,14 +3066,14 @@
         ]
       },
       birthGrant: {
-        title: "構造持続通貨 + 出産支援",
-        summary: "出産一時金を単体給付にせず、住居、産後休息、代替ケア、教育費、復帰キャリア、財政監査へ接続したシミュレーションです。『お金を増やせば子ども希望指数が戻るのか』ではなく、条件の束として効くかを検証します。",
-        lead: "このシミュレーションは、子どもを産ませる制度ではありません。望む人が子どもを迎えられる条件に支払うと、家族形成世代や若者の認識がどう変わるか、また給付があっても希望に変換されない詰まりがどこにあるかを観測します。",
+        title: "持続報酬 + 一時金（伴走なし）",
+        summary: "持続報酬に子育て初期一時金1000万円を上乗せしますが、個別通知、即時予約、初回着金、メンター伴走はまだ弱い比較です。お金と制度メニューがあっても、本人が『使える』と感じる導線がないと不安に吸収されるかを検証します。",
+        lead: "このシミュレーションは、子どもを産ませる制度ではありません。望む人が子どもを迎えられる条件に支払っても、申請負荷、条件変更、財政不安、対象外感、着金までの見えにくさが残ると、希望には変わりにくいことを観測します。",
         sections: [
           {
             title: "検証している問い",
             items: [
-              "出産一時金や子育て支援は、住居、休息、代替ケア、復帰キャリアと束ねないと効かないのか。",
+              "出産一時金や子育て支援は、住居、休息、代替ケア、復帰キャリアと束ねても、使える導線が弱いと効き切らないのか。",
               "制度が存在しても、届くまでの空白、申請負荷、条件変更への恐怖があると利用実感に変わらないのか。",
               "家族形成支援が、非婚・非出産層の不公平感や反発を生まないように設計できるか。"
             ]
@@ -3081,14 +3083,14 @@
             items: [
               "成果報酬として『産んだら支払う』のではなく、住居、休息、代替ケア、復帰、教育費の条件整備として扱っています。",
               "財政持続監査と非強制監査を入れ、金融・インフレ・対象外感で制度が崩れる可能性も観測対象にしています。",
-              "結果として、支援があっても『自分に届くか分からない』と不安に吸収されるケースを許容しています。"
+              "結果として、支援があっても『自分に届くか分からない』と不安に吸収されるケースを、伴走なしの比較として見せています。"
             ]
           }
         ]
       },
       hopeFamily: {
-        title: "構造持続通貨 + 制度利用伴走支援",
-        summary: "給付や制度名だけでなく、個別資格通知、即時予約、nat着金、若者メンター、地域の成功ケース、家族形成面談を追加したシミュレーションです。制度をしっかり使えるように支えた時、行動・安心・子ども希望指数がどう変わるかを検証します。",
+        title: "持続報酬 + 伴走支援",
+        summary: "給付や制度名だけでなく、個別資格通知、即時予約、初回着金、若者メンター、地域の成功ケース、家族形成面談を追加したシミュレーションです。制度をしっかり使えるように支えた時、行動・安心・子ども希望指数がどう変わるかを検証します。",
         lead: "このシミュレーションは、希望を直接命令していません。『本人に届く通知』『予約できる枠』『初回着金』『伴走者』『監査の継続性』という社会的事実を追加し、エージェントがそれを信じる、疑う、使う、相談する、まだ不安に留まるなどの分岐を観測しています。制度があるだけでなく、本人が使える状態まで伴走する設計です。",
         sections: [
           {
@@ -3127,7 +3129,7 @@
           "イベント: 世界圧力、政策介入、社会反応、組織判断、長期評価を分け、何が効いたかを後から読めるようにしています。",
           "観測: 感情だけでなく、行動、内心、友達との会話、SNS発信、因果、持ち越し記憶を固定スキーマの観測データとして保存しています。",
           "創発: LLMには結論を命令せず、状態と文脈を情報として渡し、エージェントが信じる、疑う、使う、怒る、動かない分岐を残します。",
-          "検証: 介入なし、出産支援のみ、構造持続通貨、構造持続+出産、構造持続+伴走、政策設計AI介入の新通貨なし/ありを同じ時点で比較し、効いた施策と効かなかった施策を両方説明できます。"
+          "検証: 比較基準、一時金のみ、持続報酬のみ、持続報酬+一時金、持続報酬+伴走、自動追加施策の通常制度/持続報酬ありを同じ時点で比較し、効いた施策と効かなかった施策を両方説明できます。"
         ]
       },
       {
@@ -3142,7 +3144,7 @@
     ];
     const scenarioReports = {
       baseline: {
-        title: "介入なし レポート",
+        title: "比較基準 レポート",
         lead: "制度側の追加介入を置かず、AGI/AIロボ普及、生活コスト、地政学不安、SNS悲観、医療・介護負荷がそのまま進む比較基準です。希望が消えるかどうかだけでなく、どのイベントが生活防衛や撤退圧へ変換されるかを見ます。",
         summaryCards: [
           { label: "40年後の主状態", value: "注意18 / 危険10" },
@@ -3187,8 +3189,8 @@
         ]
       },
       sustain: {
-        title: "構造持続通貨のみ レポート",
-        lead: "住居、学び直し、ケア、地域更新、社会持続活動へのnat報酬を入れたシミュレーションです。資本主義の外側に逃げるのではなく、社会を維持・修復する活動を役割と所得に変えた時、危険域から戻れるかを見ます。",
+        title: "持続報酬のみ レポート",
+        lead: "住居、学び直し、ケア、地域更新、社会を支える活動への持続報酬を入れたシミュレーションです。資本主義の外側に逃げるのではなく、社会を維持・修復する活動を役割と所得に変えた時、危険域から戻れるかを見ます。",
         summaryCards: [
           { label: "40年後の主状態", value: "注意22 / 中立6" },
           { label: "希望人数", value: "全期間0" },
@@ -3197,8 +3199,8 @@
         milestones: [
           {
             time: "2年後",
-            summary: "注意21/22、希望0。介入なしより危険は大きく減る。",
-            event: "住居安定、社会持続活動nat報酬、学び直し・移行雇用保証が入り始める。",
+            summary: "注意21/22、希望0。比較基準より危険は大きく減る。",
+            event: "住居安定、社会持続活動への持続報酬、学び直し・移行雇用保証が入り始める。",
             analysis: "危険域から注意域へ戻す効果はある。ただし本人にはまだ『本当に届くか』『自分が使えるか』が見えておらず、希望より情報収集と生活防衛が強い。"
           },
           {
@@ -3210,8 +3212,8 @@
           {
             time: "10年後",
             summary: "注意21、中立5、希望0。制度利用10まで増える。",
-            event: "nat報酬や移行雇用が社会に定着し始める。",
-            analysis: "生活防衛から制度利用へ一部移る。構造持続通貨は撤退を防ぐ床として効くが、希望を生むには個別導線、成功例、即時性が足りない。"
+            event: "持続報酬や移行雇用が社会に定着し始める。",
+            analysis: "生活防衛から制度利用へ一部移る。持続報酬は撤退を防ぐ床として効くが、希望を生むには個別導線、成功例、即時性が足りない。"
           },
           {
             time: "40年後",
@@ -3224,7 +3226,7 @@
           {
             title: "大きく効いたイベント",
             items: [
-              "社会持続活動nat報酬は、従来の仕事が揺らいだ時の新しい役割候補として効く。",
+              "社会持続活動への持続報酬は、従来の仕事が揺らいだ時の新しい役割候補として効く。",
               "学び直し・移行雇用保証は、危険域への落下を防ぐが、採用や収入の実績が見えるまで安心につながりにくい。",
               "住居安定は基礎条件として効くが、ケアや家族形成まで束ねないと未来選択の回復は限定的。"
             ]
@@ -3232,8 +3234,8 @@
         ]
       },
       birthGrant: {
-        title: "構造持続通貨 + 出産支援 レポート",
-        lead: "出産一時金を単独給付にせず、住居、休息、代替ケア、教育費、復帰キャリア、財政監査へ接続したシミュレーションです。結論として、制度利用は増えるが希望は0のままで、支援が『届く実感』へ変換されない詰まりが見えます。",
+        title: "持続報酬 + 一時金（伴走なし） レポート",
+        lead: "持続報酬に子育て初期一時金1000万円を上乗せし、住居、休息、代替ケア、教育費、復帰キャリア、財政監査へ接続した比較です。結論として、制度利用は増えるが希望は0のままで、伴走なしでは支援が『届く実感』へ変換されない詰まりが見えます。",
         summaryCards: [
           { label: "40年後の主状態", value: "注意28 / 希望0" },
           { label: "10年後の行動", value: "制度利用13" },
@@ -3277,8 +3279,8 @@
         ]
       },
       hopeFamily: {
-        title: "構造持続通貨 + 制度利用伴走支援 レポート",
-        lead: "構造持続通貨と家族形成支援に加え、個別資格通知、即時予約、nat初回着金、若者メンター、地域の成功ケース、家族形成面談を入れたシミュレーションです。制度をしっかり使えるように支え、不安を抱えたままでも次の行動へ進める条件を作れるかを見ます。",
+        title: "持続報酬 + 伴走支援 レポート",
+        lead: "持続報酬と家族形成支援に加え、個別資格通知、即時予約、初回着金、若者メンター、地域の成功ケース、家族形成面談を入れたシミュレーションです。制度をしっかり使えるように支え、不安を抱えたままでも次の行動へ進める条件を作れるかを見ます。",
         summaryCards: [
           { label: "5年後", value: "希望12 / 希望感情4" },
           { label: "10年後", value: "希望25 / 希望感情7" },
@@ -3294,7 +3296,7 @@
           {
             time: "5年後",
             summary: "希望12、中立10、希望感情4。制度利用18、相談5。",
-            event: "nat着金、実体験共有、個別通知、予約、成功ケースが重なる。",
+            event: "初回着金、実体験共有、個別通知、予約、成功ケースが重なる。",
             analysis: "ここで明確に差が出る。希望は抽象的な楽観ではなく、『通知が来た』『予約できる』『着金した』という実在感から立ち上がる。"
           },
           {
@@ -3315,7 +3317,7 @@
             title: "大きく効いたイベント",
             items: [
               "個別資格通知と即時予約は、抽象的な制度を本人の次の一手に変換する。",
-              "nat初回着金は、社会を維持する行動が本当に飯の種になるという証拠として効く。",
+              "初回着金は、社会を維持する行動が本当に飯の種になるという証拠として効く。",
               "若者メンター、成功ケース共有、家族形成面談は、孤立した制度利用を継続行動へつなぐ。"
             ]
           }
@@ -3355,27 +3357,27 @@
       ],
       birthOnly: [
         "AGI能力上昇の初期観測",
-        "出産支援だけを上乗せ",
+        "一時金だけを上乗せ",
         "家計・住居・雇用不安は残存",
         "対象外感と財政不安を観測",
-        "利用実感には構造条件が不足"
+        "利用実感には支える条件が不足"
       ],
       policyNoSustain: [
         "政策設計AIが通常政策を設計開始",
         "補助金・説明・窓口を順次投入",
         "対象外感と政策疲労を監査",
         "副作用に応じて簡素化へ修正",
-        "構造概念なしの限界を比較"
+        "持続報酬なしの限界を比較"
       ],
       policyWithSustain: [
-        "政策設計AIが新通貨ありで設計開始",
+        "持続報酬ありで政策AIが設計開始",
         "役割・報酬・ケアを束ね直す",
         "非対象者の参加経路を補完",
         "副作用を見て施策順序を調整",
         "通常政策探索との差分を比較"
       ],
       policyWithSustainHopeFamily: [
-        "新通貨あり+伴走支援で政策AI開始",
+        "持続報酬+伴走支援で政策AI開始",
         "個別通知・即時予約・着金を束ねる",
         "子育て支援と非対象者補完を両立",
         "副作用を見て簡素化・補償へ修正",
@@ -3383,21 +3385,21 @@
       ],
       sustain: [
         "AGI能力上昇の初期観測",
-        "構造持続クレジット実証開始",
+        "持続報酬の実証開始",
         "学校・会社・地域の役割再設計",
         "修復活動と技能継承が報酬化",
         "希望経路と世代継承意欲が回復"
       ],
       birthGrant: [
-        "構造持続と出産支援を同時観測",
+        "持続報酬と一時金を同時観測",
         "住居・ケア・復帰キャリアを束ねる",
         "制度利用と対象外反発を同時に見る",
-        "財政監査と非強制説明を確認",
+        "伴走なしの不安残存を確認",
         "家族形成条件の詰まりを抽出"
       ],
       hopeFamily: [
         "個別通知と即時予約を投入",
-        "nat着金と伴走者を観測",
+        "初回着金と伴走者を観測",
         "制度利用と政策疲労を同時に見る",
         "地域成功例と対象外反発を比較",
         "制度記憶と次世代継承を確認"
@@ -3411,11 +3413,11 @@
       { turn: 18, type: "shock", strength: 0.65, name: "医療提供体制ひっ迫", direction: "制度信頼↓ メンタル負荷↑" },
       { turn: 22, type: "shock", strength: 0.70, name: "介護需要急増", direction: "ケア負担↑ 可処分時間↓" },
       { turn: 10, type: "policy", strength: 0.70, name: "若者住居安定パッケージ", direction: "住居安定↑ 希望↑" },
-      { turn: 12, type: "policy", strength: 0.85, name: "社会持続活動nat報酬制度", direction: "nat獲得↑ 希望↑" },
+      { turn: 12, type: "policy", strength: 0.85, name: "社会持続活動への持続報酬", direction: "報酬獲得↑ 希望↑" },
       { turn: 14, type: "youth", strength: 0.25, name: "小規模デモ勃発", direction: "制度改革要求↑" },
       { turn: 16, type: "policy", strength: 0.78, name: "学び直し・移行雇用保証", direction: "雇用安定↑ 自己効力感↑" },
       { turn: 24, type: "youth", strength: 0.45, name: "SNS抗議拡散", direction: "怒り共有↑ 制度応答要求↑" },
-      { turn: 30, type: "policy", strength: 0.60, name: "nat通貨の逆進性補正", direction: "格差↓ 制度信頼↑" }
+      { turn: 30, type: "policy", strength: 0.60, name: "持続報酬の逆進性補正", direction: "格差↓ 制度信頼↑" }
     ];
     let eventSchedule = [...fallbackEventSchedule];
 
@@ -5216,7 +5218,7 @@
           : state.scenario === "policyWithSustainHopeFamily"
             ? state.turn < 18 ? "伴走設計中" : state.turn < 44 ? "家族形成を補正" : "副作用を補完"
           : state.scenario === "policyWithSustain"
-            ? state.turn < 18 ? "持続探索中" : state.turn < 44 ? "構造報酬を調整" : "参加経路を補完"
+            ? state.turn < 18 ? "持続報酬を探索" : state.turn < 44 ? "報酬設計を調整" : "参加経路を補完"
             : hasStructureSustainScenario()
               ? state.turn < 18 ? "実証準備" : state.turn < 44 ? "制度更新中" : "報酬経路が定着"
               : state.turn < 22 ? "未発動" : state.turn < 52 ? "遅延対応" : "最低限の抑制";
@@ -5407,7 +5409,7 @@
       const container = document.getElementById("counterfactualDiff");
       const label = document.getElementById("counterfactualLabel");
       if (!container) return;
-      if (label) label.textContent = state.scenario === "baseline" ? "介入なし / 同時点" : "同時点比較";
+      if (label) label.textContent = state.scenario === "baseline" ? "比較基準 / 同時点" : "同時点比較";
       const baselineRunData = runDataByScenario.get("baseline");
       const baselineRows = rowsForSameAgentsAtTurn(rows, "baseline", state.turn, baselineRunData);
       const currentStats = summaryStatsForRows(rows);
