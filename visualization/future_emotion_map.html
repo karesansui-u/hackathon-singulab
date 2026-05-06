@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>未来感情・行動シミュレーション</title>
+  <title>制度設計シミュレーション</title>
   <style>
     :root {
       color-scheme: light;
@@ -117,23 +117,10 @@
 
     .brand {
       display: grid;
-      grid-template-columns: 42px minmax(0, 1fr);
-      gap: 2px 12px;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 2px;
       align-items: center;
       min-width: 0;
-    }
-
-    .brand::before {
-      content: "";
-      grid-row: 1 / span 2;
-      width: 38px;
-      height: 38px;
-      border: 1px solid rgba(255, 255, 255, 0.34);
-      border-radius: 8px;
-      background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.05)),
-        linear-gradient(135deg, #ffffff 0 32%, var(--gov-teal) 32% 67%, var(--gov-gold) 67% 100%);
-      box-shadow: inset 0 0 0 5px rgba(16, 32, 51, 0.18), 0 10px 22px rgba(0, 0, 0, 0.18);
     }
 
     .brand-title {
@@ -2479,8 +2466,8 @@
   <main class="app">
     <header class="topbar">
       <div class="brand">
-        <h1 class="brand-title">未来感情・行動シミュレーション</h1>
-        <p class="brand-subtitle">シンギュラリティ後の社会移行を、若者・家族形成・次世代の希望経路と構造支援から検証する</p>
+        <h1 class="brand-title">制度設計シミュレーション</h1>
+        <p class="brand-subtitle">未来感情・行動シミュレーション<br>シンギュラリティ後の社会移行を、若者・家族形成・次世代の希望経路と構造支援から検証する</p>
       </div>
       <nav class="view-nav" aria-label="デモ画面">
         <a href="./future_emotion_map.html" aria-current="page">未来感情</a>
@@ -3711,10 +3698,15 @@
       return direction || "";
     }
 
+    function isHiddenTimelineEventName(name) {
+      return /40年目の構造持続評価|企業・組織の採用育成判断/.test(name || "");
+    }
+
     function buildWorldTimelineSchedule(rows) {
       const majorWorldSteps = new Set([1, 4, 8, 12, 18, 22, 24, 36, 48, 60, 61, 64, 65, 66, 67, 68, 69, 70, 71, 74, 79]);
       return rows
         .filter((row) => row.step && row["世界イベント名"])
+        .filter((row) => !isHiddenTimelineEventName(row["世界イベント名"]))
         .filter((row) => majorWorldSteps.has(Number(row.step) || 0))
         .map((row) => ({
           turn: Number(row.step) || 0,
@@ -5042,7 +5034,7 @@
 
     function isTimelineEvent(event) {
       if (!event || event.turn < minTurn || event.turn > maxTurn) return false;
-      if (/企業・組織の採用育成判断/.test(event.name || "")) return false;
+      if (isHiddenTimelineEventName(event.name)) return false;
       if (["policy", "milestone", "youth"].includes(event.type)) return true;
       const category = event.category || "";
       const source = event.source || "";
