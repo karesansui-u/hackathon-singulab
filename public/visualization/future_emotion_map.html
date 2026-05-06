@@ -2734,7 +2734,7 @@
 
         <section class="panel counterfactual-panel">
           <header class="panel-header">
-            <h2 class="panel-title">比較基準との差分</h2>
+            <h2 class="panel-title" id="counterfactualTitle">追加施策なしとの比較</h2>
             <span class="panel-title-sub" id="counterfactualLabel">同時点比較</span>
           </header>
           <div class="cockpit-body">
@@ -5407,9 +5407,21 @@
 
     function renderCounterfactualDiff(rows) {
       const container = document.getElementById("counterfactualDiff");
+      const title = document.getElementById("counterfactualTitle");
       const label = document.getElementById("counterfactualLabel");
       if (!container) return;
-      if (label) label.textContent = state.scenario === "baseline" ? "比較基準 / 同時点" : "同時点比較";
+      if (state.scenario === "baseline") {
+        if (title) title.textContent = "この表示が比較基準";
+        if (label) label.textContent = "差分なし";
+        container.innerHTML = `
+          <div class="agent-summary">
+            追加施策を置かない基準シナリオです。ほかのシナリオに切り替えると、同じ時点の希望・中立・注意・危険・子ども希望指数との差分がここに表示されます。
+          </div>
+        `;
+        return;
+      }
+      if (title) title.textContent = "追加施策なしとの比較";
+      if (label) label.textContent = "同時点比較";
       const baselineRunData = runDataByScenario.get("baseline");
       const baselineRows = rowsForSameAgentsAtTurn(rows, "baseline", state.turn, baselineRunData);
       const currentStats = summaryStatsForRows(rows);
