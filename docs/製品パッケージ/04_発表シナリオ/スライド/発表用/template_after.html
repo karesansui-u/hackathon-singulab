@@ -52,9 +52,12 @@
 
 		document.addEventListener('click', (event) => {
 			if (event.target.closest('a, button')) return;
-			if (event.clientX < window.innerWidth * 0.36) {
+			const edgeWidth = Math.min(180, Math.max(96, window.innerWidth * 0.14));
+			if (event.clientX <= edgeWidth) {
 				prevSlide();
-			} else {
+				return;
+			}
+			if (event.clientX >= window.innerWidth - edgeWidth) {
 				nextSlide();
 			}
 		});

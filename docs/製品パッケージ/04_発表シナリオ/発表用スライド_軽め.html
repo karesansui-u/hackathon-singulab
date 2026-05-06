@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>制度設計AI — Hackathon Presentation</title>
+	<title>制度設計シミュレーション — Hackathon Presentation</title>
 	<style>
 		@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -11,6 +11,8 @@
 			margin: 0;
 			padding: 0;
 			box-sizing: border-box;
+			-webkit-print-color-adjust: exact;
+			print-color-adjust: exact;
 		}
 
 		:root {
@@ -85,8 +87,11 @@
 			align-items: center;
 			justify-content: space-between;
 			padding: 16px 40px;
-			border-bottom: 1px solid var(--border);
-			background: var(--bg);
+			border-bottom: 0;
+			background:
+				repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.052) 0 1px, transparent 1px 13px),
+				linear-gradient(90deg, #102033 0%, #17395a 58%, #0f766e 100%);
+			box-shadow: inset 0 -3px 0 #b7791f;
 			flex-shrink: 0;
 			position: relative;
 			z-index: 5;
@@ -98,16 +103,10 @@
 			gap: 8px;
 		}
 
-		.slide-header-logo .mark {
-			font-size: 20px;
-			font-weight: 300;
-			color: var(--purple);
-		}
-
 		.slide-header-logo .name {
 			font-size: 14px;
 			font-weight: 700;
-			color: var(--navy);
+			color: #ffffff;
 		}
 
 		.slide-header-badge {
@@ -116,22 +115,27 @@
 			gap: 8px;
 			font-size: 12px;
 			font-weight: 600;
-			color: var(--text-light);
+			color: rgba(255, 255, 255, 0.78);
 		}
 
 		.slide-header-badge .badge-label {
-			color: var(--purple);
+			color: #102033;
 			font-weight: 700;
 			text-transform: uppercase;
+			background: rgba(255, 255, 255, 0.94);
+			border-radius: 999px;
+			padding: 3px 10px;
+			box-shadow: inset 0 -3px 0 #b7791f;
 		}
 
 		.slide-header-badge .badge-pct {
-			background: var(--purple-bg);
-			color: var(--purple);
+			background: rgba(255, 255, 255, 0.94);
+			color: #102033;
 			font-size: 11px;
 			font-weight: 700;
 			padding: 2px 8px;
 			border-radius: 12px;
+			box-shadow: inset 0 -3px 0 #b7791f;
 		}
 
 		.slide-body {
@@ -200,13 +204,98 @@
 			font-weight: 400;
 		}
 
-		.slide-title .slide-inner,
+		.question-slide-body {
+			padding: 28px 46px 32px;
+		}
+
+		.question-title {
+			font-size: 30px;
+			line-height: 1.23;
+			margin-bottom: 14px;
+		}
+
+		.question-risk-image {
+			display: block;
+			width: 100%;
+			height: 458px;
+			object-fit: contain;
+			object-position: center center;
+			border: 1px solid var(--border);
+			border-radius: 14px;
+			background: #fff;
+			box-shadow: 0 14px 30px rgba(10, 37, 64, 0.10);
+		}
+
+		.slide-title .slide-inner {
+			background:
+				repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.052) 0 1px, transparent 1px 13px),
+				radial-gradient(circle at 86% 22%, rgba(15, 118, 110, 0.34), transparent 34%),
+				radial-gradient(circle at 20% 86%, rgba(183, 121, 31, 0.20), transparent 28%),
+				linear-gradient(90deg, #102033 0%, #17395a 58%, #0f766e 100%);
+			text-align: left;
+			align-items: flex-start;
+			justify-content: flex-start;
+			padding: 54px 68px;
+		}
+
 		.slide-closing .slide-inner {
-			background: linear-gradient(135deg, #0a2540 0%, #1a3a5c 50%, #0a2540 100%);
+			background:
+				repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.052) 0 1px, transparent 1px 13px),
+				radial-gradient(circle at 84% 22%, rgba(15, 118, 110, 0.34), transparent 34%),
+				radial-gradient(circle at 16% 78%, rgba(183, 121, 31, 0.22), transparent 30%),
+				linear-gradient(90deg, #102033 0%, #17395a 58%, #0f766e 100%);
 			text-align: center;
 			align-items: center;
 			justify-content: center;
 			padding: 0;
+		}
+
+		.slide-closing .slide-inner::before {
+			content: "";
+			position: absolute;
+			top: 44px;
+			left: 48px;
+			right: 48px;
+			height: 1px;
+			background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(183, 121, 31, 0.92) 34%, rgba(255, 255, 255, 0.52) 68%, rgba(15, 118, 110, 0));
+		}
+
+		.slide-closing .slide-inner::after {
+			content: "";
+			position: absolute;
+			left: 0;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			background:
+				radial-gradient(ellipse at 18% 92%, rgba(183, 121, 31, 0.22), transparent 34%),
+				radial-gradient(ellipse at 82% 86%, rgba(15, 118, 110, 0.24), transparent 38%),
+				linear-gradient(180deg, rgba(16, 32, 51, 0) 0%, rgba(16, 32, 51, 0) 58%, rgba(16, 32, 51, 0.58) 100%);
+			opacity: 0.78;
+		}
+
+		.slide-title .slide-inner::before {
+			content: "";
+			position: absolute;
+			top: 44px;
+			left: 48px;
+			right: 48px;
+			height: 1px;
+			background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(183, 121, 31, 0.92) 34%, rgba(255, 255, 255, 0.52) 68%, rgba(15, 118, 110, 0));
+		}
+
+		.slide-title .slide-inner::after {
+			content: "";
+			position: absolute;
+			left: 0;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			background:
+				radial-gradient(ellipse at 18% 92%, rgba(183, 121, 31, 0.20), transparent 34%),
+				radial-gradient(ellipse at 82% 86%, rgba(15, 118, 110, 0.22), transparent 38%),
+				linear-gradient(180deg, rgba(16, 32, 51, 0) 0%, rgba(16, 32, 51, 0) 58%, rgba(16, 32, 51, 0.54) 100%);
+			opacity: 0.78;
 		}
 
 		.slide-title .slide-header,
@@ -216,25 +305,171 @@
 
 		.slide-title h1 {
 			color: #fff;
-			font-size: 68px;
-			margin-bottom: 14px;
+			font-size: 66px;
+			margin-bottom: 18px;
 			position: relative;
+			z-index: 2;
+			letter-spacing: 0;
+			max-width: none;
+			white-space: nowrap;
 		}
 
 		.slide-title .subtitle {
-			color: #adbdcc;
+			color: rgba(235, 246, 255, 0.84);
 			font-size: 22px;
 			font-weight: 400;
-			line-height: 1.6;
+			line-height: 1.75;
 			position: relative;
+			z-index: 2;
+			max-width: 780px;
 		}
 
 		.slide-title .tagline {
-			color: rgba(255, 255, 255, 0.72);
-			font-size: 17px;
-			font-weight: 500;
+			display: inline-flex;
+			align-items: center;
+			width: fit-content;
+			color: #102033;
+			font-size: 13px;
+			font-weight: 800;
+			letter-spacing: 0;
 			position: relative;
-			margin-bottom: 8px;
+			z-index: 2;
+			margin-bottom: 18px;
+			padding: 7px 12px;
+			border: 1px solid rgba(255, 255, 255, 0.24);
+			border-radius: 999px;
+			background: rgba(255, 255, 255, 0.92);
+			box-shadow: inset 0 -3px 0 #b7791f, 0 10px 24px rgba(16, 32, 51, 0.16);
+		}
+
+		.title-icon-field {
+			position: absolute;
+			inset: 0;
+			overflow: hidden;
+			pointer-events: none;
+			z-index: 1;
+		}
+
+		.cover-icon {
+			position: absolute;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 88px;
+			height: 88px;
+			border: 1px solid rgba(255, 255, 255, 0.14);
+			border-radius: 22px;
+			background:
+				linear-gradient(135deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.025)),
+				rgba(10, 37, 64, 0.16);
+			box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+			color: rgba(235, 246, 255, 0.60);
+			font-size: 15px;
+			font-weight: 800;
+			letter-spacing: 0;
+		}
+
+		.cover-icon::before {
+			content: "";
+			position: absolute;
+			inset: 20px;
+			border: 2px solid currentColor;
+			border-radius: 50%;
+			opacity: 0.72;
+		}
+
+		.cover-icon::after {
+			content: "";
+			position: absolute;
+			width: 28px;
+			height: 3px;
+			border-radius: 99px;
+			background: currentColor;
+			opacity: 0.62;
+			transform: translateY(18px);
+		}
+
+		.cover-icon span {
+			position: relative;
+			z-index: 1;
+		}
+
+		.icon-ai {
+			right: 92px;
+			top: 86px;
+			color: rgba(15, 118, 110, 0.74);
+			transform: rotate(8deg);
+		}
+
+		.icon-policy {
+			right: 252px;
+			top: 130px;
+			color: rgba(183, 121, 31, 0.72);
+			transform: rotate(-7deg);
+		}
+
+		.icon-family {
+			right: 132px;
+			top: 238px;
+			color: rgba(255, 255, 255, 0.56);
+			transform: rotate(5deg);
+		}
+
+		.icon-care {
+			left: 72px;
+			bottom: 88px;
+			color: rgba(15, 118, 110, 0.56);
+			transform: rotate(-9deg);
+		}
+
+		.icon-signal {
+			left: 318px;
+			bottom: 122px;
+			color: rgba(29, 79, 122, 0.62);
+			transform: rotate(6deg);
+		}
+
+		.icon-index {
+			right: 584px;
+			bottom: 72px;
+			color: rgba(183, 121, 31, 0.56);
+			transform: rotate(-4deg);
+		}
+
+		.icon-map {
+			right: 438px;
+			top: 72px;
+			color: rgba(255, 255, 255, 0.34);
+			transform: rotate(10deg);
+		}
+
+		.icon-voice {
+			left: 438px;
+			top: 318px;
+			color: rgba(15, 118, 110, 0.44);
+			transform: rotate(-5deg);
+		}
+
+		.icon-loop {
+			right: 38px;
+			bottom: 78px;
+			color: rgba(255, 255, 255, 0.42);
+			transform: rotate(8deg);
+		}
+
+		.title-screenshot {
+			position: absolute;
+			right: 60px;
+			bottom: 58px;
+			width: 486px;
+			height: 412px;
+			object-fit: cover;
+			object-position: center center;
+			border: 1px solid rgba(183, 121, 31, 0.58);
+			border-radius: 14px;
+			box-shadow: 0 26px 58px rgba(0, 0, 0, 0.34), 0 0 0 1px rgba(255, 255, 255, 0.14);
+			opacity: 0.96;
+			z-index: 2;
 		}
 
 		.slide-title .page-num,
@@ -620,6 +855,88 @@
 			opacity: 0.22;
 		}
 
+		.demo-capture {
+			display: block;
+			width: 100%;
+			height: 322px;
+			object-fit: contain;
+			object-position: center center;
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			background: #081f35;
+			box-shadow: 0 14px 28px rgba(10, 37, 64, 0.10);
+		}
+
+		.demo-only-body {
+			padding: 24px 36px 32px;
+		}
+
+		.demo-only-title {
+			font-size: 34px;
+			line-height: 1.15;
+			margin-bottom: 0;
+		}
+
+		.demo-title-row {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 20px;
+			margin-bottom: 12px;
+		}
+
+		.demo-url-pill {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			padding: 8px 14px;
+			border: 1px solid var(--border);
+			border-radius: 999px;
+			background: #ffffff;
+			box-shadow: inset 0 -3px 0 #b7791f, 0 8px 18px rgba(16, 32, 51, 0.08);
+			color: #102033;
+			font-size: 13px;
+			font-weight: 800;
+			line-height: 1;
+			text-decoration: none;
+			white-space: nowrap;
+		}
+
+		.demo-capture-large {
+			height: 520px;
+			border-radius: 14px;
+		}
+
+		.slide-image-only .slide-inner {
+			background: #fff;
+		}
+
+		.slide-image-body {
+			align-items: center;
+			justify-content: center;
+			padding: 12px 28px 24px;
+		}
+
+		.slide-image-full {
+			display: block;
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+			object-position: center center;
+		}
+
+		.slide-figure {
+			display: block;
+			width: 100%;
+			max-height: 530px;
+			object-fit: contain;
+			object-position: center center;
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			background: #fff;
+			box-shadow: 0 14px 34px rgba(10, 37, 64, 0.10);
+		}
+
 		.voice-panel {
 			height: 322px;
 			background: #fff;
@@ -663,24 +980,31 @@
 
 		.slide-closing h1 {
 			color: #fff;
-			font-size: 52px;
+			font-size: 46px;
+			line-height: 1.22;
 			position: relative;
-			max-width: 960px;
+			z-index: 2;
+			max-width: none;
+			white-space: nowrap;
 		}
 
-		.slide-closing p {
-			color: #adbdcc;
-			font-size: 22px;
+		.closing-demo-url {
 			position: relative;
-			max-width: 900px;
-		}
-
-		.slide-closing .cta {
-			color: #fff;
-			font-size: 26px;
+			z-index: 2;
+			display: inline-flex;
+			margin-top: 28px;
+			padding: 12px 20px;
+			border: 1px solid rgba(255, 255, 255, 0.22);
+			border-radius: 999px;
+			background: rgba(255, 255, 255, 0.94);
+			box-shadow: inset 0 -3px 0 #b7791f, 0 18px 36px rgba(16, 32, 51, 0.18);
+			color: #102033;
+			font-size: 18px;
 			font-weight: 700;
-			position: relative;
-			margin-top: 16px;
+			line-height: 1.3;
+			text-decoration: none;
+			letter-spacing: 0;
+			white-space: nowrap;
 		}
 
 		.speaker-note {
@@ -757,6 +1081,8 @@
 				height: 720px;
 				border-radius: 0;
 				box-shadow: none;
+				-webkit-print-color-adjust: exact;
+				print-color-adjust: exact;
 			}
 
 			#progress,
@@ -770,10 +1096,22 @@
 	<div class="deck" id="deck">
 <div class="slide slide-title active" data-slide="0">
 			<div class="slide-inner">
+				<div class="title-icon-field" aria-hidden="true">
+					<span class="cover-icon icon-ai"><span>AI</span></span>
+					<span class="cover-icon icon-policy"><span>制度</span></span>
+					<span class="cover-icon icon-family"><span>家族</span></span>
+					<span class="cover-icon icon-care"><span>支援</span></span>
+					<span class="cover-icon icon-signal"><span>反応</span></span>
+					<span class="cover-icon icon-index"><span>指標</span></span>
+					<span class="cover-icon icon-map"><span>社会</span></span>
+					<span class="cover-icon icon-voice"><span>声</span></span>
+					<span class="cover-icon icon-loop"><span>循環</span></span>
+				</div>
 				<p class="tagline">Hackathon Demo / LLM Agent Simulation</p>
-				<h1>制度設計AI</h1>
-				<p class="subtitle">制度が社会に出る前に、<br>人間の反応をシミュレーションする</p>
-				<span class="page-num">1 / 11</span>
+				<h1>制度設計シミュレーション</h1>
+				<p class="subtitle">未来感情・行動シミュレーション<br>シンギュラリティ後の未来に、我々はどう希望を見出すか</p>
+				<img class="title-screenshot" src="assets/cover_map_preview.png" alt="未来感情・行動シミュレーションの4分類ルーム画面">
+				<span class="page-num">1 / 8</span>
 				<p class="speaker-note">これは、未来を当てるAIではありません。制度が人間にどう届き、どこで詰まり、どの設計で行動が変わるかを、LLMエージェントで事前にデバッグするシミュレーションです。</p>
 			</div>
 		</div>
@@ -781,343 +1119,98 @@
 		<div class="slide" data-slide="1">
 			<div class="slide-inner">
 				<div class="slide-header">
-					<div class="slide-header-logo"><span class="mark">δ</span><span class="name">制度設計AI</span></div>
-					<div class="slide-header-badge"><span class="badge-label">Question</span><span>制度は作っただけでは届かない</span></div>
+					<div class="slide-header-logo"><span class="name">制度設計シミュレーション</span></div>
+					<div class="slide-header-badge"><span class="badge-label">Question</span><span>このまま進めてよいのか</span></div>
 				</div>
-				<div class="slide-body">
-					<div class="section-badge">問い</div>
-					<h2>制度は、作っただけでは<br><span class="hl-red">機能しない</span></h2>
-					<p class="lead">人がそれを知り、信じ、予約し、相談し、実際に使うところまで進まなければ、効果は社会に届きません。</p>
-					<div class="flow" style="margin-top: 36px;">
-						<div class="flow-step">知る</div>
-						<div class="flow-arrow">→</div>
-						<div class="flow-step">信じる</div>
-						<div class="flow-arrow">→</div>
-						<div class="flow-step">予約する</div>
-						<div class="flow-arrow">→</div>
-						<div class="flow-step">相談する</div>
-						<div class="flow-arrow">→</div>
-						<div class="flow-step active">使う</div>
-					</div>
-					<div class="callout">観測対象は「制度そのもの」ではなく、制度が人間の生活・感情・行動に変換される過程です。</div>
+				<div class="slide-body question-slide-body">
+					<h2 class="question-title">シンギュラリティ・AGI・AIロボによって、<br><span class="hl-red">我々の社会は破綻するのではないか？</span></h2>
+					<img class="question-risk-image" src="assets/singularity_social_break_risk.png" alt="シンギュラリティ後社会の破綻リスク構造">
 				</div>
-				<span class="page-num">2 / 11</span>
-				<p class="speaker-note">制度は、作っただけでは機能しません。人がそれを知り、信じ、予約し、相談し、実際に使うところまで進まなければ、効果は社会に届きません。</p>
+				<span class="page-num">2 / 8</span>
+				<p class="speaker-note">問いは、シンギュラリティやAGIで便利になるかではありません。このまま仕事、所得、ケア、家族形成、制度信頼が同時に揺らぐと、社会は希望を維持できるのか、という問いです。</p>
 			</div>
 		</div>
 
-		<div class="slide" data-slide="2">
+		<div class="slide slide-image-only" data-slide="2">
 			<div class="slide-inner">
 				<div class="slide-header">
-					<div class="slide-header-logo"><span class="mark">δ</span><span class="name">制度設計AI</span></div>
+					<div class="slide-header-logo"><span class="name">制度設計シミュレーション</span></div>
 					<div class="slide-header-badge"><span class="badge-label">Product</span><span class="badge-pct">事前リハーサル</span></div>
 				</div>
-				<div class="slide-body">
-					<div class="section-badge">作ったもの</div>
-					<h2>制度設計の<span class="hl">事前リハーサル</span></h2>
-					<div class="features">
-						<div class="feature">
-							<div class="feature-icon purple">IN</div>
-							<h3>入力</h3>
-							<p>世界イベント、制度介入、日本社会状態、生活者属性、過去記憶を渡す。</p>
-						</div>
-						<div class="feature">
-							<div class="feature-icon cyan">OUT</div>
-							<h3>出力</h3>
-							<p>感情、行動、内心、友達との会話、SNS、制度利用、持ち越し懸念をrow化する。</p>
-						</div>
-					</div>
-					<div class="flow" style="margin-top: 30px;">
-						<div class="flow-step">施策・イベント</div>
-						<div class="flow-arrow">→</div>
-						<div class="flow-step">LLMエージェント反応</div>
-						<div class="flow-arrow">→</div>
-						<div class="flow-step">rowデータ</div>
-						<div class="flow-arrow">→</div>
-						<div class="flow-step active">介入前後を比較</div>
-					</div>
+				<div class="slide-body slide-image-body">
+					<img class="slide-image-full" src="assets/demo_two_axes.png" alt="このデモは、未来感情4分類と子ども意向の2軸で見ています">
 				</div>
-				<span class="page-num">3 / 11</span>
-				<p class="speaker-note">そこで私たちは、制度そのものではなく、制度が人間の生活と感情と行動に変換される過程を観測対象にしました。</p>
+				<span class="page-num">3 / 8</span>
+				<p class="speaker-note">このデモでは、雰囲気だけでも、出生数だけでも判断しません。社会全体の未来感情4分類と、家族形成に関わる子ども意向の2軸で、制度の反応を見ます。</p>
 			</div>
 		</div>
 
-<div class="slide" data-slide="3">
+<div class="slide slide-demo-only" data-slide="3">
 			<div class="slide-inner">
 				<div class="slide-header">
-					<div class="slide-header-logo"><span class="mark">δ</span><span class="name">制度設計AI</span></div>
-					<div class="slide-header-badge"><span class="badge-label">Agent</span><span>会話キャラではなく観測器</span></div>
+					<div class="slide-header-logo"><span class="name">制度設計シミュレーション</span></div>
+					<div class="slide-header-badge"><span class="badge-label">Demo</span><span>未来感情・行動シミュレーション</span></div>
 				</div>
-				<div class="slide-body">
-					<div class="section-badge">LLMエージェント設計</div>
-					<h2>LLMを<span class="hl">自由会話キャラ</span>ではなく、<br>反応を観測するエージェントとして使う</h2>
-					<div class="features-3">
-						<div class="feature">
-							<div class="feature-icon purple">1</div>
-							<h3>生活属性</h3>
-							<p>年齢、家計、住居、雇用、家族形成、ケア責任。</p>
-						</div>
-						<div class="feature">
-							<div class="feature-icon cyan">2</div>
-							<h3>認知属性</h3>
-							<p>制度信頼、SNS影響、不安感受性、過去記憶。</p>
-						</div>
-						<div class="feature">
-							<div class="feature-icon amber">3</div>
-							<h3>反応row</h3>
-							<p>感情、行動、内心、友達トーク、SNS、懸念。</p>
-						</div>
+				<div class="slide-body demo-only-body">
+					<div class="demo-title-row">
+						<h2 class="demo-only-title">デモ画面</h2>
+						<a class="demo-url-pill" href="https://karesansui-u.github.io/hackathon-singulab/visualization/future_emotion_map.html">Demo URL</a>
 					</div>
-					<div class="code-block">
-						<span class="prompt">agent</span> = 属性 + 状況 + 制度情報 + 過去記憶<br>
-						<span class="prompt">output</span> = 感情 / 行動 / 内心 / 会話 / SNS / 反応根拠
-					</div>
+					<img class="demo-capture demo-capture-large" src="assets/demo_clip_7s_27s.gif" alt="制度設計シミュレーションのデモ画面">
 				</div>
-				<span class="page-num">4 / 11</span>
-				<p class="speaker-note">各エージェントは、年齢、家計、住居、雇用、ケア責任、制度信頼、SNS影響、過去の記憶を持っています。LLMを自由な会話キャラとして使うのではなく、属性と状況に対する反応をrowデータとして出す観測器として使っています。</p>
+				<span class="page-num">4 / 8</span>
+				<p class="speaker-note">ここでは実際のデモ画面を見せます。制度変更に対する集団反応と個別エージェントの声を、時間変化として確認できます。</p>
 			</div>
 		</div>
 
-		<div class="slide" data-slide="4">
+		<div class="slide slide-image-only" data-slide="4">
 			<div class="slide-inner">
 				<div class="slide-header">
-					<div class="slide-header-logo"><span class="mark">δ</span><span class="name">制度設計AI</span></div>
-					<div class="slide-header-badge"><span class="badge-label">Scenario</span><span>3つを比較</span></div>
+					<div class="slide-header-logo"><span class="name">制度設計シミュレーション</span></div>
+					<div class="slide-header-badge"><span class="badge-label">Result</span><span>比較結果</span></div>
 				</div>
-				<div class="slide-body">
-					<div class="section-badge">比較設計</div>
-					<h2>「お金を配る」だけではなく、<br><span class="hl">使える制度</span>まで設計する</h2>
-					<table class="data-table" style="margin-top: 28px;">
-						<thead>
-							<tr>
-								<th>シナリオ</th>
-								<th>置くもの</th>
-								<th>観測したいこと</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td>介入なし</td>
-								<td>制度側の追加介入なし</td>
-								<td>不安、生活防衛、制度不信がどう進むか</td>
-							</tr>
-							<tr>
-								<td>出産支援のみ</td>
-								<td>子育て初期一時金1000万円</td>
-								<td>金銭支援だけで子どもを持つ選択が戻るか</td>
-							</tr>
-							<tr>
-								<td>構造持続通貨 + 伴走</td>
-								<td>報酬設計、通知、予約、着金、メンター</td>
-								<td><span class="badge">制度利用・相談・参加</span>へ変わるか</td>
-							</tr>
-						</tbody>
-					</table>
-					<p style="font-size: 17px; color: var(--text-light); margin-top: 24px;">発表では「この政策が正解」ではなく、「施策案の比較材料を作る」と言う。</p>
+				<div class="slide-body slide-image-body">
+					<img class="slide-image-full" src="assets/result_before_after.png" alt="次世代が希望を持てる設計が見えた">
 				</div>
-				<span class="page-num">5 / 11</span>
-				<p class="speaker-note">子育て初期一時金1000万円の出産支援のみでは、金銭支援は一部の不安を下げます。しかし、住居、仕事、ケア、制度への信頼、相談できる相手が弱いままだと、子どもを持つ選択は十分には戻りません。</p>
+				<span class="page-num">5 / 8</span>
+				<p class="speaker-note">比較基準と持続報酬プラス伴走支援の差分を、1枚の結果画像として見せます。</p>
 			</div>
 		</div>
 
-		<div class="slide" data-slide="5">
+		<div class="slide slide-image-only" data-slide="5">
 			<div class="slide-inner">
 				<div class="slide-header">
-					<div class="slide-header-logo"><span class="mark">δ</span><span class="name">制度設計AI</span></div>
-					<div class="slide-header-badge"><span class="badge-label">Incentive</span><span>創発の正確な言い方</span></div>
+					<div class="slide-header-logo"><span class="name">制度設計シミュレーション</span></div>
+					<div class="slide-header-badge"><span class="badge-label">Discovery</span><span>想定外の発見</span></div>
 				</div>
-				<div class="slide-body">
-					<div class="section-badge">インセンティブ設計</div>
-					<h2>「支え合いが自然発生」ではなく、<br>支え合いが起きる<span class="hl">条件を置く</span></h2>
-					<div class="cols" style="margin-top: 28px;">
-						<div class="col">
-							<h3>置いた設計</h3>
-							<ul class="bullet-list">
-								<li><strong>社会持続活動nat報酬制度</strong></li>
-								<li><strong>地域ケア就労の評価と賃金底上げ</strong></li>
-								<li><strong>若者持分型地域プロジェクト</strong></li>
-								<li><strong>通知・予約・自動着金・メンター</strong></li>
-							</ul>
-						</div>
-						<div class="col">
-							<h3>rowで観測する変化</h3>
-							<ul class="bullet-list">
-								<li>制度利用が増えるか</li>
-								<li>相談に進むか</li>
-								<li>参加・連帯へ移るか</li>
-								<li>不安や不信が何として残るか</li>
-							</ul>
-						</div>
-					</div>
+				<div class="slide-body slide-image-body">
+					<img class="slide-image-full" src="assets/unexpected_discovery.png" alt="シミュレーションしないと見えなかった想定外の発見">
 				</div>
-				<span class="page-num">6 / 11</span>
-				<p class="speaker-note">これは単なる給付ではありません。地域、ケア、教育、防災、制度更新のような、社会を持続させる活動に報酬が流れるインセンティブ設計を置きます。</p>
+				<span class="page-num">6 / 8</span>
+				<p class="speaker-note">シミュレーションによって、効果だけでなく副作用も見えたこと、追加仮説と追加施策の解像度が上がったことを見せます。</p>
 			</div>
 		</div>
 
-<div class="slide" data-slide="6">
+<div class="slide slide-image-only" data-slide="6">
 			<div class="slide-inner">
 				<div class="slide-header">
-					<div class="slide-header-logo"><span class="mark">δ</span><span class="name">制度設計AI</span></div>
-					<div class="slide-header-badge"><span class="badge-label">Evidence</span><span>rowデータで説明</span></div>
-				</div>
-				<div class="slide-body">
-					<div class="section-badge">観測結果の見せ方</div>
-					<h2>創発を、雰囲気ではなく<br><span class="hl">再生・比較できるデータ</span>にする</h2>
-					<div class="stats">
-						<div class="stat">
-							<div class="stat-number">982</div>
-							<div class="stat-label">制度利用 row</div>
-						</div>
-						<div class="stat">
-							<div class="stat-number">289</div>
-							<div class="stat-label">相談 row</div>
-						</div>
-						<div class="stat">
-							<div class="stat-number">21</div>
-							<div class="stat-label">参加・連帯 row</div>
-						</div>
-					</div>
-					<div class="flow">
-						<div class="flow-step">通知</div>
-						<div class="flow-arrow">→</div>
-						<div class="flow-step">予約</div>
-						<div class="flow-arrow">→</div>
-						<div class="flow-step">着金</div>
-						<div class="flow-arrow">→</div>
-						<div class="flow-step">相談</div>
-						<div class="flow-arrow">→</div>
-						<div class="flow-step active">参加</div>
-					</div>
-					<div class="callout callout-cyan" style="font-size: 20px;">断定は「地域の支え合いが自然発生」ではなく、「制度利用・相談・参加への行動変化の芽が観測された」。</div>
-				</div>
-				<span class="page-num">7 / 11</span>
-				<p class="speaker-note">rowデータ上では、制度利用、相談、参加・連帯への行動変化が観測されます。ただし、支え合いが自然発生したという断定ではなく、行動変化の芽として説明します。</p>
-			</div>
-		</div>
-
-		<div class="slide" data-slide="7">
-			<div class="slide-inner">
-				<div class="slide-header">
-					<div class="slide-header-logo"><span class="mark">δ</span><span class="name">制度設計AI</span></div>
-					<div class="slide-header-badge"><span class="badge-label">Demo</span><span>4部屋マップ + Live Voice</span></div>
-				</div>
-				<div class="slide-body">
-					<div class="section-badge">デモ画面</div>
-					<h2>集団反応と、一人の内側を<br>同時に見る</h2>
-					<div class="cols" style="gap: 28px; margin-top: 12px;">
-						<div class="col">
-							<div class="mini-map">
-								<div class="room" style="left: 18px; top: 18px;"><span>希望</span></div>
-								<div class="room" style="right: 18px; top: 18px;"><span>中立</span></div>
-								<div class="room" style="left: 18px; bottom: 18px;"><span>注意</span></div>
-								<div class="room" style="right: 18px; bottom: 18px;"><span>危険</span></div>
-								<div class="agent-dot" style="left: 88px; top: 72px; color: var(--purple);"></div>
-								<div class="agent-dot" style="left: 306px; top: 86px; color: var(--cyan-dark); border-color: var(--cyan);"></div>
-								<div class="agent-dot" style="left: 156px; top: 232px; color: var(--amber); border-color: var(--amber);"></div>
-								<div class="agent-dot" style="left: 392px; top: 244px; color: var(--red); border-color: var(--red);"></div>
-								<div class="agent-dot" style="left: 270px; top: 178px; color: var(--purple);"></div>
-							</div>
-						</div>
-						<div class="col">
-							<div class="voice-panel">
-								<div class="voice-title">Live Voice</div>
-								<div class="bubble red">求人減るって聞くと怖い。でも通知が具体なら、面談で確認したい。</div>
-								<div class="bubble amber">1000万円は助かる。でも仕事とケアが見えないと、子どもはまだ怖い。</div>
-								<div class="bubble cyan">通知、予約、着金まで見えると、制度を使える感じがしてきた。</div>
-								<div class="bubble">世界は荒れてるけど、自分の次の手が見えるのは大きい。</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<span class="page-num">8 / 11</span>
-				<p class="speaker-note">デモ画面では、4部屋マップで集団反応を見ながら、Live Voiceで内心、友達との会話、SNS発信、行動を切り替えて見ます。</p>
-			</div>
-		</div>
-
-		<div class="slide" data-slide="8">
-			<div class="slide-inner">
-				<div class="slide-header">
-					<div class="slide-header-logo"><span class="mark">δ</span><span class="name">制度設計AI</span></div>
-					<div class="slide-header-badge"><span class="badge-label">Tech</span><span>閉ループ</span></div>
-				</div>
-				<div class="slide-body">
-					<div class="section-badge">技術点</div>
-					<h2>LLMを「それっぽい文章生成」ではなく、<br><span class="hl">閉ループ</span>の中に組み込む</h2>
-					<div class="flow" style="margin-top: 34px;">
-						<div class="flow-step">世界イベント</div>
-						<div class="flow-arrow">→</div>
-						<div class="flow-step">日本社会状態</div>
-						<div class="flow-arrow">→</div>
-						<div class="flow-step active">LLM反応row</div>
-						<div class="flow-arrow">→</div>
-						<div class="flow-step">集団集約</div>
-						<div class="flow-arrow">→</div>
-						<div class="flow-step">次ステップへ反映</div>
-					</div>
-					<div class="features-3">
-						<div class="feature">
-							<div class="feature-icon purple">A</div>
-							<h3>固定スキーマ</h3>
-							<p>比較可能なrowへ正規化する。</p>
-						</div>
-						<div class="feature">
-							<div class="feature-icon cyan">B</div>
-							<h3>複数観測面</h3>
-							<p>内心、友達トーク、SNS、行動を分ける。</p>
-						</div>
-						<div class="feature">
-							<div class="feature-icon amber">C</div>
-							<h3>安定再生</h3>
-							<p>生成済みrowを発表UIで再生する。</p>
-						</div>
-					</div>
-				</div>
-				<span class="page-num">9 / 11</span>
-				<p class="speaker-note">LLMにこう反応しなさいと命令するのではなく、属性、状態、イベント、制度情報、過去記憶を渡し、反応を観測しています。</p>
-			</div>
-		</div>
-
-<div class="slide" data-slide="9">
-			<div class="slide-inner">
-				<div class="slide-header">
-					<div class="slide-header-logo"><span class="mark">δ</span><span class="name">制度設計AI</span></div>
+					<div class="slide-header-logo"><span class="name">制度設計シミュレーション</span></div>
 					<div class="slide-header-badge"><span class="badge-label">Expansion</span><span>転用可能</span></div>
 				</div>
-				<div class="slide-body">
-					<div class="section-badge">転用先</div>
-					<h2>AGI若者デモで終わらない。<br>制度変更の<span class="hl">汎用シミュレーター</span>へ</h2>
-					<div class="features-3">
-						<div class="feature">
-							<div class="feature-icon purple">企</div>
-							<h3>企業</h3>
-							<p>人事制度変更、AI導入、評価制度、退職防止。</p>
-						</div>
-						<div class="feature">
-							<div class="feature-icon cyan">自</div>
-							<h3>自治体</h3>
-							<p>子育て支援、移住、介護、地域交通。</p>
-						</div>
-						<div class="feature">
-							<div class="feature-icon amber">学</div>
-							<h3>学校</h3>
-							<p>進路支援、校則変更、探究学習、相談体制。</p>
-						</div>
-					</div>
-					<div class="callout" style="margin-top: 30px;">エージェント、イベント、感情辞書、行動辞書、評価指標を差し替えれば、別ドメインでも使える。</div>
+				<div class="slide-body slide-image-body">
+					<img class="slide-image-full" src="assets/general_simulator_engine.png" alt="シンギュラリティ後社会から制度変更の汎用シミュレーターへ">
 				</div>
-				<span class="page-num">10 / 11</span>
-				<p class="speaker-note">この仕組みは、自治体政策だけでなく、企業の人事制度変更、退職防止、採用、福利厚生、学校や地域施策にも転用できます。</p>
+				<span class="page-num">7 / 8</span>
+				<p class="speaker-note">この仕組みは、AGIデモ専用ではなく、ドメインパックを差し替えれば企業、自治体、学校などの制度変更にも転用できます。</p>
 			</div>
 		</div>
 
-		<div class="slide slide-closing" data-slide="10">
+		<div class="slide slide-closing" data-slide="7">
 			<div class="slide-inner">
-				<h1>未来を予言するのではなく、<br>制度の反応経路を観測する。</h1>
-				<p>制度が人間にどう受け取られ、どこで詰まり、どの補助設計で行動が変わるかを、実施前に比較する。</p>
-				<p class="cta">制度設計の事前デバッグ</p>
-				<span class="page-num">11 / 11</span>
-				<p class="speaker-note">未来を予言するのではなく、制度が社会に出る前に、人間の反応経路を観測する。それが今回のデモです。</p>
+				<h1>制度導入前に、シミュレーションでデバッグする。</h1>
+				<a class="closing-demo-url" href="https://karesansui-u.github.io/hackathon-singulab/visualization/future_emotion_map.html">https://karesansui-u.github.io/hackathon-singulab/visualization/future_emotion_map.html</a>
+				<span class="page-num">8 / 8</span>
+				<p class="speaker-note">最後は、制度導入前に、シミュレーションでデバッグする、という一言とデモリンクで締めます。</p>
 			</div>
 		</div>
 </div>
@@ -1174,9 +1267,12 @@
 
 		document.addEventListener('click', (event) => {
 			if (event.target.closest('a, button')) return;
-			if (event.clientX < window.innerWidth * 0.36) {
+			const edgeWidth = Math.min(180, Math.max(96, window.innerWidth * 0.14));
+			if (event.clientX <= edgeWidth) {
 				prevSlide();
-			} else {
+				return;
+			}
+			if (event.clientX >= window.innerWidth - edgeWidth) {
 				nextSlide();
 			}
 		});
