@@ -54,7 +54,7 @@ AGI・AIロボ普及後の社会移行を題材に、制度や施策が人間の
 <p>
   <img src="docs/assets/まとめ1.png" alt="まとめ1" width="32%">
   <img src="docs/assets/まとめ2.png" alt="まとめ2" width="32%">
-  <img src="docs/assets/まとめ3.png" alt="まとめ3" width="32%">
+  <img src="docs/assets/まとめ3.png" alt="LLMエージェントの作り込み" width="32%">
 </p>
 
 ## まず動かす
