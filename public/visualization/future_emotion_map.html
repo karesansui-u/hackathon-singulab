@@ -313,6 +313,54 @@
       flex-wrap: wrap;
     }
 
+    .observation-layers {
+      flex: 1 1 100%;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 7px 10px;
+      background: linear-gradient(90deg, #ffffff 0%, #f8fafc 100%);
+      box-shadow: inset 3px 0 0 rgba(15, 118, 110, 0.38);
+    }
+
+    .observation-layers-label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .observation-layer-flow {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .observation-layer-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border: 1px solid #dbe3ea;
+      border-radius: 7px;
+      padding: 0 8px;
+      background: #ffffff;
+      color: #172033;
+      white-space: nowrap;
+    }
+
+    .observation-layer-arrow {
+      color: #94a3b8;
+      font-weight: 900;
+    }
+
     .scenario-detail-button {
       min-height: 34px;
       padding: 0 10px;
@@ -2421,6 +2469,11 @@
         width: 100%;
       }
 
+      .observation-layers {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
       .scenario-detail-button {
         flex: 1 1 140px;
       }
@@ -2467,7 +2520,7 @@
     <header class="topbar">
       <div class="brand">
         <h1 class="brand-title">制度設計シミュレーション</h1>
-        <p class="brand-subtitle">未来感情・行動シミュレーション<br>シンギュラリティ後の社会移行を、若者・家族形成・次世代の希望経路と構造支援から検証する</p>
+        <p class="brand-subtitle">未来感情・行動シミュレーション<br>シンギュラリティ後の社会移行を、若者世代・家族形成世代・次世代の希望経路と構造支援から検証する</p>
       </div>
       <nav class="view-nav" aria-label="デモ画面">
         <a href="./future_emotion_map.html" aria-current="page">観測</a>
@@ -2534,6 +2587,20 @@
           <button type="button" class="layout-toggle-button" data-left-layout="normal" aria-pressed="true">標準</button>
           <button type="button" class="layout-toggle-button" data-left-layout="compact" aria-pressed="false">狭</button>
           <button type="button" class="layout-toggle-button" data-left-layout="hidden" aria-pressed="false">非表示</button>
+        </div>
+      </section>
+      <section class="observation-layers" aria-label="観測レイヤー">
+        <span class="observation-layers-label">観測レイヤー</span>
+        <div class="observation-layer-flow">
+          <span class="observation-layer-chip">国家・世界</span>
+          <span class="observation-layer-arrow">→</span>
+          <span class="observation-layer-chip">組織</span>
+          <span class="observation-layer-arrow">→</span>
+          <span class="observation-layer-chip">若者世代</span>
+          <span class="observation-layer-arrow">→</span>
+          <span class="observation-layer-chip">家族形成世代</span>
+          <span class="observation-layer-arrow">→</span>
+          <span class="observation-layer-chip">次世代</span>
         </div>
       </section>
     </section>
@@ -2736,8 +2803,8 @@
           <header class="panel-header">
             <h2 class="panel-title">4分類サマリー</h2>
             <div class="shape-key">
-              <span>● 若者</span>
-              <span>● 家族形成</span>
+              <span>● 若者世代</span>
+              <span>● 家族形成世代</span>
               <span>● 次世代</span>
               <span style="color:var(--male)">青 男性</span>
               <span style="color:var(--female)">赤 女性</span>
@@ -3109,10 +3176,18 @@
         ]
       },
       {
+        title: "5層の観測レイヤー",
+        items: [
+          "国家・世界: country_turnsとして地政学、財政、エネルギー、SNS不安などを生成し、日本社会状態へ変換します。",
+          "組織: organization_turnsとして採用、育成、AI導入、雇用維持、事業転換の判断を生成し、若者・家族形成世代へ波及させます。",
+          "人間側: 若者世代、家族形成世代、次世代コホートを分け、年齢上昇と制度記憶の継承を観測します。"
+        ]
+      },
+      {
         title: "今回の設計の強さ（6軸）",
         items: [
           "問い: 未来を当てるのではなく、施策を入れた時の感情・行動・副作用・波及を事前観測する設計にしています。",
-          "エージェント: 年齢、所得、雇用、住居、奨学金、ケア責任、SNS感受性、制度信頼、自己効力感、人口重みを持つ代表エージェントにしています。",
+          "エージェント: 国家、組織、若者世代、家族形成世代、次世代を分け、年齢、所得、雇用、住居、ケア責任、SNS感受性、制度信頼、人口重みを持たせています。",
           "イベント: 世界圧力、政策介入、社会反応、組織判断、長期評価を分け、何が効いたかを後から読めるようにしています。",
           "観測: 感情だけでなく、行動、内心、友達との会話、SNS発信、因果、持ち越し記憶を固定スキーマの観測データとして保存しています。",
           "創発: LLMには結論を命令せず、状態と文脈を情報として渡し、エージェントが信じる、疑う、使う、怒る、動かない分岐を残します。",
@@ -3318,8 +3393,8 @@
       neutral: { xMin: 517, xMax: 928, yMin: 436, yMax: 622 }
     };
     const groups = [
-      { key: "youth", label: "若者", count: 12 },
-      { key: "family", label: "家族形成", count: 8 },
+      { key: "youth", label: "若者世代", count: 12 },
+      { key: "family", label: "家族形成世代", count: 8 },
       { key: "generation", label: "次世代", count: 8 },
       { key: "auxiliary", label: "補助観測", count: 0 }
     ];
@@ -5192,13 +5267,13 @@
       const signalSummary = summarize(signalRows);
       const signalTop = Object.entries(signalSummary.counts).sort((a, b) => b[1] - a[1])[0][0];
       const signalLabel = state.agentFilter === "family"
-        ? "家族形成の支配状態"
+        ? "家族形成世代の支配状態"
         : state.agentFilter === "generation"
           ? "次世代の支配状態"
           : state.agentFilter === "auxiliary"
             ? "補助観測の支配状態"
             : state.agentFilter === "youth"
-              ? "若者の支配状態"
+              ? "若者世代の支配状態"
               : "LLM対象の支配状態";
       document.getElementById("dominantSignalLabel").textContent = signalLabel;
       document.getElementById("youthSignal").textContent = `${categoryByKey[signalTop].label}が中心`;
