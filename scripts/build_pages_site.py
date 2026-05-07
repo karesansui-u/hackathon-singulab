@@ -50,6 +50,8 @@ DOMAIN_DATA_FILES = (
     "time_schedule.tsv",
     "world_events.tsv",
 )
+PRESENTATION_SOURCE = ROOT / "docs" / "製品パッケージ" / "04_発表シナリオ" / "発表用スライド_軽め.html"
+PRESENTATION_ASSETS = ROOT / "docs" / "製品パッケージ" / "04_発表シナリオ" / "assets"
 TEXT_SUFFIXES = {".html", ".json", ".md", ".tsv", ".txt", ".yaml", ".yml"}
 
 
@@ -97,6 +99,12 @@ def build_public_site() -> None:
         if asset_source.exists():
             shutil.copytree(asset_source, PUBLIC / "visualization" / "assets" / asset_dir_name, dirs_exist_ok=True)
 
+    if PRESENTATION_SOURCE.exists():
+        copy_text(PRESENTATION_SOURCE, PUBLIC / "presentation" / "index.html")
+        copy_text(PRESENTATION_SOURCE, PUBLIC / "presentation" / "発表用スライド_軽め.html")
+        if PRESENTATION_ASSETS.exists():
+            shutil.copytree(PRESENTATION_ASSETS, PUBLIC / "presentation" / "assets", dirs_exist_ok=True)
+
     published_run_ids = []
     for run_id in [*REQUIRED_RUN_IDS, *OPTIONAL_RUN_IDS]:
         run_source = ROOT / "outputs" / "runs" / run_id
@@ -140,26 +148,28 @@ def build_public_site() -> None:
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>文明OSシミュレーション デモ</title>
+  <title>制度設計シミュレーション デモ</title>
   <meta http-equiv="refresh" content="0; url=visualization/future_emotion_map.html">
   <link rel="canonical" href="visualization/future_emotion_map.html">
 </head>
 <body>
-  <p><a href="visualization/future_emotion_map.html">文明OSシミュレーション デモ</a></p>
+  <p><a href="visualization/future_emotion_map.html">制度設計シミュレーション デモ</a></p>
   <p><a href="visualization/simulation_studio_mock.html">シミュレーション作成スタジオ モック</a></p>
+  <p><a href="presentation/">発表スライド</a></p>
 </body>
 </html>
 """,
     )
     write_text(
         PUBLIC / "README.md",
-        f"""# 文明OSシミュレーション デモ
+        f"""# 制度設計シミュレーション デモ
 
 GitHub Pages公開用の静的サイトです。
 
 - Demo URL: `https://karesansui-u.github.io/hackathon-singulab/visualization/future_emotion_map.html`
 - Main UI: `visualization/future_emotion_map.html`
 - Studio mock: `visualization/simulation_studio_mock.html`
+- Presentation: `presentation/`
 - 実行結果データ: {", ".join(f"`data/runs/{run_id}/`" for run_id in published_run_ids)}
 - Domain data: `domain_packs/agi_youth_japan/data/`
 

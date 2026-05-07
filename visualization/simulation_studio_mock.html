@@ -134,6 +134,12 @@
       color: #ffffff;
     }
 
+    .button.primary:disabled {
+      background: #f8fafc;
+      border-color: var(--line);
+      color: var(--muted);
+    }
+
     .button:disabled {
       cursor: not-allowed;
       opacity: 0.55;
@@ -483,6 +489,11 @@
       background: #f8fafc;
     }
 
+    .run-card.is-disabled {
+      opacity: 0.68;
+      cursor: not-allowed;
+    }
+
     .run-title {
       font-size: 12px;
       line-height: 1.25;
@@ -682,10 +693,10 @@
         <span class="brand-meta">Demo 2</span>
       </div>
       <div class="top-actions">
-        <span class="status-pill" id="statusPill">ブラウザ内生成</span>
+        <span class="status-pill" id="statusPill">生成準備中</span>
         <a class="nav-link" href="future_emotion_map.html">ビューア</a>
         <button class="button" type="button" id="saveButton">JSON保存</button>
-        <button class="button primary" type="button" id="generateButton">生成</button>
+        <button class="button primary" type="button" id="generateButton" disabled aria-disabled="true" title="UIからの新規シミュレーション生成は準備中です">準備中</button>
       </div>
     </header>
 
@@ -957,8 +968,8 @@
                 <div class="run-status">再生可能</div>
                 <div class="run-title">段階導入</div>
               </article>
-              <article class="run-card" id="runCustom">
-                <div class="run-status waiting">未生成</div>
+              <article class="run-card is-disabled" id="runCustom" aria-disabled="true" title="UIからの新規シミュレーション生成は準備中です">
+                <div class="run-status waiting">準備中</div>
                 <div class="run-title">カスタム案</div>
               </article>
             </div>
@@ -988,7 +999,7 @@
               </thead>
               <tbody id="resultRows"></tbody>
             </table>
-            <div class="footnote">このMVPはブラウザ内の簡易ルール生成。API接続時は同じ実行条件をバックエンドへ送り、LLM観測データへ差し替える。</div>
+            <div class="footnote">この画面は作成スタジオのモックです。UIからの新規シミュレーション生成は準備中です。API接続後は同じ実行条件をバックエンドへ送り、LLM観測データへ差し替える想定です。</div>
           </div>
         </section>
       </section>
@@ -1107,6 +1118,7 @@
       insightList: document.getElementById("insightList")
     };
 
+    const customGenerationEnabled = false;
     let currentResult = null;
 
     function clamp(value, min = 0, max = 100) {
@@ -1364,7 +1376,9 @@
           { step: 2, target: "employee_representatives", participation_0to1: Number(input.communication.toFixed(2)) },
           { step: 3, target: "all_employees", guardrail_0to1: Number(input.guardrail.toFixed(2)) }
         ],
-        model: { backend: "browser_rule_based", name: "studio-mvp-v0" },
+        model: customGenerationEnabled
+          ? { backend: "browser_rule_based", name: "studio-mvp-v0" }
+          : { backend: "api_llm_pending", name: "studio-generation-preparing" },
         privacy_mode: "synthetic_segments_only",
         output_dir: `outputs/simulations/${runId}`
       };
@@ -1396,10 +1410,10 @@
       renderMap(rows);
       renderInsights(result);
       renderRunCards(result.scenario_kind);
-      dom.statusPill.textContent = "生成済み";
-      dom.statusPill.style.background = "var(--green-soft)";
-      dom.statusPill.style.borderColor = "#86efac";
-      dom.statusPill.style.color = "var(--green)";
+      dom.statusPill.textContent = "生成準備中";
+      dom.statusPill.style.background = "var(--amber-soft)";
+      dom.statusPill.style.borderColor = "#fde68a";
+      dom.statusPill.style.color = "var(--amber)";
     }
 
     function setText(id, value) {
@@ -1496,9 +1510,13 @@
         custom: "runCustom"
       };
       Object.values(mapping).forEach((id) => document.getElementById(id)?.classList.remove("is-active"));
-      document.getElementById(mapping[active] || "runCustom")?.classList.add("is-active");
-      document.querySelector("#runCustom .run-status").textContent = active === "custom" ? "生成済み" : "生成可能";
-      document.querySelector("#runCustom .run-status").classList.toggle("waiting", active !== "custom");
+      const safeActive = active === "custom" && !customGenerationEnabled ? "phased" : active;
+      document.getElementById(mapping[safeActive] || "runPhased")?.classList.add("is-active");
+      const customStatus = document.querySelector("#runCustom .run-status");
+      if (customStatus) {
+        customStatus.textContent = "準備中";
+        customStatus.classList.add("waiting");
+      }
     }
 
     function updatePreviewOnly() {
@@ -1549,12 +1567,33 @@
       simulate("phased");
     }
 
+    function showGenerationPreparing() {
+      updatePreviewOnly();
+      dom.statusPill.textContent = "生成準備中";
+      dom.statusPill.style.background = "var(--amber-soft)";
+      dom.statusPill.style.borderColor = "#fde68a";
+      dom.statusPill.style.color = "var(--amber)";
+      renderRunCards(currentResult?.scenario_kind || "phased");
+    }
+
     ["input", "change"].forEach((eventName) => {
       [dom.evalIntensity, dom.communicationIntensity, dom.guardrailIntensity, dom.scenarioTitle, dom.question, dom.target, dom.policyType, dom.stepCount, dom.reproSeed].forEach((node) => {
         node?.addEventListener(eventName, updatePreviewOnly);
       });
     });
-    dom.generateButton?.addEventListener("click", () => simulate("custom"));
+    if (dom.generateButton) {
+      dom.generateButton.disabled = !customGenerationEnabled;
+      dom.generateButton.textContent = customGenerationEnabled ? "生成" : "準備中";
+      dom.generateButton.setAttribute("aria-disabled", String(!customGenerationEnabled));
+      dom.generateButton.title = customGenerationEnabled ? "" : "UIからの新規シミュレーション生成は準備中です";
+      dom.generateButton.addEventListener("click", () => {
+        if (!customGenerationEnabled) {
+          showGenerationPreparing();
+          return;
+        }
+        simulate("custom");
+      });
+    }
     dom.validateButton?.addEventListener("click", () => {
       updatePreviewOnly();
       dom.statusPill.textContent = "検証OK";
@@ -1567,7 +1606,13 @@
     document.getElementById("runBaseline")?.addEventListener("click", () => simulate("baseline"));
     document.getElementById("runDirect")?.addEventListener("click", () => simulate("direct"));
     document.getElementById("runPhased")?.addEventListener("click", () => simulate("phased"));
-    document.getElementById("runCustom")?.addEventListener("click", () => simulate("custom"));
+    document.getElementById("runCustom")?.addEventListener("click", () => {
+      if (!customGenerationEnabled) {
+        showGenerationPreparing();
+        return;
+      }
+      simulate("custom");
+    });
 
     updatePreviewOnly();
     simulate("phased");

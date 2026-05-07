@@ -14,7 +14,7 @@ AGI・AIロボ普及後の社会移行を題材に、制度や施策が人間の
 |---|---|
 | 観測ビューア | [制度設計シミュレーション](https://karesansui-u.github.io/hackathon-singulab/visualization/future_emotion_map.html) |
 | 作成スタジオ | [シミュレーション作成スタジオ モック](https://karesansui-u.github.io/hackathon-singulab/visualization/simulation_studio_mock.html) |
-| 発表スライド | [HTML](docs/製品パッケージ/04_発表シナリオ/発表用スライド_軽め.html) / [PDF](docs/製品パッケージ/04_発表シナリオ/exports/発表用スライド_軽め.pdf) |
+| 発表スライド | [GitHub Pagesで開く](https://karesansui-u.github.io/hackathon-singulab/presentation/) |
 
 ![デモGIF](docs/assets/demo.gif)
 
