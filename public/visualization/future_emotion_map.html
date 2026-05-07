@@ -903,6 +903,19 @@
       background: #e2e8f0;
     }
 
+    .map-control-button:disabled {
+      border-color: #e2e8f0;
+      background: #f8fafc;
+      color: #94a3b8;
+      cursor: not-allowed;
+      opacity: 0.58;
+      box-shadow: none;
+    }
+
+    .map-control-button:disabled:hover {
+      background: #f8fafc;
+    }
+
     .map-control-button.is-wide {
       width: auto;
       min-width: 58px;
@@ -4400,6 +4413,7 @@
       renderEventBurst();
       renderEventTimeline();
       syncStepSlider();
+      syncStepControls();
     }
 
     function syncStepSlider() {
@@ -4410,6 +4424,28 @@
       if (stepMinLabel) stepMinLabel.textContent = turnToYear(minTurn);
       if (stepMaxLabel) stepMaxLabel.textContent = turnToYear(maxTurn);
       if (stepCurrentLabel) stepCurrentLabel.textContent = `現在: ${turnToYear(state.turn)}想定`;
+    }
+
+    function setControlDisabled(button, disabled) {
+      if (!button) return;
+      button.disabled = Boolean(disabled);
+      button.setAttribute("aria-disabled", String(Boolean(disabled)));
+    }
+
+    function syncStepControls() {
+      const atStart = state.turn <= minTurn;
+      const atEnd = state.turn >= maxTurn;
+      const turns = timelineTurns();
+      const hasPreviousEvent = turns.some((turn) => turn < state.turn);
+      const hasNextEvent = turns.some((turn) => turn > state.turn);
+
+      setControlDisabled(startButton, atStart);
+      setControlDisabled(prevButton, atStart);
+      setControlDisabled(prevEventButton, !hasPreviousEvent);
+      setControlDisabled(endButton, atEnd);
+      setControlDisabled(nextButton, atEnd);
+      setControlDisabled(nextEventButton, !hasNextEvent);
+      setControlDisabled(playButton, !state.playing && (atEnd || maxTurn <= minTurn));
     }
 
     function hasLlmForTurn(agentId, turn = state.turn) {
@@ -6046,6 +6082,7 @@
 
     function jumpToTurn(turn) {
       state.turn = clamp(Number(turn) || minTurn, minTurn, maxTurn);
+      if (state.turn >= maxTurn) stopPlayback();
       render();
     }
 
@@ -6058,11 +6095,17 @@
     }
 
     function togglePlay() {
+      if (!state.playing && state.turn >= maxTurn) return;
       state.playing = !state.playing;
       playButton.textContent = state.playing ? "Ⅱ" : "▶";
       if (state.playing) {
         state.timer = window.setInterval(() => {
-          state.turn = state.turn >= maxTurn ? minTurn : state.turn + 1;
+          if (state.turn >= maxTurn) {
+            stopPlayback();
+            render();
+            return;
+          }
+          state.turn = state.turn + 1;
           render();
         }, 1800);
       } else {
